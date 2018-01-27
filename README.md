@@ -1,5 +1,4 @@
-
-#SurfPad
+# SurfPad
 Turn your old Surface into into a large touchpad.
 
 Have you got an old RT Surface 1 or 2 gathering dust and don't know what to do with it?
