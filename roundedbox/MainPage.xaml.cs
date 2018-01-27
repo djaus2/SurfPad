@@ -54,9 +54,9 @@ namespace roundedbox
             //};
 
             Brush red = new SolidColorBrush(Colors.Red);
-            AddMyUserControl1( 0, 0,"arc1", "First", red,123,50);
-            AddMyUserControl1(1, 2, "arc2", "Second",null, 124, 5);
-            AddMyUserControl1(3, 3, "The quick brown fox jumps over the lazy dog",  "Third");
+            AddMyUserControl1( 0, 0,"arc1", "First", red,123,50,1,2);
+            AddMyUserControl1(1, 1, "arc2", "Second", null, 124, 5, 2);
+            AddMyUserControl1(2, 2, "The quick brown fox jumps over the lazy dog",  "Third");
 
             uc.MyUserControl1.ButtonTapped += MainPage_ButtonTapped1;
         }
@@ -64,9 +64,10 @@ namespace roundedbox
         private void AddMyUserControl1(int row, int col, string text, 
             //Optional parameters:
             //Name or Id should be unique
-            string name = "", Brush background = null, int id = -1, int cnrRad = -1)
+            string name = "", Brush background = null,
+            int id = -1, int cnrRad = -1, int colSpan=1, int rowSpan=1)
         {
-            buttons[row][col] = new uc.MyUserControl1(row,col,text,TheGrid,name,background,id,cnrRad);
+            buttons[row][col] = new uc.MyUserControl1(row,col,text,TheGrid,name,background,id,cnrRad, colSpan, rowSpan);
         }
 
         private void MainPage_ButtonTapped1(string sender, int args)
@@ -88,12 +89,11 @@ namespace roundedbox
         public void InitTheGrid(int x, int y, int Height = DefaultCellHeight, int Width = DefaultCellWidth, int space = DefaultCellSpacing)
         {
             TheGrid.Children.Clear();
+            TheGrid.RowSpacing = space;
+            TheGrid.ColumnSpacing = space;
             buttons = new uc.MyUserControl1[x][];
             for (int i = 0; i<x;i++)
             {
-                RowDefinition rd = new RowDefinition();
-                rd.Height = new GridLength((double)space);
-                TheGrid.RowDefinitions.Add(rd);
                 buttons[i] = new uc.MyUserControl1[y];
                 RowDefinition rd2 = new RowDefinition();
                 rd2.Height = new GridLength((double)Height);
@@ -101,9 +101,6 @@ namespace roundedbox
             }
             for (int j = 0; j < y; j++)
             {
-                ColumnDefinition cd = new ColumnDefinition();
-                cd.Width = new GridLength((double)space);
-                TheGrid.ColumnDefinitions.Add(cd);
                 ColumnDefinition cd2 = new ColumnDefinition();
                 cd2.Width = new GridLength((double)Width);
                 TheGrid.ColumnDefinitions.Add(cd2);

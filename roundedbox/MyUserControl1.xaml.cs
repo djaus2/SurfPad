@@ -23,13 +23,14 @@ namespace roundedbox.uc
         static readonly  Brush DefaultBackground =  new SolidColorBrush (Colors.Beige);
         const int FlagForDefaultVal = -1;
         const int CornerRadiusVal = 5;
-
         public CornerRadius DefaultCornerRadius
         {
             get {
                 return  new CornerRadius(CornerRadiusVal);
             }
         }
+
+        //Enable wrapped text on button
         public string Text {
             set { TheText.Content =
                     new TextBlock
@@ -40,67 +41,27 @@ namespace roundedbox.uc
                     };
             }
          }
+
         public int Id { get; set; }
-        public MyUserControl1()
-        {
-            this.InitializeComponent();
-            TheText.Width = 100;
-            TheText.Height = 110;
-        }
-        //public MyUserControl1(string name, int row, int col, string text, Grid containerGrid)
-        //{
-        //    this.InitializeComponent();
-        //    Name = name;
-        //    Row = row;
-        //    Col = col;
-        //    Text = text;
-        //    ContainrerGrid = containerGrid;
-        //    Id = containerGrid.ColumnDefinitions.Count * row + col;
-        //    TheText.Width = 100;
-        //    TheText.Height = 110;
-        //}
-
-        //public MyUserControl1(string name, int row, int col, string text, Grid containerGrid, Brush background)
-        //{
-        //    this.InitializeComponent();
-        //    Name = name;
-        //    Row = row;
-        //    Col = col;
-        //    Text = text;
-        //    ContainrerGrid = containerGrid;
-        //    Borderx.Background = background;
-        //    Id = (containerGrid.ColumnDefinitions.Count/2) * row + col;
-        //    TheText.Width = 100;
-        //    TheText.Height = 110;
-        //}
-
-        //public MyUserControl1(string name,  int row, int col, string text, Grid containerGrid, int id = -1 )
-        //{
-        //    this.InitializeComponent();
-        //    Name = name;
-        //    Row = row;
-        //    Col = col;
-        //    Text = text;
-        //    ContainrerGrid = containerGrid;
-        //    if (id != -1)
-        //        Id = id;
-        //    else
-        //        Id = (containerGrid.ColumnDefinitions.Count/2) * row + col;
-        //    TheText.Width = containerGrid.ColumnDefinitions[0].Width.Value;
-        //    TheText.Height = containerGrid.RowDefinitions[0].Height.Value;
-        //}
+        public int Row { get; set; } = 0;
+        public int Col { get; set; } = 0;
+        public int RowSpan { get; set; } = 1;
+        public int ColSpan { get; set; } = 1;
 
         public MyUserControl1(int row, int col, string text, Grid containerGrid, 
             //Optional parameters:
             //Name or Id should be unique
-            string name="", Brush background = null, int id = FlagForDefaultVal, int cnrRad= FlagForDefaultVal)
+            string name="", Brush background = null, 
+            int id = FlagForDefaultVal, int cnrRad= FlagForDefaultVal,
+            int colSpan= FlagForDefaultVal, int rowSpan = FlagForDefaultVal
+            )
         {
             this.InitializeComponent();
             Name = name;
             Row = row;
             Col = col;
             Text = text;
-            ContainrerGrid = containerGrid;
+            
 
             if (cnrRad == FlagForDefaultVal)
                 Borderx.CornerRadius = DefaultCornerRadius;
@@ -115,40 +76,43 @@ namespace roundedbox.uc
             if (id != FlagForDefaultVal)
                 Id = id;
             else
-                Id = (containerGrid.ColumnDefinitions.Count/2) * row + col;
+                Id = containerGrid.ColumnDefinitions.Count * row + col;
 
-            TheText.Width = containerGrid.ColumnDefinitions[1].Width.Value;
-            TheText.Height = containerGrid.RowDefinitions[1].Height.Value;
+            if (colSpan == FlagForDefaultVal)
+                ColSpan=1;
+            else
+                ColSpan=colSpan;
 
+            if (rowSpan == FlagForDefaultVal)
+                RowSpan = 1;
+            else
+               RowSpan = rowSpan;
+
+            TheText.Width = containerGrid.ColumnDefinitions[0].Width.Value;
+            TheText.Height = containerGrid.RowDefinitions[0].Height.Value;
+
+            ContainrerGrid = containerGrid;
         }
 
-        public int Row { get; set; } = 0;
-        public int Col { get; set; } = 0;
-
-        public int RowSpan { get; set; } = 1;
-        public int ColSpan { get; set; } = 1;
 
         public Grid ContainrerGrid
         {
             set
             {
                     value.Children.Add(this);
-                    Grid.SetColumn(this, 2*Col+1);
-                    Grid.SetRow(this, 2*Row+1);
+                    Grid.SetColumn(this, Col);
+                    Grid.SetRow(this, Row);
                     Grid.SetColumnSpan(this, ColSpan);
                     Grid.SetRowSpan(this, RowSpan);
             }
         }
 
+        //Send back button Name and Id
         public static event TypedEventHandler<string,int> ButtonTapped;
-
         private void TheText_Tapped(object sender, TappedRoutedEventArgs e)
         {
-
             if (ButtonTapped != null)
             {
-                EventArgs ev = new EventArgs();
-
                 ButtonTapped(this.Name, this.Id);
             }
         }
