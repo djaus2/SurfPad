@@ -13,11 +13,17 @@
     </Control.Resources>
 
     <Grid>
-        <Border x:Name="Border" BorderThickness="1" BorderBrush="Black" Background="LightGreen" 
+        <Border x:Name="Borderx" BorderThickness="1" BorderBrush="Black" Background="LightGreen" 
+                Padding="0"
                 CornerRadius="{Binding Source={StaticResource GridRound}}" >
-            <TextBlock x:Name="TheText" Text="{Binding}"  TextAlignment="Center"  
-                       TextWrapping="WrapWholeWords"
-                       VerticalAlignment="Center" HorizontalAlignment="Center" Tapped="TheText_Tapped" />
+
+            <Button x:Name="TheText"  
+                       VerticalAlignment="Center" HorizontalAlignment="Center" 
+                        Background="Transparent"
+                        Tapped="TheText_Tapped" >
+
+            </Button>
+
         </Border >
     </Grid>
 </UserControl>

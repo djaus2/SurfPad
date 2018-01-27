@@ -29,7 +29,7 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           x:Name="TheGrid">
 
-        <Grid.RowDefinitions>
+        <!--<Grid.RowDefinitions>
             <RowDefinition Height="{Binding Source={StaticResource GridLength1}}" />
             <RowDefinition Height="{Binding Source={StaticResource GridLength2}}" />
             <RowDefinition Height="{Binding Source={StaticResource GridLength1}}" />
@@ -58,11 +58,10 @@
         <UserControl x:Name="RoundedButton">
             
             <Border BorderThickness="1" BorderBrush="Black" Background="LightGreen" 
-                CornerRadius="{Binding Source={StaticResource GridRound}}" 
-                 Tapped="Border_Tapped">
+                CornerRadius="{Binding Source={StaticResource GridRound}}">
                 <TextBlock Text="{Binding}"  TextAlignment="Center"  
                        TextWrapping="WrapWholeWords"
-                       VerticalAlignment="Center" HorizontalAlignment="Center" Tapped="TextBlock_Tapped"/>
+                       VerticalAlignment="Center" HorizontalAlignment="Center" />
             </Border >
         </UserControl>
                      
@@ -72,7 +71,7 @@
                 Grid.Row="1" Grid.Column="1">
             <TextBlock Text="Description Now When"  TextAlignment="Center"  
                        TextWrapping="WrapWholeWords"
-                       VerticalAlignment="Center" HorizontalAlignment="Center" Tapped="TextBlock_Tapped"/>
+                       VerticalAlignment="Center" HorizontalAlignment="Center" />
         </Border>
 
         <Border BorderThickness="1" BorderBrush="Black" Background="LightGreen" 
@@ -97,7 +96,7 @@
             <TextBlock Text="Description Now When"  TextAlignment="Center"  
                        TextWrapping="WrapWholeWords"
                        VerticalAlignment="Center" HorizontalAlignment="Center"/>
-        </Border>
+        </Border>-->
 
         
 
