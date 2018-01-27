@@ -1,6 +1,8 @@
 # SurfPad
 Turn your old Surface into into a large touchpad.
 
+## Status: First release under developement. Watch this space.
+
 Have you got an old RT Surface 1 or 2 gathering dust and don't know what to do with it?
 
 With this app:
@@ -31,3 +33,6 @@ May add Widgets later:
 
 Also later on my add:
 - Page to display XAML sent astext from remote app.
+
+## Target for Remote app
+Cabn be any app on any system that supports Serial, Bluetooth Serial, or Sockets. Just neeeds to implement the interface. Some examples will be given eg for Windows 10 desktop, Windows 10 Mobile and Windows 10 IoT-Core. You are invited to add mote targets, once the interface is published here.
