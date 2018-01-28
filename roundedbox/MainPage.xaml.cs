@@ -27,9 +27,6 @@ namespace roundedbox
         const int DefaultCellWidth= 120;
         const int DefaultCellHeight = 120;
         const int DefaultCellSpacing = 10;
-        int iDefaultCellWidth = DefaultCellWidth;
-        int iDefaultCellHeight = DefaultCellHeight;
-        int iDefaultCellSpacing = DefaultCellSpacing;
 
         //public double Width_1 = 5;
         //public Thickness W1 = new Thickness(5);
