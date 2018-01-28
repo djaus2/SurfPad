@@ -28,7 +28,7 @@ namespace roundedbox
         const int DefaultCellHeight = 120;
         const int DefaultCellSpacing = 10;
 
-;
+
         uc.MyUserControl1[][] buttons = new uc.MyUserControl1[0][];
 
         public MainPage()
