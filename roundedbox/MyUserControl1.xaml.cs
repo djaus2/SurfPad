@@ -60,6 +60,11 @@ namespace roundedbox.uc
             Name = name;
             Row = row;
             Col = col;
+            if (text[0] == '_')
+            {
+                text = text.Substring(1);
+                this.IsEnabled = false;
+            }
             Text = text;
             
 

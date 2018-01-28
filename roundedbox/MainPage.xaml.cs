@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
@@ -35,7 +36,7 @@ namespace roundedbox
             //Resources.Add("GridLength2", new GridLength((double)120));
             //Resources.Add("GridRound", new CornerRadius((int)20));
             this.InitializeComponent();
-            InitTheGrid(4,4);
+            
             //buttons[1][1] = new uc.MyUserControl1()
             //{
             //    Name = "fred",
@@ -54,11 +55,21 @@ namespace roundedbox
             //};
 
             Brush red = new SolidColorBrush(Colors.Red);
-            AddMyUserControl1( 0, 0,"arc1", "First", red,123,50,1,2);
-            AddMyUserControl1(1, 1, "arc2", "Second", null, 124, 5, 2);
-            AddMyUserControl1(2, 2, "The quick brown fox jumps over the lazy dog",  "Third");
-
+            //AddMyUserControl1( 0, 0,"arc1", "First", red,123,50,1,2);
+            //AddMyUserControl1(1, 1, "arc2", "Second", null, 124, 5, 2);
+            //AddMyUserControl1(2, 2, "The quick brown fox jumps over the lazy dog",  "Third");
+            DoCommands();
+            InitTheGrid(Commands.ElementConfigInt["iRows"], Commands.ElementConfigInt["iColumns"]);
+            foreach (var men in MainMenu)
+            {
+                AddMyUserControl1(men.idTag.Row, men.idTag.Col, men.name);
+            }
             uc.MyUserControl1.ButtonTapped += MainPage_ButtonTapped1;
+            
+            //Task t = Task.Run(() => {.
+                //DoCommands();
+            //});
+            //t.Wait();
         }
 
         private void AddMyUserControl1(int row, int col, string text, 
@@ -105,6 +116,20 @@ namespace roundedbox
                 cd2.Width = new GridLength((double)Width);
                 TheGrid.ColumnDefinitions.Add(cd2);
             }
+        }
+
+        List<Commands> MainMenu;
+        private void DoCommands()
+        {
+            GetCommands("ElementConfig");
+            //Following settings are mandatory
+            bool res = Commands.CheckKeys();
+            //Next two are optional settings
+            ////bool res2 = Commands.CheckComportIdSettingExists();
+            ////res2 = Commands.CheckcIfComportConnectDeviceNoKeySettingExists();
+            GetCommands("MainMenu");
+            MainMenu = Commands.GetMenu("MainMenu");
+
         }
 
 

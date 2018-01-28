@@ -1,0 +1,59 @@
+﻿[
+  {
+    "ElementConfig": [
+      [
+        { "Comment_": "These items are ignored" },
+        { "Comment_DataTypes": "In ElementConfig, first character of name sets data type: i=integer, c=character, string" },
+        { "Comment_ignore": "=======================================================================================" },
+        { "Comment_Next5": "These are UI element properties:" },
+        { "iWidth": 120 },
+        { "iHeight": 100 },
+        { "iSpace": 5 },
+        { "iCornerRadius": 10 },
+        { "iRows": 6 },
+        { "iColumns": 5 },
+        { "Comment_iSensorsRowIndex": "MainMenu: A row in MainMenu that contains the names of the sensors." },
+        { "iSensorsRowIndex": 1 },
+        { "Comment_iValuesRowIndex": "Main:Menu The row in the UI that shows the individual sensor values." },
+        { "iValuesRowIndex": 2 },
+        { "Comment_iCommandActionsColIndex": "MainMenu: The column that has the names of the actions, usually 0" },
+        { "iCommandActionsColIndex": 0 },
+        { "Comment_cTextBlockPrefix": "MainMenu: If the UI element name is prefixed with this then its a TextBlock." },
+        { "cTextBlockPrefix": "_" },
+        { "Comment_cTextBoxPrefix": "MainMenu: If the UI element name is prefixed wth this then its a TextBox." },
+        { "cTextBoxPrefix": "=" },
+        { "Comment_ignore2 ": "=======================================================================================" },
+        { "Comment_sComPortId": "SerialPort: The serial port's Id string." },
+        { "sComPortId": "\\\\?\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}" },
+        { "Comment_iComportConnectDeviceNo": "SerialPort: The index of the serial port in list of connnected devices." },
+        { "iComportConnectDeviceNo": -1 },
+        { "Comment_sUseSerial": "Either BT for Bluetooth, or USB Serial" },
+        { "sUseSerial": "BT" }
+      ]
+    ]
+  },
+  {
+    "MainMenu": [
+      [ "Setup BT", "Setup Serial", "Show sensor list", "Back to sensor list", "=Sensor" ],
+      [ "_READ:", "DHTemp", "BaroTemp", "Humidity", "Pressure" ],
+      [ "_Value:", "=DHTemp", "=BaroTemp", "=Humidity", "=Pressure" ],
+      [ "_POST:", "DHTemp", "BaroTemp", "Humidity", "Pressure" ],
+      [ "_GET:", "DHTemp", "BaroTemp", "Humidity", "Pressure" ],
+      [ "_HISTORY:", "DHTemp", "BaroTemp", "Humidity", "Pressure" ]
+    ]
+  },
+  {
+    "SecondMenu": [
+      [ "a" ],
+      [ "b" ],
+      [ "c" ]
+    ]
+  },
+  {
+    "ThirdMenu": [
+      [ "a" ],
+      [ "b" ],
+      [ "c" ]
+    ]
+  }
+]
