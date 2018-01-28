@@ -28,32 +28,12 @@ namespace roundedbox
         const int DefaultCellHeight = 120;
         const int DefaultCellSpacing = 10;
 
-        //public double Width_1 = 5;
-        //public Thickness W1 = new Thickness(5);
+;
         uc.MyUserControl1[][] buttons = new uc.MyUserControl1[0][];
+
         public MainPage()
         {
-            //Resources.Add("GridLength1", new GridLength((double)10));
-            //Resources.Add("GridLength2", new GridLength((double)120));
-            //Resources.Add("GridRound", new CornerRadius((int)20));
             this.InitializeComponent();
-            
-            //buttons[1][1] = new uc.MyUserControl1()
-            //{
-            //    Name = "fred",
-            //    Text = "Qwerty",
-            //    Row = 1,
-            //    Col = 1,
-            //    ContainrerGrid=TheGrid
-            //};
-            //buttons[3][3] = new uc.MyUserControl1()
-            //{
-            //    Name = "fred",
-            //    Text = "Qwerty2",
-            //    Row = 3,
-            //    Col = 3,
-            //    ContainrerGrid = TheGrid
-            //};
 
             //Brush red = new SolidColorBrush(Colors.Red);
             //AddMyUserControl1( 0, 0,"arc1", "First", red,123,50,1,2);
@@ -61,7 +41,6 @@ namespace roundedbox
             //AddMyUserControl1(2, 2, "The quick brown fox jumps over the lazy dog",  "Third");
 
             DoCommands();
-
 
             int iCornerRadius = Commands.ElementConfigInt["iCornerRadius"];
 
@@ -92,16 +71,6 @@ namespace roundedbox
             string name = sender;
             int id = args;
         }
-
-        //private void MainPage_ButtonTapped(object sender, TappedRoutedEventArgs e)
-        //{
-        //    if (sender is Button)
-        //    {
-        //        Button but = (Button)sender;
-        //        string name = but.Name;
-        //    }
-        //    //throw new NotImplementedException();
-        //}
 
         public void InitTheGrid(int x, int y, int Height = DefaultCellHeight, int Width = DefaultCellWidth, int space = DefaultCellSpacing)
         {
@@ -135,7 +104,6 @@ namespace roundedbox
             ////res2 = Commands.CheckcIfComportConnectDeviceNoKeySettingExists();
             GetCommands("MainMenu");
             MainMenu = Commands.GetMenu("MainMenu");
-
         }
 
 
