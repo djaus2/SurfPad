@@ -27,6 +27,10 @@ namespace roundedbox
         const int DefaultCellWidth= 120;
         const int DefaultCellHeight = 120;
         const int DefaultCellSpacing = 10;
+        int iDefaultCellWidth = DefaultCellWidth;
+        int iDefaultCellHeight = DefaultCellHeight;
+        int iDefaultCellSpacing = DefaultCellSpacing;
+
         //public double Width_1 = 5;
         //public Thickness W1 = new Thickness(5);
         uc.MyUserControl1[][] buttons = new uc.MyUserControl1[0][];
@@ -54,22 +58,27 @@ namespace roundedbox
             //    ContainrerGrid = TheGrid
             //};
 
-            Brush red = new SolidColorBrush(Colors.Red);
+            //Brush red = new SolidColorBrush(Colors.Red);
             //AddMyUserControl1( 0, 0,"arc1", "First", red,123,50,1,2);
             //AddMyUserControl1(1, 1, "arc2", "Second", null, 124, 5, 2);
             //AddMyUserControl1(2, 2, "The quick brown fox jumps over the lazy dog",  "Third");
+
             DoCommands();
-            InitTheGrid(Commands.ElementConfigInt["iRows"], Commands.ElementConfigInt["iColumns"]);
-            foreach (var men in MainMenu)
+
+
+            int iCornerRadius = Commands.ElementConfigInt["iCornerRadius"];
+
+            InitTheGrid(Commands.ElementConfigInt["iRows"], Commands.ElementConfigInt["iColumns"],
+                Commands.ElementConfigInt["iHeight"], Commands.ElementConfigInt["iWidth"], 
+                Commands.ElementConfigInt["iSpace"]);
+            foreach (var menuItem in MainMenu)
             {
-                AddMyUserControl1(men.idTag.Row, men.idTag.Col, men.name);
+                AddMyUserControl1(menuItem.idTag.Row, menuItem.idTag.Col, menuItem.name,"",
+                    null,-1,iCornerRadius);
             }
+
             uc.MyUserControl1.ButtonTapped += MainPage_ButtonTapped1;
-            
-            //Task t = Task.Run(() => {.
-                //DoCommands();
-            //});
-            //t.Wait();
+
         }
 
         private void AddMyUserControl1(int row, int col, string text, 
