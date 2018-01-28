@@ -3,6 +3,8 @@ Turn your old Surface into into a large touchpad.
 
 ## Status: First release under developement. Watch this space.
 
+Further Info: http://embedded101.com/Blogs/David-Jones/entryid/797/SurfPad-Your-old-Surface-as-a-Remote-App-Touchpad
+
 Have you got an old RT Surface 1 or 2 gathering dust and don't know what to do with it?
 
 With this app:
