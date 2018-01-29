@@ -34,14 +34,15 @@ With this app:
 - When a key is pressed its ID is sent to the app for action
 - Scrolling textbox to display remote app info
 
-May add Widgets later:
+May add Widgets later on:
 - Switch
 - Slider
 - Rotator
 - LEDs
 
-Also later on my add:
-- Page to display XAML sent astext from remote app.
+Also later on:
+- Page to display XAML sent as text from remote app.
+- Surface as X-Y large mouse pad.
 
 ## Target for Remote app
 The remote app platform can be any app on any system that supports Serial, Bluetooth Serial, or Sockets. Just neeeds to implement the interface. Some examples will be given eg for Windows 10 desktop, Windows 10 Mobile and Windows 10 IoT-Core. You are invited to add mote targets, once the interface is published here.
