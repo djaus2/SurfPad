@@ -1,7 +1,9 @@
 # SurfPad
 Turn your old Surface into into a large touchpad.
 
-## Status: Second release under developement. Watch this space.
+## Status:
+Second release now available: Reads button and app metainfo from a Json file.
+First release, as specified below.
 
 Further Info: http://embedded101.com/Blogs/David-Jones/entryid/797/SurfPad-Your-old-Surface-as-a-Remote-App-Touchpad
 
