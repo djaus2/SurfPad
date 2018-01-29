@@ -30,6 +30,7 @@ namespace roundedbox.uc
             }
         }
 
+        private string text;
         //Enable wrapped text on button
         public string Text {
             set { TheText.Content =
@@ -39,6 +40,11 @@ namespace roundedbox.uc
                         TextWrapping = TextWrapping.Wrap,
                         TextAlignment = TextAlignment.Center,
                     };
+                text = value;
+            }
+            get
+            {
+                return text;
             }
          }
 
@@ -118,7 +124,7 @@ namespace roundedbox.uc
         {
             if (ButtonTapped != null)
             {
-                ButtonTapped(this.Name, this.Id);
+                ButtonTapped(this.Text, this.Id);
             }
         }
     }

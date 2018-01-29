@@ -27,6 +27,10 @@ namespace roundedbox
         const int DefaultCellWidth= 120;
         const int DefaultCellHeight = 120;
         const int DefaultCellSpacing = 10;
+        const int TextSpan = 2;
+        Brush Black = new SolidColorBrush(Colors.Black);
+        Brush White = new SolidColorBrush(Colors.White);
+
 
 
         uc.MyUserControl1[][] buttons = new uc.MyUserControl1[0][];
@@ -70,6 +74,7 @@ namespace roundedbox
         {
             string name = sender;
             int id = args;
+            listView1.Items.Insert(0, name);
         }
 
         public void InitTheGrid(int x, int y, int Height = DefaultCellHeight, int Width = DefaultCellWidth, int space = DefaultCellSpacing)
@@ -85,14 +90,49 @@ namespace roundedbox
                 rd2.Height = new GridLength((double)Height);
                 TheGrid.RowDefinitions.Add(rd2);
             }
-            for (int j = 0; j < y; j++)
+            for (int j = 0; j < y+ TextSpan; j++)
             {
                 ColumnDefinition cd2 = new ColumnDefinition();
                 cd2.Width = new GridLength((double)Width);
                 TheGrid.ColumnDefinitions.Add(cd2);
             }
+            var bdr =
+                new Border
+                {
+                    BorderThickness = new Thickness(1),
+                    BorderBrush = Black,            
+                    Background = White,
+                    Padding = new Thickness(0),
+                    CornerRadius = new CornerRadius(5)
+                };
+            TheGrid.Children.Add(bdr);
+            Grid.SetColumn(bdr, y);
+            Grid.SetRow(bdr, 0);
+            Grid.SetColumnSpan(bdr, TextSpan);
+            Grid.SetRowSpan(bdr, y+1);
+            //var tb =
+            //    new TextBlock
+            //    {
+            //        Text = "bla bla",
+            //        TextWrapping = TextWrapping.Wrap,
+            //        TextAlignment = TextAlignment.Left
+            //    };
+            //bdr.Child = tb;
+            listView1 = new ListView()
+            {
+                IsEnabled = false,
+                
+            };
+            listView1.Items.Add("Item 1");
+            listView1.Items.Add("Item 2");
+            listView1.Items.Add("Item 3");
+            listView1.Items.Add("Item 4");
+            listView1.Items.Add("Item 5");
+            listView1.Items.Insert(0, "Front");
+            bdr.Child = listView1;
         }
 
+        ListView listView1;
         List<Commands> MainMenu;
         private void DoCommands()
         {
