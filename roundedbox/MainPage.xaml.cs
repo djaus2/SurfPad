@@ -39,11 +39,6 @@ namespace roundedbox
         {
             this.InitializeComponent();
 
-            //Brush red = new SolidColorBrush(Colors.Red);
-            //AddMyUserControl1( 0, 0,"arc1", "First", red,123,50,1,2);
-            //AddMyUserControl1(1, 1, "arc2", "Second", null, 124, 5, 2);
-            //AddMyUserControl1(2, 2, "The quick brown fox jumps over the lazy dog",  "Third");
-
             DoCommands();
 
             int iCornerRadius = Commands.ElementConfigInt["iCornerRadius"];
