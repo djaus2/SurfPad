@@ -9,8 +9,10 @@ using Windows.Devices.SerialCommunication;
 using Windows.Storage.Streams;
 using System.Threading;
 using System.Threading.Tasks;
+using roundedbox;
+using System.Linq;
 
-namespace IoTCoreMenu
+namespace Serial
 {
     public sealed partial class SerialTerminalPage : Page
     {
@@ -29,7 +31,8 @@ namespace IoTCoreMenu
         {
             Disconnected,
             JustConnected,
-            Connected
+            Connected,
+            AwaitJson
         }
         Mode _Mode= Mode.Disconnected;
 
@@ -44,10 +47,11 @@ namespace IoTCoreMenu
             comPortInput.IsEnabled = false;
             sendTextButton.IsEnabled = false;
             listOfDevices = new ObservableCollection<DeviceInformation>();
-            ListAvailablePorts();
-            Globals.SerialTerminalPage = this;
+            MainPage.SerialTerminalPage = this;
             _Mode = Mode.Disconnected;
         }
+
+        
 
         /// <summary>
         /// ListAvailablePorts
@@ -63,6 +67,23 @@ namespace IoTCoreMenu
 
                 var numDevices = dis.Count;
                 status.Text = "Select a device and connect";
+                //if (dis.Any())
+                //{
+                //    var deviceId = dis[1].Id;
+                //    var device = await SerialDevice.FromIdAsync(deviceId);
+
+                //    if (device != null)
+                //    {
+                //        device.BaudRate = 57600;
+                //        device.StopBits = SerialStopBitCount.One;
+                //        device.DataBits = 8;
+                //        device.Parity = SerialParity.None;
+                //        device.Handshake = SerialHandshake.None;
+
+                //        var reader = new DataReader(device.InputStream);
+                //    }
+                //}
+
 
                 listOfDevices.Clear();
 
@@ -89,6 +110,8 @@ namespace IoTCoreMenu
                             }
                         }
                     }
+
+                    bool done = false;
                     if (Commands.ElementConfigInt.ContainsKey(Commands.cComportConnectDeviceNoKey))
                     {
                         if (ConnectDevices.Items.Count > Commands.ElementConfigInt[Commands.cComportConnectDeviceNoKey])
@@ -99,11 +122,39 @@ namespace IoTCoreMenu
                                 //If only one item then connect to it.
                                 ConnectDevices.SelectedIndex = index;
                                 DeviceInformation di = (DeviceInformation)ConnectDevices.SelectedItem;
-                                comPortInput_Click(di, null);
+                                if (di.Id == Commands.ElementConfigStr[Commands.cComPortIdKey])
+                                {
+                                    comPortInput_Click(di, null);
+                                    done = true;
+                                }
                             }
                             //Doesn't return to here
                         }
                     }
+                    if (!done)
+                        if (Commands.ElementConfigInt.ContainsKey(Commands.cFTDIComportConnectDeviceNoKey))
+                        {
+                            if (ConnectDevices.Items.Count > Commands.ElementConfigInt[Commands.cFTDIComportConnectDeviceNoKey])
+                            {
+                                int index = Commands.ElementConfigInt[Commands.cFTDIComportConnectDeviceNoKey];
+                                if (index >= 0)
+                                {
+                                    //If only one item then connect to it.
+                                    ConnectDevices.SelectedIndex = index;
+                                    //var FTDIIdList = from n in Commands.ElementConfigStr where n.Key == Commands.cFTDIComPortIdKey select n;
+                                    var FTDIIdList = Commands.ElementConfigStr.ElementAt(1);
+                                   
+                                    DeviceInformation di = (DeviceInformation)ConnectDevices.SelectedItem;
+                                    //if (di.Id == Commands.ElementConfigStr[Commands.cFTDIComPortIdKey]) //This fails
+                                    if (di.Id == FTDIIdList.Value)
+                                    {
+                                        comPortInput_Click(di, null);
+                                    }
+                                 
+                                }
+                                //Doesn't return to here
+                            }
+                        }
                 }
             }
             catch (Exception ex)
@@ -140,9 +191,22 @@ namespace IoTCoreMenu
             DeviceInformation entry = (DeviceInformation)selection[0];
             await ConnectSerial(entry);
         }
+		
+	    private void backButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_Mode == Mode.JustConnected)
+            {
+                _Mode = Mode.Connected;
+                Send("ACK1");
+            }
+
+                this.Frame.GoBack();
+            //this.Frame.Navigate(typeof(MainPage),null);
+
+        }
 
         public async Task ConnectSerial(DeviceInformation entry)
-        { 
+        {
 
             try
             {
@@ -179,8 +243,8 @@ namespace IoTCoreMenu
                 // Enable 'WRITE' button to allow sending data
                 sendTextButton.IsEnabled = true;
                 string lcdMsg = "~C" + "Serial Connected";
-                lcdMsg += "~" + ArduinoLCDDisplay.LCD.CMD_DISPLAY_LINE_2_CH + "PressBack/Select   ";
-                Send(lcdMsg);
+                //lcdMsg += "~" + ArduinoLCDDisplay.LCD.CMD_DISPLAY_LINE_2_CH + "PressBack/Select   ";
+                //Send(lcdMsg);
                 status.Text = "Serial Connected: Press [Back] or (Select)";
 
                 Listen();
@@ -232,12 +296,14 @@ namespace IoTCoreMenu
                 }
             }
         }
-        public  void Send(int i)
+
+        //If sending key's code only
+        public  void Send(int i) //1
         {
-             Send(ArduinoLCDDisplay.LCD.CMD_COMMAND_ON_CH + ArduinoLCDDisplay.SensorCommands[i].ToString());
+             Send(string.Format("~{0}",i));
         }
 
-        public async void Send(string msg)
+        public async void Send(string msg) //2
         {
             try
             {
@@ -279,7 +345,7 @@ namespace IoTCoreMenu
             Task<UInt32> storeAsyncTask;
 
             if (msg == "")
-                msg = sendText.Text;
+                msg = sendText.Text; //??
             if (msg.Length != 0)
             //if (msg.sendText.Text.Length != 0)
             {
@@ -297,7 +363,7 @@ namespace IoTCoreMenu
                     //status.Text = sendText.Text + ", ";
                     status.Text += "bytes written successfully!";
                 }
-                sendText.Text = "";
+                sendText.Text = ""; //??
             }
             else
             {
@@ -380,23 +446,27 @@ namespace IoTCoreMenu
                     this.recvdText.Text += recvdtxt;
                     if (_Mode == Mode.JustConnected)
                     {
-                        if (recvdtxt[0]== ArduinoLCDDisplay.keypad.BUTTON_SELECT_CHAR)
+                        if (recvdtxt.ToUpper() == "READY")
                         {
-                            _Mode = Mode.Connected;                
-                            
-                            //Reset back to Cmd = Read sensor and First Sensor
-                            await Globals.MP.UpdateText("@");
-                            //LCD Display: Fist sensor and first comamnd
-                            string lcdMsg = "~C" + Commands.Sensors[0];
-                            lcdMsg += "~" + ArduinoLCDDisplay.LCD.CMD_DISPLAY_LINE_2_CH + Commands.CommandActions[1] + "           ";
-                            Send(lcdMsg);
-
-                            backButton_Click(null, null);
+                            _Mode = Mode.AwaitJson;
+                            recvdText.Text = "";
+                            Send("ACK2");
+                        }
+                    }
+                    else if (_Mode == Mode.AwaitJson)
+                    {
+                        if (recvdtxt.ToUpper().Substring(0, "JSON".Length)== "JSON")
+                        {
+                            recvdtxt = recvdtxt.Substring("JSON".Length);
+                            MainPage.MP.Setup(recvdtxt);
+                            recvdText.Text = "";
+                            _Mode = Mode.Connected;
+                            Send("ACK3");
                         }
                     }
                     else if (_Mode==Mode.Connected)
                     {
-                        await Globals.MP.UpdateText(recvdtxt);
+                        MainPage.MP.UpdateText(recvdtxt);
                         recvdText.Text = "";
                         status.Text = "bytes read successfully!";
                     }
@@ -462,6 +532,7 @@ namespace IoTCoreMenu
                 this.recvdText.Text = "";
                 
                 closeDevice.IsEnabled = false;
+                //CloseDevice(); Is closed by reader cancel
             }
             catch (Exception ex)
             {
@@ -469,30 +540,12 @@ namespace IoTCoreMenu
             }
         }
 
-        private async void backButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_Mode == Mode.JustConnected)
-            {
-                _Mode = Mode.Connected;               
-                
-                //Reset back to Cmd = Read sensor and First Sensor
-                await Globals.MP.UpdateText("@");
-                //LCD Display: Fist sensor and first comamnd
-                string lcdMsg = "~C" + Commands.Sensors[0];
-                lcdMsg += "~" + ArduinoLCDDisplay.LCD.CMD_DISPLAY_LINE_2_CH + Commands.CommandActions[1] + "           ";
-                Send(lcdMsg);
 
-            }
-
-                this.Frame.GoBack();
-            //this.Frame.Navigate(typeof(MainPage),null);
-
-        }
 
         private void ConnectDevices_DoubleTapped(object sender, Windows.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
         {
             comPortInput_Click(null, null);
-            this.Frame.Navigate(typeof(MainPage), null);
+            ////this.Frame.GoBack();
         }
 
         private void cancelSendTextButton_Click(object sender, RoutedEventArgs e)
@@ -506,6 +559,41 @@ namespace IoTCoreMenu
             listOfDevices.Clear();
             ListAvailablePorts();
             
+        }
+
+        bool FirstVisit = true;
+        private async void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (FirstVisit)
+            {
+                FirstVisit = false;
+                ListAvailablePorts();
+                await AwaitS("Ack1");
+                Send("Ack1");
+                bool res = GetJson();
+                if (res)
+                {
+                    Send("Ack2");
+                    backButton_Click(null, null);
+                    Send("Ack3");
+                }
+            }
+            else
+            {
+                closeDevice_Click(null, null);
+                backButton_Click(null, null);
+            }
+        }
+
+        private async Task AwaitS(string v)
+        {
+            //throw new NotImplementedException();
+        }
+
+        private bool GetJson()
+        {
+            //throw new NotImplementedException();
+            return true;
         }
     }
 }

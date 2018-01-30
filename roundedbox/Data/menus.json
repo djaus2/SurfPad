@@ -25,8 +25,13 @@
         { "Comment_ignore2 ": "=======================================================================================" },
         { "Comment_sComPortId": "SerialPort: The serial port's Id string." },
         { "sComPortId": "\\\\?\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}" },
-        { "Comment_iComportConnectDeviceNo": "SerialPort: The index of the serial port in list of connnected devices." },
+        { "sFTDIComPortId": "\\\\?\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}" },
+        { "Comment_About1": "Only one (or none) of these ConnectDeviceNo(as below)should be selected (!= -1)" },
+        { "Comment_About2": " -1 means not selected. " },
+        { "Comment_About3": "If selected then it is automatically connected to (if possible)." },
+        { "Comment_About4": "Otherwise you select from the menu" },
         { "iComportConnectDeviceNo": -1 },
+        { "iFTDIComportConnectDeviceNo": 1 },
         { "Comment_sUseSerial": "Either BT for Bluetooth, or USB Serial" },
         { "sUseSerial": "BT" }
       ]

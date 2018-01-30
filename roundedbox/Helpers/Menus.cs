@@ -55,6 +55,8 @@ namespace roundedbox
         public const string cValuesRowIndexKey = "iValuesRowIndex";
         public const string cComPortIdKey = "sComPortId";
         public const string cComportConnectDeviceNoKey = "iComportConnectDeviceNo";
+        public const string cFTDIComPortIdKey = "sFDTIComPortId";
+        public const string cFTDIComportConnectDeviceNoKey = "iFTDIComportConnectDeviceNo";
         public const string cCommentPrefix = "Comment_";
 
         public static bool CheckKeys()

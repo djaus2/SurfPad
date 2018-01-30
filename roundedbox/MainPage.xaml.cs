@@ -37,6 +37,7 @@ namespace roundedbox
 
         public static MainPage MP;
         public static Bluetooth.BluetoothSerialTerminalPage BTTerminalPage;
+        public static Serial.SerialTerminalPage SerialTerminalPage;
 
         public MainPage()
         {
@@ -78,7 +79,8 @@ namespace roundedbox
             int id = args;
             listView1.Items.Insert(0, name);
             if (args==0)
-                Frame.Navigate(typeof(Bluetooth.BluetoothSerialTerminalPage));
+                //Frame.Navigate(typeof(Serial.SerialTerminalPage));
+            Frame.Navigate(typeof(Bluetooth.BluetoothSerialTerminalPage));
         }
 
         public void InitTheGrid(int x, int y, int Height = DefaultCellHeight, int Width = DefaultCellWidth, int space = DefaultCellSpacing)
