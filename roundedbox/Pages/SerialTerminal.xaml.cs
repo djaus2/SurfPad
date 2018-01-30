@@ -466,7 +466,7 @@ namespace Serial
                     }
                     else if (_Mode==Mode.Connected)
                     {
-                        MainPage.MP.UpdateText(recvdtxt);
+                        MainPage.MP.UpdateTextAsync(recvdtxt);
                         recvdText.Text = "";
                         status.Text = "bytes read successfully!";
                     }

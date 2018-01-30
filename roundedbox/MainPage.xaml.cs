@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -77,10 +78,12 @@ namespace roundedbox
         {
             string name = sender;
             int id = args;
-            listView1.Items.Insert(0, name);
-            if (args==0)
+            //listView1.Items.Insert(0, name);
+            if (args == 0)
                 //Frame.Navigate(typeof(Serial.SerialTerminalPage));
-            Frame.Navigate(typeof(Bluetooth.BluetoothSerialTerminalPage));
+                Frame.Navigate(typeof(Bluetooth.BluetoothSerialTerminalPage));
+            else
+                BTTerminalPage.Send(name+"#");
         }
 
         public void InitTheGrid(int x, int y, int Height = DefaultCellHeight, int Width = DefaultCellWidth, int space = DefaultCellSpacing)
@@ -157,9 +160,12 @@ namespace roundedbox
 
         }
 
-        internal void UpdateText(string recvdtxt)
+        internal async Task UpdateTextAsync(string recvdtxt)
         {
-            throw new NotImplementedException();
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                listView1.Items.Insert(0, recvdtxt);
+            });
         }
 
         private void Button_Tapped(object sender, TappedRoutedEventArgs e)

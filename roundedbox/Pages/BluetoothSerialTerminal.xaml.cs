@@ -21,6 +21,7 @@ using Windows.UI.Popups;
 using System.Threading.Tasks;
 using System.Threading;
 using roundedbox;
+using System.Text;
 
 namespace Bluetooth
 {
@@ -29,6 +30,8 @@ namespace Bluetooth
     /// </summary>
     public sealed partial class BluetoothSerialTerminalPage : Page
     {
+        const int PauseBtwSentCharsmS = 1000;
+
         string Title = "Generic Bluetooth Serial Universal Windows App";
         private Windows.Devices.Bluetooth.Rfcomm.RfcommDeviceService _service;
         private StreamSocket _socket;
@@ -182,6 +185,7 @@ namespace Bluetooth
                         break;
                     case "Send":
                         //await _socket.OutputStream.WriteAsync(OutBuff);
+                        string az = this.textBoxSendText.Text;
                         Send(this.textBoxSendText.Text);
                         this.textBoxSendText.Text = "";
                         break;
@@ -225,45 +229,50 @@ namespace Bluetooth
         {
              Send(string.Format("~{0}",i));
         }
- 
+
         //Normally send key's text. Also some commands
         public async void Send(string msg)
         {
-            try
+            for (int i = 0; i < msg.Length; i++)
             {
-                if (_socket.OutputStream != null)
+                try
                 {
-                    // Create the DataWriter object and attach to OutputStream
-                    dataWriteObject = new DataWriter(_socket.OutputStream);
+                    if (_socket.OutputStream != null)
+                    {
+                        // Create the DataWriter object and attach to OutputStream
+                        dataWriteObject = new DataWriter(_socket.OutputStream);
 
-                    //Launch the WriteAsync task to perform the write
-                    await WriteAsync(msg);
+                        //Launch the WriteAsync task to perform the write
+                        await WriteAsync(msg.Substring(i, 1));
+                    }
+                    else
+                    {
+                        //status.Text = "Select a device and connect";
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    //status.Text = "Select a device and connect";
+                    //status.Text = "Send(): " + ex.Message;
+                    System.Diagnostics.Debug.WriteLine(ex.Message);
                 }
-            }
-            catch (Exception ex)
-            {
-                //status.Text = "Send(): " + ex.Message;
-                System.Diagnostics.Debug.WriteLine(ex.Message);
-            }
-            finally
-            {
-                // Cleanup once complete
-                if (dataWriteObject != null)
+                finally
                 {
-                    dataWriteObject.DetachStream();
-                    dataWriteObject = null;
+                    // Cleanup once complete
+                    if (dataWriteObject != null)
+                    {
+                        dataWriteObject.DetachStream();
+                        dataWriteObject = null;
+                    }
                 }
+
             }
+            Task.Delay(PauseBtwSentCharsmS).Wait();
         }
 
-        /// <summary>
-        /// WriteAsync: Task that asynchronously writes data from the input text box 'sendText' to the OutputStream 
-        /// </summary>
-        /// <returns></returns>
+            /// <summary>
+            /// WriteAsync: Task that asynchronously writes data from the input text box 'sendText' to the OutputStream 
+            /// </summary>
+            /// <returns></returns>
         private async Task WriteAsync(string msg)
         {
             Task<UInt32> storeAsyncTask;
@@ -296,7 +305,7 @@ namespace Bluetooth
             }
         }
 
-
+        string recvdtxt = "";
         /// <summary>
         /// - Create a DataReader object
         /// - Create an async task to read from the SerialDevice InputStream
@@ -313,8 +322,9 @@ namespace Bluetooth
                     dataReaderObject = new DataReader(_socket.InputStream);
                     this.buttonStopRecv.IsEnabled = true;
                     this.buttonDisconnect.IsEnabled = false;
+                    recvdtxt = "";
                     // keep reading the serial input
-                    while (!ReadCancellationTokenSource.Token.IsCancellationRequested)
+                    while (true) //!ReadCancellationTokenSource.Token.IsCancellationRequested)
                     {                 
                         await ReadAsync(ReadCancellationTokenSource.Token);
                     }
@@ -348,6 +358,8 @@ namespace Bluetooth
             }
         }
 
+    
+
         /// <summary>
         /// ReadAsync: Task that waits on data and reads asynchronously from the serial device InputStream
         /// </summary>
@@ -374,34 +386,43 @@ namespace Bluetooth
             {
                 try
                 {
-                    string recvdtxt = dataReaderObject.ReadString(bytesRead);
+                    byte[] rt = new byte[bytesRead];
+                    dataReaderObject.ReadBytes(rt);
+
+                    recvdtxt += Encoding.UTF8.GetString(rt);
+                    //recvdtxt += dataReaderObject.ReadString(bytesRead);
                     System.Diagnostics.Debug.WriteLine(recvdtxt);
                     this.recvdText.Text += recvdtxt;
                     if (_Mode == Mode.JustConnected)
                     {
-                        if (recvdtxt.ToUpper() == "READY")
+                        if (recvdtxt.ToUpper() == "ACK0")
                         {
                             _Mode = Mode.AwaitJson;
-                            recvdText.Text = "";
-                            Send("ACK2");
+                            recvdtxt = "";
+                            Send("ACK1");
                         }
                     }
                     else if (_Mode == Mode.AwaitJson)
                     {
-                        if (recvdtxt.ToUpper().Substring(0, "JSON".Length)== "JSON")
+                        if (recvdtxt.ToUpper() == "ACK1")
                         {
-                            recvdtxt = recvdtxt.Substring("JSON".Length);
-                            MainPage.MP.Setup(recvdtxt);
-                            recvdText.Text = "";
+                            //    if (recvdtxt.ToUpper().Substring(0, "JSON".Length)== "JSON")
+                            //{
+                            //    recvdtxt = recvdtxt.Substring("JSON".Length);
+                            //    MainPage.MP.Setup(recvdtxt);
+                            recvdtxt = "";
                             _Mode = Mode.Connected;
-                            Send("ACK3");
+                            Send("ACK2");
                         }
                     }
                     else if (_Mode == Mode.Connected)
                     {
-                        MainPage.MP.UpdateText(recvdtxt);
-                        recvdText.Text = "";
-                        System.Diagnostics.Debug.WriteLine("bytes read successfully!");
+                        if (recvdtxt.Substring(recvdtxt.Length -1, 1) == "#")
+                        {
+                            await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1));
+                            recvdtxt = "";
+                            System.Diagnostics.Debug.WriteLine("bytes read successfully!");
+                        }
                     }
                 }
                 catch (Exception ex)
