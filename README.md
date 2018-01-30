@@ -2,11 +2,15 @@
 Turn your old Surface into into a large touchpad.
 
 ## Status:
-- Second release now available: Reads button and app metainfo from a Json file: https://github.com/djaus2/SurfPad/tree/0507ef48136b1e9a5d707ba4d7a3b5706111a23b
-- First release, as specified below:
+- Third release now available: Implements a ListView on right. The text of button taps are listed.
+https://github.com/djaus2/SurfPad/tree/9cc2bc99bcd19f9ee547906375b6ea28d3fe3279
+- Second release: Reads button and app metainfo from a Json file: https://github.com/djaus2/SurfPad/tree/0507ef48136b1e9a5d707ba4d7a3b5706111a23b
+- First release: As specified below:
 https://github.com/djaus2/SurfPad/tree/38e4b990b59c7f5e5efcbf02d2c02670b423e370
 
-Further Info: http://embedded101.com/Blogs/David-Jones/entryid/797/SurfPad-Your-old-Surface-as-a-Remote-App-Touchpad
+## Articles: 
+- [SurfPad -  Your old Surface as a Remote App Touchpad: The UI](http://embedded101.com/Blogs/David-Jones/entryid/797/SurfPad-Your-old-Surface-as-a-Remote-App-Touchpad)
+- [SurfPad - Your old Surface as a Remote App Touchpad: Json Configuration](http://embedded101.com/Blogs/David-Jones/entryid/798/SurfPad-Your-old-Surface-as-a-Remote-App-Touchpad-Json-Configuration)
 
 Have you got an old RT Surface 1 or 2 gathering dust and don't know what to do with it?
 
@@ -30,14 +34,15 @@ With this app:
 - When a key is pressed its ID is sent to the app for action
 - Scrolling textbox to display remote app info
 
-May add Widgets later:
+May add Widgets later on:
 - Switch
 - Slider
 - Rotator
 - LEDs
 
-Also later on my add:
-- Page to display XAML sent astext from remote app.
+Also later on:
+- Page to display XAML sent as text from remote app.
+- Surface as X-Y large mouse pad.
 
 ## Target for Remote app
 The remote app platform can be any app on any system that supports Serial, Bluetooth Serial, or Sockets. Just neeeds to implement the interface. Some examples will be given eg for Windows 10 desktop, Windows 10 Mobile and Windows 10 IoT-Core. You are invited to add mote targets, once the interface is published here.
