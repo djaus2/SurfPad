@@ -35,9 +35,14 @@ namespace roundedbox
 
         uc.MyUserControl1[][] buttons = new uc.MyUserControl1[0][];
 
+        public static MainPage MP;
+        public static Bluetooth.BluetoothSerialTerminalPage BTTerminalPage;
+
         public MainPage()
         {
             this.InitializeComponent();
+
+            MP = this;
 
             DoCommands();
 
@@ -53,6 +58,8 @@ namespace roundedbox
             }
 
             uc.MyUserControl1.ButtonTapped += MainPage_ButtonTapped1;
+
+            this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
 
         }
 
@@ -70,6 +77,8 @@ namespace roundedbox
             string name = sender;
             int id = args;
             listView1.Items.Insert(0, name);
+            if (args==0)
+                Frame.Navigate(typeof(Bluetooth.BluetoothSerialTerminalPage));
         }
 
         public void InitTheGrid(int x, int y, int Height = DefaultCellHeight, int Width = DefaultCellWidth, int space = DefaultCellSpacing)
@@ -141,6 +150,19 @@ namespace roundedbox
             MainMenu = Commands.GetMenu("MainMenu");
         }
 
+        public void Setup(string json)
+        {
 
+        }
+
+        internal void UpdateText(string recvdtxt)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Button_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(Bluetooth.BluetoothSerialTerminalPage));
+        }
     }
 }

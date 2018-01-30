@@ -28,6 +28,7 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           x:Name="TheGrid">
+        <Button Tapped="Button_Tapped"  />
 
         <!--<Grid.RowDefinitions>
             <RowDefinition Height="{Binding Source={StaticResource GridLength1}}" />
