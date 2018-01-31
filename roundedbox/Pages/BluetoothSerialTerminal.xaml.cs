@@ -233,8 +233,8 @@ namespace Bluetooth
         //Normally send key's text. Also some commands
         public async void Send(string msg)
         {
-            for (int i = 0; i < msg.Length; i++)
-            {
+            //for (int i = 0; i < msg.Length; i++)
+            //{
                 try
                 {
                     if (_socket.OutputStream != null)
@@ -243,7 +243,7 @@ namespace Bluetooth
                         dataWriteObject = new DataWriter(_socket.OutputStream);
 
                         //Launch the WriteAsync task to perform the write
-                        await WriteAsync(msg.Substring(i, 1));
+                        await WriteAsync(msg); //.Substring(i, 1));
                     }
                     else
                     {
@@ -265,8 +265,8 @@ namespace Bluetooth
                     }
                 }
 
-            }
-            Task.Delay(PauseBtwSentCharsmS).Wait();
+            //}
+            //Task.Delay(PauseBtwSentCharsmS).Wait();
         }
 
             /// <summary>
@@ -283,8 +283,12 @@ namespace Bluetooth
             //if (msg.sendText.Text.Length != 0)
             {
                 // Load the text from the sendText input text box to the dataWriter object
-                dataWriteObject.WriteString(msg);
-
+                //dataWriteObject.WriteString(msg);
+                byte[] bytes;
+                //recvdtxt += Encoding.UTF8.GetString(rt);
+                bytes = Encoding.UTF8.GetBytes(msg);
+                dataWriteObject.WriteBytes(bytes);
+                dataWriteObject.WriteByte(0);
                 // Launch an async task to complete the write operation
                 storeAsyncTask = dataWriteObject.StoreAsync().AsTask();
 
