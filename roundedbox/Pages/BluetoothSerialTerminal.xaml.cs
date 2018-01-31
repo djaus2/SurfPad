@@ -132,7 +132,7 @@ namespace Bluetooth
                     this.buttonSend.IsEnabled = true;
                     this.buttonStartRecv.IsEnabled = true;
                     this.buttonStopRecv.IsEnabled = false;
-                    Send("ACK0");
+                    Send("ACK0#");
                     this.buttonStartRecv.IsEnabled = false;
                     this.buttonStopRecv.IsEnabled = true;
                     Listen();
@@ -218,7 +218,7 @@ namespace Bluetooth
             if (_Mode == Mode.JustConnected)
             {
                 _Mode = Mode.Connected;
-                Send("ACK1");
+                Send("ACK1#");
             }
             this.Frame.GoBack();;
 
@@ -399,16 +399,16 @@ namespace Bluetooth
                     this.recvdText.Text += recvdtxt;
                     if (_Mode == Mode.JustConnected)
                     {
-                        if (recvdtxt.ToUpper() == "ACK0")
+                        if (recvdtxt.ToUpper() == "ACK0#")
                         {
                             _Mode = Mode.AwaitJson;
                             recvdtxt = "";
-                            Send("ACK1");
+                            Send("ACK1#");
                         }
                     }
                     else if (_Mode == Mode.AwaitJson)
                     {
-                        if (recvdtxt.ToUpper() == "ACK1")
+                        if (recvdtxt.ToUpper() == "ACK1#")
                         {
                             //    if (recvdtxt.ToUpper().Substring(0, "JSON".Length)== "JSON")
                             //{
@@ -416,7 +416,7 @@ namespace Bluetooth
                             //    MainPage.MP.Setup(recvdtxt);
                             recvdtxt = "";
                             _Mode = Mode.Connected;
-                            Send("ACK2");
+                            Send("ACK2#");
                         }
                     }
                     else if (_Mode == Mode.Connected)

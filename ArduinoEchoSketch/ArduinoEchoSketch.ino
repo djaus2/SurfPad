@@ -39,10 +39,13 @@ void loop() {
 		while (thisByte != '#')
 		{
 			thisByte = bt.read();
-			msg += thisByte;
+			if (thisByte != -1)
+				msg += thisByte;
 		}
 		//bt.write(thisByte);
 		Serial.println(msg);
+		bt.print(msg);
+		int i = 0;
 	}
 	//  bt.write(thisByte);
 	//
