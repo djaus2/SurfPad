@@ -20,32 +20,108 @@
 SoftwareSerial bt(2, 3); // RX, TX
 
 char  thisByte;
+bool useName = true;
+enum Mode { ACK0, ACK1, ACK2, Running, GetString };
+Mode mode = ACK1;
+byte bytz;
 
 void setup() {
 	bt.begin(9600);
 	Serial.begin(9600);
-	Serial.print("AAAA");
+	Serial.print("Started");
+	mode = ACK0;
+	useName = false;
 }
 
 void loop() {
 	bt.listen();
 	thisByte = bt.read();
-	String msg = "";
-	if (thisByte != -1)
+	if (useName)
 	{
-		
-		msg += thisByte;
-
-		while (thisByte != '#')
+		// At start read messages as ending with last character #
+		// Expect ACK0#
+		// Send ACK1
+		// Expect ACK1
+		// Send Json config file
+		// Expect ACK12#
+		// Switch to single char mode
+		String msg = "";
+		if (thisByte != -1)
 		{
-			thisByte = bt.read();
-			if (thisByte != -1)
-				msg += thisByte;
+			//Uses # terminated string
+			msg += thisByte;
+
+			while (thisByte != '#')
+			{
+				thisByte = bt.read();
+				if (thisByte != -1)
+					msg += thisByte;
+			}
+			//bt.write(thisByte);
+			int j = 0;
+			Serial.println(msg);
+			//bt.print(msg);
+			//if (mode == ACK0)
+			//{
+				if (msg == "ACK0#")
+				{
+					mode == ACK1;
+					//Send Json file
+					bt.print("ACK1#");
+				}
+			//}
+			///else if (mode == ACK1)
+			//{
+				else if (msg == "ACK2#")
+				{
+					mode == ACK2;
+					//Send Json file
+					bt.print("[{ \"ElementConfig\": \"Config\" },{ \"MainMenu\": [ \"Setup BT\", \"Setup Serial\", \"Show sensor list\", \"Back to sensor list\", \" = Sensor\" ]}]#");
+					bt.print("ACK3");
+				}
+			//}
+			//else if (mode == ACK2)
+			//{
+				else if (msg == "ACK4#")
+				{
+					mode == Running;
+					useName = false;
+				}
+			//}
 		}
-		//bt.write(thisByte);
-		Serial.println(msg);
-		bt.print(msg);
-		int i = 0;
+	}
+	else
+	{
+		if (thisByte != -1)
+		{
+				//Each char is interpretted as byte representing a keypress
+				//The byte is the id of button pressed + ' ' (so are printable
+				//bt.print(thisByte);
+				//bt.print('#');
+			switch (thisByte)
+			{
+			case '0':
+				bt.print('1');
+				break;
+			case '2':
+				bt.print('3');
+				break;
+			case '4':
+				bt.print('5');
+				break;
+			case '!':
+				bytz = 200;
+				bt.print('/');
+				break;
+			case '/':
+				bt.print("Hello World~");
+				mode == Running;
+				break;
+			default:
+				bt.print(thisByte);
+				break;
+			}
+		}
 	}
 	//  bt.write(thisByte);
 	//

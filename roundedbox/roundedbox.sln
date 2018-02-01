@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "roundedbox", "roundedbox.csproj", "{D45B429C-A11D-4333-9469-EE4AD4D2A688}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArduinoEchoSketch", "..\ArduinoEchoSketch\ArduinoEchoSketch.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|ARM = Release|ARM
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|ARM.ActiveCfg = Debug|ARM
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|ARM.Build.0 = Debug|ARM
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|ARM.Deploy.0 = Debug|ARM
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|x64.ActiveCfg = Debug|x64
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|x64.Build.0 = Debug|x64
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|x64.Deploy.0 = Debug|x64
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|x86.ActiveCfg = Debug|x86
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|x86.Build.0 = Debug|x86
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|x86.Deploy.0 = Debug|x86
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Release|ARM.ActiveCfg = Release|ARM
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Release|ARM.Build.0 = Release|ARM
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Release|ARM.Deploy.0 = Release|ARM
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Release|x64.ActiveCfg = Release|x64
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Release|x64.Build.0 = Release|x64
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Release|x64.Deploy.0 = Release|x64
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Release|x86.ActiveCfg = Release|x86
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Release|x86.Build.0 = Release|x86
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Release|x86.Deploy.0 = Release|x86
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|ARM.ActiveCfg = Debug|Win32
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x64.ActiveCfg = Debug|Win32
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.ActiveCfg = Debug|Win32
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.Build.0 = Debug|Win32
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|ARM.ActiveCfg = Release|Win32
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x64.ActiveCfg = Release|Win32
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.ActiveCfg = Release|Win32
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D57FDE66-CA2C-4C2F-807C-A5D252AEE37A}
+	EndGlobalSection
+EndGlobal

@@ -29,6 +29,8 @@ namespace roundedbox
         const int DefaultCellHeight = 120;
         const int DefaultCellSpacing = 10;
         const int TextSpan = 2;
+        public const string EOStringStr = "~";
+        public const char EOStringChar = '~';
         Brush Black = new SolidColorBrush(Colors.Black);
         Brush White = new SolidColorBrush(Colors.White);
 
@@ -74,7 +76,7 @@ namespace roundedbox
             buttons[row][col] = new uc.MyUserControl1(row,col,text,TheGrid,name,background,id,cnrRad, colSpan, rowSpan);
         }
 
-        private void MainPage_ButtonTapped1(string sender, int args)
+        private async void MainPage_ButtonTapped1(string sender, int args)
         {
             string name = sender;
             int id = args;
@@ -83,7 +85,15 @@ namespace roundedbox
                 //Frame.Navigate(typeof(Serial.SerialTerminalPage));
                 Frame.Navigate(typeof(Bluetooth.BluetoothSerialTerminalPage));
             else
-                BTTerminalPage.Send(name+"#");
+            {
+                char ch = (char)( 32 + id);
+                string msg = "";
+                msg += ch;
+                msg += '#';
+                //BTTerminalPage.Send(name + EOStringChar);
+                BTTerminalPage.SendCh(ch);
+                //await UpdateTextAsync(msg);
+            }
         }
 
         public void InitTheGrid(int x, int y, int Height = DefaultCellHeight, int Width = DefaultCellWidth, int space = DefaultCellSpacing)
@@ -162,10 +172,33 @@ namespace roundedbox
 
         internal async Task UpdateTextAsync(string recvdtxt)
         {
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            if(recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
             {
-                listView1.Items.Insert(0, recvdtxt);
-            });
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    listView1.Items.Insert(0, recvdtxt.Substring(0,recvdtxt.Length - 1));
+                });
+
+            }
+            else
+            {
+                char ch = recvdtxt[0];
+                int index = ch - ((int)' ');
+                foreach (uc.MyUserControl1[] buts in buttons)
+                {
+                    var but = from n in buts where n.Id == index select n.Text;
+
+                    if (but.Count() != 0)
+                    {
+                        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                        {
+                            listView1.Items.Insert(0, but.First());
+                        });
+                        break;
+                    }
+                }
+            }
+
         }
 
         private void Button_Tapped(object sender, TappedRoutedEventArgs e)
