@@ -2,13 +2,16 @@
 Turn your old Surface into into a large touchpad.
 
 ## Status:
+- Fourth version (not a release as under devlopement): Adds Arduino app as the remote app. Adds an Arduino app into the solution (needs VMicro Arduino Vs 2017 plugin.). Currently UWP app does some initial handshaking with remote app. Only. Keypresses are echoed (code sent to remote app and then its Text is looked up upon return. Also if second key is pressed, ie [Set up Serial] then get Hello World" message sent from remote app! [Setup BT] goes to BT setup page. Just double click on the BT device. (*More on this in my blog later*): https://github.com/djaus2/SurfPad/tree/2254af7aad5777ac74d87f13f7c349bc78d1e40e
 - Third release now available: Implements a ListView on right. The text of button taps are listed.
 https://github.com/djaus2/SurfPad/tree/9cc2bc99bcd19f9ee547906375b6ea28d3fe3279
 - Second release: Reads button and app metainfo from a Json file: https://github.com/djaus2/SurfPad/tree/0507ef48136b1e9a5d707ba4d7a3b5706111a23b
 - First release: As specified below:
 https://github.com/djaus2/SurfPad/tree/38e4b990b59c7f5e5efcbf02d2c02670b423e370
 
-## Articles: 
+## Articles:
+- Coming: Bluetooth Serial Connectivity.
+- [SurfPad - Your old Surface as a Remote App Touchpad: Text Output](http://embedded101.com/Blogs/David-Jones/entryid/799/SurfPad-Your-old-Surface-as-a-Remote-App-Touchpad-Text-Output)
 - [SurfPad -  Your old Surface as a Remote App Touchpad: The UI](http://embedded101.com/Blogs/David-Jones/entryid/797/SurfPad-Your-old-Surface-as-a-Remote-App-Touchpad)
 - [SurfPad - Your old Surface as a Remote App Touchpad: Json Configuration](http://embedded101.com/Blogs/David-Jones/entryid/798/SurfPad-Your-old-Surface-as-a-Remote-App-Touchpad-Json-Configuration)
 
