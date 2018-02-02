@@ -113,6 +113,7 @@
     <Content Include="Data\menus.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Data\json.json" />
     <None Include="roundedbox_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

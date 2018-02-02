@@ -508,17 +508,13 @@ namespace Bluetooth
                             //Send("ACK4#");
                             SendCh('4');
                         }
-                        else
-                        {
-                            string json = recvdtxt;
-                        }
                     }
                     else if (_Mode == Mode.Connected)
                     {
                         byte byt = rt[0];
                         switch (byt)
                         {
-                            case 47:  //'/'
+                            case 47:  //'!'
                                 _Mode = Mode.GetString;
                                 recvdtxt = "";
                                 SendCh('/');
@@ -534,11 +530,15 @@ namespace Bluetooth
                     else if (_Mode == Mode.GetString)
                     {
                         recvdtxt += Encoding.UTF8.GetString(rt);
+                        //System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
                         if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
                         {
                             System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
                             await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1))
-                            _Mode = Mode.Connected;
+                            if (recvdtxt.Contains("MAINMENU"))
+                                _Mode = Mode.Connected;
+                            else
+                                SendCh('~');
                             recvdtxt = "";
                         }
                         else

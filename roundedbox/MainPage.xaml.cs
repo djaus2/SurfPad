@@ -48,23 +48,30 @@ namespace roundedbox
 
             MP = this;
 
-            DoCommands();
-
-            int iCornerRadius = Commands.ElementConfigInt["iCornerRadius"];
-
-            InitTheGrid(Commands.ElementConfigInt["iRows"], Commands.ElementConfigInt["iColumns"],
-                Commands.ElementConfigInt["iHeight"], Commands.ElementConfigInt["iWidth"], 
-                Commands.ElementConfigInt["iSpace"]);
-            foreach (var menuItem in MainMenu)
-            {
-                AddMyUserControl1(menuItem.idTag.Row, menuItem.idTag.Col, menuItem.name,"",
-                    null,-1,iCornerRadius);
-            }
-
+            Setup("");
             uc.MyUserControl1.ButtonTapped += MainPage_ButtonTapped1;
 
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
 
+        }
+
+        private void Setup(string jsonData)
+        {
+            DoCommands(jsonData);
+
+            int iCornerRadius = Commands.ElementConfigInt["iCornerRadius"];
+
+            InitTheGrid(Commands.ElementConfigInt["iRows"], Commands.ElementConfigInt["iColumns"],
+                Commands.ElementConfigInt["iHeight"], Commands.ElementConfigInt["iWidth"],
+                Commands.ElementConfigInt["iSpace"]);
+            //uc.MyUserControl1[][] buttons = new uc.MyUserControl1[0][]; ... Is inited in the InitTheGrid(), row by row
+            foreach (var menuItem in MainMenu)
+            {
+                AddMyUserControl1(menuItem.idTag.Row, menuItem.idTag.Col, menuItem.name, "",
+                    null, -1, iCornerRadius);
+            }
+
+            
         }
 
         private void AddMyUserControl1(int row, int col, string text, 
@@ -76,7 +83,7 @@ namespace roundedbox
             buttons[row][col] = new uc.MyUserControl1(row,col,text,TheGrid,name,background,id,cnrRad, colSpan, rowSpan);
         }
 
-        private async void MainPage_ButtonTapped1(string sender, int args)
+        private void MainPage_ButtonTapped1(string sender, int args)
         {
             string name = sender;
             int id = args;
@@ -142,42 +149,48 @@ namespace roundedbox
                 IsEnabled = false,
                 
             };
-            listView1.Items.Add("Item 1");
-            listView1.Items.Add("Item 2");
-            listView1.Items.Add("Item 3");
-            listView1.Items.Add("Item 4");
-            listView1.Items.Add("Item 5");
-            listView1.Items.Insert(0, "Front");
             bdr.Child = listView1;
         }
 
         ListView listView1;
         List<Commands> MainMenu;
-        private void DoCommands()
+        private void DoCommands(string jsonData)
         {
-            GetCommands("ElementConfig");
+            GetCommands("ElementConfig", jsonData);
             //Following settings are mandatory
             bool res = Commands.CheckKeys();
             //Next two are optional settings
             ////bool res2 = Commands.CheckComportIdSettingExists();
             ////res2 = Commands.CheckcIfComportConnectDeviceNoKeySettingExists();
-            GetCommands("MainMenu");
+            GetCommands("MainMenu", jsonData);
             MainMenu = Commands.GetMenu("MainMenu");
         }
 
-        public void Setup(string json)
-        {
 
-        }
-
+        private string config = "";
         internal async Task UpdateTextAsync(string recvdtxt)
         {
-            if(recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
+            if(recvdtxt.Substring(recvdtxt.Length - 1,1) == EOStringStr)
             {
-                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                if (recvdtxt.Substring(0, "{\"ElementConfig\":".Length) == "{\"ElementConfig\":")
                 {
-                    listView1.Items.Insert(0, recvdtxt.Substring(0,recvdtxt.Length - 1));
-                });
+                    config = recvdtxt;
+                    config = config.Replace(EOStringStr, "");
+                }
+                else if (recvdtxt.Substring(0, "{\"MainMenu\":".Length) == "{\"MainMenu\":")
+                {
+                    string menus = recvdtxt;
+                    menus = menus.Replace(EOStringStr, "");
+                    string jsonData = "[ " + config + " , " + menus + " ]";
+                    Setup(jsonData);
+                }
+                else
+                {
+                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        listView1.Items.Insert(0, recvdtxt.Substring(0, recvdtxt.Length - 1));
+                    });
+                }
 
             }
             else

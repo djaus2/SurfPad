@@ -455,10 +455,16 @@ namespace Serial
                     }
                     else if (_Mode == Mode.AwaitJson)
                     {
-                        if (recvdtxt.ToUpper().Substring(0, "JSON".Length)== "JSON")
+                        if (recvdtxt.ToUpper().Substring(0, "CONFIG".Length)== "CONFIG")
+                        {
+                            recvdtxt = recvdtxt.Substring("CONFIG".Length);
+                            await MainPage.MP.UpdateTextAsync(recvdtxt);
+                            Send("~");
+                        }
+                        else if (recvdtxt.ToUpper().Substring(0, "JSON".Length) == "JSON")
                         {
                             recvdtxt = recvdtxt.Substring("JSON".Length);
-                            MainPage.MP.Setup(recvdtxt);
+                            await MainPage.MP.UpdateTextAsync(recvdtxt);
                             recvdText.Text = "";
                             _Mode = Mode.Connected;
                             Send("ACK3");
@@ -466,7 +472,7 @@ namespace Serial
                     }
                     else if (_Mode==Mode.Connected)
                     {
-                        MainPage.MP.UpdateTextAsync(recvdtxt);
+                        await MainPage.MP.UpdateTextAsync(recvdtxt);
                         recvdText.Text = "";
                         status.Text = "bytes read successfully!";
                     }

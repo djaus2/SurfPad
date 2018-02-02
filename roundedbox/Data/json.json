@@ -1,0 +1,25 @@
+﻿[
+  {
+    "ElementConfig": [
+      [
+        { "iWidth": 120 },
+        { "iHeight": 100 },
+        { "iSpace": 5 },
+        { "iCornerRadius": 10 },
+        { "iRows": 2 },
+        { "iColumns": 5 },
+        { "sComPortId": "\\\\?\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}" },
+        { "sFTDIComPortId": "\\\\?\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}" },
+        { "iComportConnectDeviceNo": -1 },
+        { "iFTDIComportConnectDeviceNo": 1 },
+        { "sUseSerial": "BT" }
+      ]
+    ]
+  },
+  {
+    "MainMenu": [
+      [ "Setup BT", "Setup Serial", "Show sensor list", "Back to sensor list", " = Sensor" ],
+      [ "Setup BT", "Setup Serial", "Show sensor list", "Back to sensor list", " = Sensor" ]
+    ]
+  }
+]

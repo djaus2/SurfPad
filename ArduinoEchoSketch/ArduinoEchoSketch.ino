@@ -109,13 +109,17 @@ void loop() {
 			case '4':
 				bt.print('5');
 				break;
-			case '!':
+			case '!': //Get Exclamation mark as indicator of request for Json
 				bytz = 200;
-				bt.print('/');
+				bt.print('/'); //Send back / meaning it will follow
 				break;
-			case '/':
-				bt.print("Hello World~");
-				mode == Running;
+			case '/':  //App sends this back
+				bt.print("{\"ElementConfig\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~");
+				break;
+			case '~':  //Then when it gets above then sends this back as confirmation
+				//bt.print("Hello World~");
+				bt.print("{\"MainMenu\":[ [ \"Setup BT\", \"Setup Serial\", \"Show sensor list\", \"Back to sensor list\", \" = Sensor\" ],[ \"Setup BT\", \"Setup Serial\", \"Show sensor list\", \"Back to sensor list\", \" = Sensor\" ] ] }~");
+				mode = Running;
 				break;
 			default:
 				bt.print(thisByte);

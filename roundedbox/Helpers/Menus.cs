@@ -223,23 +223,35 @@ namespace roundedbox
         ///         Don't have to have same number on each row.
         /// </summary>
         /// <param name="Menu">Either All Commands ("") or One menu name</param>
-        private void GetCommands(string Menu)
+        private void GetCommands(string Menu,string jsonData)
         {
 
             JsonArray ResultData = null;
-            using (StreamReader file = File.OpenText(".\\Data\\menus.json"))
+            if (jsonData == "")
             {
-                String JSONData;
+                using (StreamReader file = File.OpenText(".\\Data\\menus.json"))
+                {
+                    String JSONData;
 
-                //Get the stream as text.
-                JSONData = file.ReadToEnd();
+                    //Get the stream as text.
+                    JSONData = file.ReadToEnd();
 
-                //Json data is an array of arrays
-                //These are then either an array of strings or just a string.
-                //Convert to JSON object
-                ResultData = (JsonArray)JsonArray.Parse(JSONData);
+                    //Json data is an array of arrays
+                    //These are then either an array of strings or just a string.
+                    //Convert to JSON object
+                    ResultData = (JsonArray)JsonArray.Parse(JSONData);
+                }
             }
+            else
+            {
+                try
+                {
+                    ResultData = (JsonArray)JsonArray.Parse(jsonData);
+                } catch (Exception ex)
+                {
 
+                }
+            }
             if (ResultData != null)
             {
                 JsonArray jMenu = null;
