@@ -111,7 +111,6 @@ namespace roundedbox
         }
         public Commands(string Menu, string Name, int Col, int Row)
         {
-
             menu = Menu;
             name = Name;
             idTag = new Point(Col, Row);
@@ -121,20 +120,23 @@ namespace roundedbox
                 MaxIdTag = new Point(MaxIdTag.Col, Row);
             CommandsList.Add(this);
 
-            if ((Row == Commands.ElementConfigInt[cSensorsRowIndexKey]) && (Col != Commands.ElementConfigInt[cCommandActionsColIndexKey]))
-            {
-                Array.Resize(ref Sensors, Sensors.Length + 1);
-                Sensors[Sensors.Length - 1] = Name;
-            }
-            else if (Col == Commands.ElementConfigInt[cCommandActionsColIndexKey])
-            {
-                Array.Resize(ref CommandActions, CommandActions.Length + 1);
-                CommandActions[CommandActions.Length - 1] = Name.Substring(1);
-            }
+            ////if ((Row == Commands.ElementConfigInt[cSensorsRowIndexKey]) && (Col != Commands.ElementConfigInt[cCommandActionsColIndexKey]))
+            ////{
+            ////    Array.Resize(ref Sensors, Sensors.Length + 1);
+            ////    Sensors[Sensors.Length - 1] = Name;
+            ////}
+            ////else if (Col == Commands.ElementConfigInt[cCommandActionsColIndexKey])
+            ////{
+            ////    Array.Resize(ref CommandActions, CommandActions.Length + 1);
+            ////    CommandActions[CommandActions.Length - 1] = Name.Substring(1);
+            ////}
         }
-        public static Dictionary<string, int> ElementConfigInt { get; set; } = new Dictionary<string, int>();
-        public static Dictionary<string, char> ElementConfigCh { get; set; } = new Dictionary<string, char>();
-        public static Dictionary<string, string> ElementConfigStr { get; set; } = new Dictionary<string, string>();
+        public static Dictionary<string, int> ElementConfigInt { get; set; }
+        //= new Dictionary<string, int>();
+        public static Dictionary<string, char> ElementConfigCh { get; set; }
+        //= new Dictionary<string, char>();
+        public static Dictionary<string, string> ElementConfigStr { get; set; }
+            //= new Dictionary<string, string>();
 
         public static void Init()
         {
@@ -202,8 +204,8 @@ namespace roundedbox
             return menuList.ToList<Commands>();
         }
 
-        public static string[] Sensors = new string[0];
-        public static string[] CommandActions = new string[0];
+        public static string[] Sensors;// = new string[0];
+        public static string[] CommandActions;// = new string[0];
     }
 
 
@@ -287,6 +289,7 @@ namespace roundedbox
                                     //Got command so add to list (done automatically when instantiated).
                                     if (Menu == "ElementConfig")
                                     {
+
                                         JsonObject jo2 = (JsonObject)jv2.GetObject();
                                         string config = jo2.Keys.First();
                                         //Ignore comments in ElementConfig

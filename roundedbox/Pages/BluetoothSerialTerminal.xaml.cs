@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using roundedbox;
 using System.Text;
+using System.Diagnostics;
 
 namespace Bluetooth
 {
@@ -50,7 +51,7 @@ namespace Bluetooth
             JustConnected,
             Connected,
             AwaitJson,
-            GetString
+            JsonConfig
         }
         Mode _Mode = Mode.Disconnected;
 
@@ -515,7 +516,7 @@ namespace Bluetooth
                         switch (byt)
                         {
                             case 47:  //'!'
-                                _Mode = Mode.GetString;
+                                _Mode = Mode.JsonConfig;
                                 recvdtxt = "";
                                 SendCh('/');
                                 break;
@@ -527,7 +528,7 @@ namespace Bluetooth
                                 break;
                         }
                     }
-                    else if (_Mode == Mode.GetString)
+                    else if (_Mode == Mode.JsonConfig)
                     {
                         recvdtxt += Encoding.UTF8.GetString(rt);
                         //System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
@@ -535,10 +536,22 @@ namespace Bluetooth
                         {
                             System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
                             await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1))
-                            if (recvdtxt.Contains("MAINMENU"))
+
+                            if (recvdtxt.Substring(0, "{\"ElementConfig\":".Length) == "{\"ElementConfig\":")
+                                SendCh('~');
+                            else if (recvdtxt.Substring(0, "{\"MainMenu\":".Length) == "{\"MainMenu\":")
                                 _Mode = Mode.Connected;
                             else
-                                SendCh('~');
+                            {
+                                //// Get stack trace for the exception with source file information
+                                //var st = new StackTrace(ex, true);
+                                //string thisFile = new System.Diagnostics.StackTrace(true).GetFrame(0).GetFileName();
+                                //var frame = st.GetFrame(0);
+                                //// Get the line number from the stack frame
+                                //var line = frame.GetFileLineNumber();
+                                throw new System.Exception("BluetoothSerialTerminal.cs: ReadAsync() Getting JsonConfig. Shouldn't have reached this LOC"); //: { 0 }",line);
+
+                            }
                             recvdtxt = "";
                         }
                         else

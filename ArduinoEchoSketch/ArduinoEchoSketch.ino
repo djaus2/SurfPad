@@ -118,7 +118,7 @@ void loop() {
 				break;
 			case '~':  //Then when it gets above then sends this back as confirmation
 				//bt.print("Hello World~");
-				bt.print("{\"MainMenu\":[ [ \"Setup BT\", \"Setup Serial\", \"Show sensor list\", \"Back to sensor list\", \" = Sensor\" ],[ \"Setup BT\", \"Setup Serial\", \"Show sensor list\", \"Back to sensor list\", \" = Sensor\" ] ] }~");
+				bt.print("{\"MainMenu\":[ [ \"Setup BT\", \"Setup Serial\", \"Redo\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
 				mode = Running;
 				break;
 			default:

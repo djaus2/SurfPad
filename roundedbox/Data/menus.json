@@ -39,9 +39,9 @@
   },
   {
     "MainMenu": [
-      [ "Setup BT", "Setup Serial", "Show sensor list", "Back to sensor list", "=Sensor" ],
+      [ "Setup BT", "Load App Menu", "Setup Serial", "Setup Sockets", "Use Azure IoT Hub" ],
       [ "_READ:", "DHTemp", "BaroTemp", "Humidity", "Pressure" ],
-      [ "_Value:", "=DHTemp", "=BaroTemp", "=Humidity", "=Pressure" ],
+      [ "_Value:", "DHTemp", "BaroTemp", "=Humidity", "Pressure" ],
       [ "_POST:", "DHTemp", "BaroTemp", "Humidity", "Pressure" ],
       [ "_GET:", "DHTemp", "BaroTemp", "Humidity", "Pressure" ],
       [ "_HISTORY:", "DHTemp", "BaroTemp", "Humidity", "Pressure" ]

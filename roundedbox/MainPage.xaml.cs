@@ -98,7 +98,8 @@ namespace roundedbox
                 msg += ch;
                 msg += '#';
                 //BTTerminalPage.Send(name + EOStringChar);
-                BTTerminalPage.SendCh(ch);
+                if (BTTerminalPage != null)
+                    BTTerminalPage.SendCh(ch);
                 //await UpdateTextAsync(msg);
             }
         }
@@ -156,6 +157,7 @@ namespace roundedbox
         List<Commands> MainMenu;
         private void DoCommands(string jsonData)
         {
+            Commands.Init();
             GetCommands("ElementConfig", jsonData);
             //Following settings are mandatory
             bool res = Commands.CheckKeys();
