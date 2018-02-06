@@ -102,6 +102,7 @@
     <Compile Include="MyUserControl1.xaml.cs">
       <DependentUpon>MyUserControl1.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\USBSerialTerminal.xaml.cs" />
     <Compile Include="Pages\BluetoothSerialTerminal.xaml.cs" />
     <Compile Include="Pages\SerialTerminal.xaml.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -137,6 +138,10 @@
     <Page Include="MyUserControl1.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\USBSerialTerminal .xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\BluetoothSerialTerminal.xaml">
       <Generator>MSBuild:Compile</Generator>

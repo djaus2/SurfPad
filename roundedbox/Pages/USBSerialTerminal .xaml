@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="Bluetooth.BluetoothSerialTerminalPage"
+    x:Class="USBSerial.USBSerialTerminalPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:roundedbox"
@@ -8,23 +8,23 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <CollectionViewSource x:Name="PairedDevices"/>
+        <CollectionViewSource x:Name="DeviceListSource"/>
     </Page.Resources>
 
     <Grid x:Name="Layout">
         <Grid.Background>
             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                 <GradientStop Color="White" Offset="1"/>
-                <GradientStop Color="LightCoral" Offset="0.75"/>
+                <GradientStop Color="LightCyan" Offset="0.75"/>
                 <GradientStop Color="LightYellow" Offset="0.5"/>
                 <GradientStop Color="LightYellow" Offset="0.25"/>
-                <GradientStop Color="LightSkyBlue" Offset="0"/>
+                <GradientStop Color="LightGreen" Offset="0"/>
             </LinearGradientBrush>
         </Grid.Background>
 
         <StackPanel Orientation="Vertical">
-            <TextBlock x:Name="MyTitle" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="Wrap" Text="Universal Windows Generic Bluetooth Serial Test App " VerticalAlignment="Top" Width="800"/>
-            <TextBlock  x:Name="uartTitle" Text="Bluetooth Setup" Style="{StaticResource HeaderTextBlockStyle}" 
+            <TextBlock x:Name="MyTitle" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="Wrap" Text="Universal Windows USB Serial Test App " VerticalAlignment="Top" Width="800"/>
+            <TextBlock  x:Name="uartTitle" Text="USB Serial Setup" Style="{StaticResource HeaderTextBlockStyle}" 
                         IsHitTestVisible="false" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,10,0,0"/>
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
@@ -45,7 +45,7 @@
                 <Button x:Name="buttonStopRecv" Content="Stop Recv" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
                 <Button x:Name="buttonBack" Content="Back" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>
             </StackPanel>
-            <ListBox x:Name="ConnectDevices" ItemsSource="{Binding Source={StaticResource PairedDevices}}" Background="Gray" Margin="10" DoubleTapped="ConnectDevices_DoubleTapped" 
+            <ListBox x:Name="ConnectDevices" ItemsSource="{Binding Source={StaticResource DeviceListSource}}" Background="Gray" Margin="10" DoubleTapped="ConnectDevices_DoubleTapped" 
                     Width="Auto"
                     Height="Auto"
                     >

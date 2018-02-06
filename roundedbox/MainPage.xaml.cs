@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using USBSerial;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
@@ -41,6 +42,8 @@ namespace roundedbox
         public static MainPage MP;
         public static Bluetooth.BluetoothSerialTerminalPage BTTerminalPage;
         public static Serial.SerialTerminalPage SerialTerminalPage;
+
+        public static USBSerialTerminalPage USBSerialTerminalPage { get; internal set; }
 
         public MainPage()
         {
@@ -97,7 +100,10 @@ namespace roundedbox
                     BTTerminalPage.SendCh('!');
             }
             else if (args == 2)
-                Frame.Navigate(typeof(Serial.SerialTerminalPage));
+            {
+                //var pg = new USBSerial.USBSerialTerminalPage();
+                Frame.Navigate(typeof(USBSerial.USBSerialTerminalPage));
+            }
             else
             {
                 //characters as code for keys are A..Z and a..z

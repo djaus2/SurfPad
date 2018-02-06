@@ -1,30 +1,46 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-
-using System;
-using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Navigation;
 using Windows.Devices.Enumeration;
 using Windows.Devices.SerialCommunication;
 using Windows.Storage.Streams;
-using System.Threading;
+using System.Collections.ObjectModel;
+using Windows.UI.Popups;
 using System.Threading.Tasks;
+using System.Threading;
 using roundedbox;
-using System.Linq;
+using System.Text;
+using System.Diagnostics;
 
-namespace Serial
+namespace USBSerial
 {
-    public sealed partial class SerialTerminalPage : Page
+    /// <summary>
+    /// The Bluetooth Serial page for the app
+    /// </summary>
+    public sealed partial class USBSerialTerminalPage : Page
     {
-        /// <summary>
-        /// Private variables
-        /// </summary>
-		string Title = "Generic Bluetooth Serial Universal Windows App";
+        const int PauseBtwSentCharsmS = 1000;
+        public const string EOStringStr = "~";
+        public const char EOStringChar = '~';
+        public const byte EOStringByte = 126;
+
+        string Title = "USB Serial Universal Windows App";
         private SerialDevice serialPort = null;
         DataWriter dataWriteObject = null;
         DataReader dataReaderObject = null;
 
-        private ObservableCollection<DeviceInformation> listOfDevices;
+        ObservableCollection<DeviceInformation> listofDevices;
         private CancellationTokenSource ReadCancellationTokenSource;
 
         enum Mode
@@ -32,26 +48,30 @@ namespace Serial
             Disconnected,
             JustConnected,
             Connected,
-            AwaitJson
+            AwaitJson,
+            JsonConfig
         }
-        Mode _Mode= Mode.Disconnected;
+        Mode _Mode = Mode.Disconnected;
 
-        public SerialTerminalPage()
+        public USBSerialTerminalPage()
         {
-
-
             this.NavigationCacheMode =
-                Windows.UI.Xaml.Navigation.NavigationCacheMode.Required;
+                    Windows.UI.Xaml.Navigation.NavigationCacheMode.Required;
             this.InitializeComponent();
-			MyTitle.Text = Title;
-            comPortInput.IsEnabled = false;
-            sendTextButton.IsEnabled = false;
-            listOfDevices = new ObservableCollection<DeviceInformation>();
-            MainPage.SerialTerminalPage = this;
+            MyTitle.Text = Title;         
+            listofDevices = new ObservableCollection<DeviceInformation>();
+            ListAvailablePorts(); 
+            MainPage.USBSerialTerminalPage = this;
             _Mode = Mode.Disconnected;
         }
 
-        
+        //// Remove later of reasign.
+        private TextBlock status = new TextBlock();
+        private Button comPortInput = new Button();
+        private Button refresh = new Button();
+        private Button closeDevice = new Button();
+        private Button sendTextButton = new Button();
+        private TextBlock sendText = new TextBlock();
 
         /// <summary>
         /// ListAvailablePorts
@@ -84,17 +104,16 @@ namespace Serial
                 //    }
                 //}
 
-
-                listOfDevices.Clear();
+                listofDevices.Clear();
 
                 if (numDevices != 0)
                 {
                     for (int i = 0; i < numDevices; i++)
                     {
-                        listOfDevices.Add(dis[i]);
+                        this.listofDevices.Add(dis[i]);
                     }
 
-                    DeviceListSource.Source = listOfDevices;
+                    DeviceListSource.Source = this.listofDevices;
                     comPortInput.IsEnabled = true;
                     ConnectDevices.SelectedIndex = -1;
                     if (Commands.CheckComportIdSettingExists())
@@ -143,14 +162,14 @@ namespace Serial
                                     ConnectDevices.SelectedIndex = index;
                                     //var FTDIIdList = from n in Commands.ElementConfigStr where n.Key == Commands.cFTDIComPortIdKey select n;
                                     var FTDIIdList = Commands.ElementConfigStr.ElementAt(1);
-                                   
+
                                     DeviceInformation di = (DeviceInformation)ConnectDevices.SelectedItem;
                                     //if (di.Id == Commands.ElementConfigStr[Commands.cFTDIComPortIdKey]) //This fails
                                     if (di.Id == FTDIIdList.Value)
                                     {
                                         comPortInput_Click(di, null);
                                     }
-                                 
+
                                 }
                                 //Doesn't return to here
                             }
@@ -161,7 +180,7 @@ namespace Serial
             {
                 status.Text = ex.Message;
             }
-			
+
         }
 
         /// <summary>
@@ -190,19 +209,6 @@ namespace Serial
 
             DeviceInformation entry = (DeviceInformation)selection[0];
             await ConnectSerial(entry);
-        }
-		
-	    private void backButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_Mode == Mode.JustConnected)
-            {
-                _Mode = Mode.Connected;
-                Send("ACK1");
-            }
-
-                this.Frame.GoBack();
-            //this.Frame.Navigate(typeof(MainPage),null);
-
         }
 
         public async Task ConnectSerial(DeviceInformation entry)
@@ -247,13 +253,92 @@ namespace Serial
                 //Send(lcdMsg);
                 status.Text = "Serial Connected: Press [Back] or (Select)";
 
-                Listen();
+                ///////////////////////
+                bool success = true;
+                if (success)
+                {
+                    _Mode = Mode.JustConnected;
+                    this.buttonDisconnect.IsEnabled = true;
+                    this.buttonSend.IsEnabled = true;
+                    this.buttonStartRecv.IsEnabled = true;
+                    this.buttonStopRecv.IsEnabled = false;
+                    SendCh('0');
+                    //Send("ACK0#");
+                    this.buttonStartRecv.IsEnabled = false;
+                    this.buttonStopRecv.IsEnabled = true;
+                    ///////////////////////
+                }
             }
             catch (Exception ex)
             {
                 status.Text = ex.Message;
                 comPortInput.IsEnabled = true;
                 sendTextButton.IsEnabled = false;
+            }
+        }
+
+        public async void Send(string msg) //2
+        {
+            try
+            {
+                if (serialPort != null)
+                {
+                    // Create the DataWriter object and attach to OutputStream
+                    dataWriteObject = new DataWriter(serialPort.OutputStream);
+
+                    //Launch the WriteAsync task to perform the write
+                    await WriteAsync(msg);
+                }
+                else
+                {
+                    status.Text = "Select a device and connect";
+                }
+            }
+            catch (Exception ex)
+            {
+                status.Text = "Send(): " + ex.Message;
+            }
+            finally
+            {
+                // Cleanup once complete
+                if (dataWriteObject != null)
+                {
+                    dataWriteObject.DetachStream();
+                    dataWriteObject = null;
+                }
+            }
+        }
+
+        public async void SendCh(char  ch) 
+        {
+            string msg = "" + ch;
+            try
+            {
+                if (serialPort != null)
+                {
+                    // Create the DataWriter object and attach to OutputStream
+                    dataWriteObject = new DataWriter(serialPort.OutputStream);
+
+                    //Launch the WriteAsync task to perform the write
+                    await WriteAsync(msg);
+                }
+                else
+                {
+                    status.Text = "Select a device and connect";
+                }
+            }
+            catch (Exception ex)
+            {
+                status.Text = "Send(): " + ex.Message;
+            }
+            finally
+            {
+                // Cleanup once complete
+                if (dataWriteObject != null)
+                {
+                    dataWriteObject.DetachStream();
+                    dataWriteObject = null;
+                }
             }
         }
 
@@ -297,43 +382,97 @@ namespace Serial
             }
         }
 
-        //If sending key's code only
-        public  void Send(int i) //1
-        {
-             Send(string.Format("~{0}",i));
-        }
 
-        public async void Send(string msg) //2
+        async private void ConnectDevice_Click(object sender, RoutedEventArgs e)
         {
-            try
+            var selection = ConnectDevices.SelectedItems;
+
+            if (selection.Count <= 0)
             {
-                if (serialPort != null)
-                {
-                    // Create the DataWriter object and attach to OutputStream
-                    dataWriteObject = new DataWriter(serialPort.OutputStream);
-
-                    //Launch the WriteAsync task to perform the write
-                    await WriteAsync(msg);
-                }
+                if (ConnectDevices.Items.Count == 1)
+                    ConnectDevices.SelectedIndex = 0;
                 else
                 {
                     status.Text = "Select a device and connect";
+                    return;
                 }
             }
-            catch (Exception ex)
+
+            DeviceInformation entry = (DeviceInformation)selection[0];
+            await ConnectSerial(entry);
+            
+        }
+        
+        private void ConnectDevices_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            DeviceInformation di = (DeviceInformation)ConnectDevices.SelectedItem;
+            this.TxtBlock_SelectedID.Text = di.Id;
+            this.textBlockBTName.Text = di.Name;
+            ConnectDevice_Click(sender, e);
+        }
+        
+        Windows.Storage.Streams.Buffer OutBuff;
+        
+        private async void button_Click(object sender, RoutedEventArgs e)
+        {
+            OutBuff = new Windows.Storage.Streams.Buffer(100);
+            Button button = (Button)sender;
+            if (button != null)
             {
-                status.Text = "Send(): " + ex.Message;
-            }
-            finally
-            {
-                // Cleanup once complete
-                if (dataWriteObject != null)
+                switch ((string)button.Content)
                 {
-                    dataWriteObject.DetachStream();
-                    dataWriteObject = null;
+                    case "Disconnect":
+                        CloseDevice();
+                        this.textBlockBTName.Text = "";
+                        this.TxtBlock_SelectedID.Text = "";
+                        this.buttonDisconnect.IsEnabled = false;
+                        this.buttonSend.IsEnabled = false;
+                        this.buttonStartRecv.IsEnabled = false;
+                        this.buttonStopRecv.IsEnabled = false;
+                        break;
+                    case "Send":
+                        //await _socket.OutputStream.WriteAsync(OutBuff);
+                        string az = this.textBoxSendText.Text;
+                        Send(this.textBoxSendText.Text);
+                        this.textBoxSendText.Text = "";
+                        break;
+                    case "Clear Send":
+                        this.recvdText.Text = "";
+                        break;
+                    case "Start Recv":
+                        this.buttonStartRecv.IsEnabled = false;
+                        this.buttonStopRecv.IsEnabled = true;
+                        Listen();
+                        break;
+                    case "Stop Recv":
+                        this.buttonStartRecv.IsEnabled = false;
+                        this.buttonStopRecv.IsEnabled = false;
+                        CancelReadTask();
+                        break;
+                    case "Refresh":
+                        ListAvailablePorts();
+                        break;
+                    case "Back":
+                        //this.Frame.GoBack();
+                        backButton_Click(null, null);
+                        break;
                 }
             }
         }
+
+        private  void backButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_Mode == Mode.JustConnected)
+            {
+                _Mode = Mode.Connected;
+                //Send("ACK1#");
+            }
+            this.Frame.GoBack();;
+
+        }
+
+
+
 
 
         /// <summary>
@@ -371,6 +510,13 @@ namespace Serial
             }
         }
 
+        private async Task WriteChar(char ch)
+        {
+            string msg = "" + ch;
+            await WriteAsync(msg);
+        }
+        
+        string recvdtxt = "";
         /// <summary>
         /// - Create a DataReader object
         /// - Create an async task to read from the SerialDevice InputStream
@@ -379,6 +525,8 @@ namespace Serial
         /// <param name="e"></param>
         private async void Listen()
         {
+
+            ReadCancellationTokenSource = new CancellationTokenSource();
             try
             {
                 if (serialPort != null)
@@ -398,6 +546,12 @@ namespace Serial
                 {
                     status.Text = "Reading task was cancelled, closing device and cleaning up";
                     CloseDevice();
+                    this.buttonStopRecv.IsEnabled = false;
+                    this.buttonStartRecv.IsEnabled = false;
+                    this.buttonSend.IsEnabled = false;
+                    this.buttonDisconnect.IsEnabled = false;
+                    this.textBlockBTName.Text = "";
+                    this.TxtBlock_SelectedID.Text = "";
                 }
                 else
                 {
@@ -413,7 +567,9 @@ namespace Serial
                     dataReaderObject = null;
                 }
             }
-        }
+
+            
+        }  
 
         /// <summary>
         /// ReadAsync: Task that waits on data and reads asynchronously from the serial device InputStream
@@ -441,46 +597,99 @@ namespace Serial
             {
                 try
                 {
-                    string recvdtxt = dataReaderObject.ReadString(bytesRead);
-                    System.Diagnostics.Debug.WriteLine(recvdtxt);
-                    this.recvdText.Text += recvdtxt;
+                    byte[] bytes  = new byte[bytesRead];
+                    dataReaderObject.ReadBytes(bytes);
+
+                    //recvdtxt += Encoding.UTF8.GetString(rt);
+                    //recvdtxt += dataReaderObject.ReadString(bytesRead);
+                    //System.Diagnostics.Debug.WriteLine(recvdtxt);
+                    //if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringChar)
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
+                    //    //this.recvdText.Text += recvdtxt;
+                    //}
+                    //else
+                    //    return;
                     if (_Mode == Mode.JustConnected)
                     {
-                        if (recvdtxt.ToUpper() == "READY")
+                        if ('1' == (char)bytes[0])
+                        //if (recvdtxt.ToUpper() == "ACK1#")
                         {
                             _Mode = Mode.AwaitJson;
-                            recvdText.Text = "";
-                            Send("ACK2");
+                            recvdtxt = "";
+                            //Send("ACK2#");
                         }
+                            SendCh('2');
                     }
                     else if (_Mode == Mode.AwaitJson)
                     {
-                        if (recvdtxt.ToUpper().Substring(0, "CONFIG".Length)== "CONFIG")
+                        if ('3' == (char)bytes[0])
+                        //if (recvdtxt.ToUpper() == "ACK3#")
                         {
-                            recvdtxt = recvdtxt.Substring("CONFIG".Length);
-                            await MainPage.MP.UpdateTextAsync(recvdtxt);
-                            Send("~");
-                        }
-                        else if (recvdtxt.ToUpper().Substring(0, "JSON".Length) == "JSON")
-                        {
-                            recvdtxt = recvdtxt.Substring("JSON".Length);
-                            await MainPage.MP.UpdateTextAsync(recvdtxt);
-                            recvdText.Text = "";
+                            //    if (recvdtxt.ToUpper().Substring(0, "JSON".Length)== "JSON")
+                            //{
+                            //    recvdtxt = recvdtxt.Substring("JSON".Length);
+                            //    MainPage.MP.Setup(recvdtxt);
+                            recvdtxt = "";
                             _Mode = Mode.Connected;
-                            Send("ACK3");
+                            //Send("ACK4#");
+                            SendCh('4');
                         }
                     }
-                    else if (_Mode==Mode.Connected)
+                    else if (_Mode == Mode.Connected)
                     {
-                        await MainPage.MP.UpdateTextAsync(recvdtxt);
-                        recvdText.Text = "";
-                        status.Text = "bytes read successfully!";
+                        byte byt = bytes[0];
+                        switch (byt)
+                        {
+                            case 47:  //'!'
+                                _Mode = Mode.JsonConfig;
+                                recvdtxt = "";
+                                SendCh('/');
+                                break;
+                            default:
+                                recvdtxt = "" + (char)bytes[0];
+                                await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1));
+                                recvdtxt = "";
+                                System.Diagnostics.Debug.WriteLine("bytes read successfully!");
+                                break;
+                        }
                     }
+                    else if (_Mode == Mode.JsonConfig)
+                    {
+                        recvdtxt += Encoding.UTF8.GetString(bytes);
+                        //System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
+                        if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
+                        {
+                            System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
+                            await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1))
+
+                            if (recvdtxt.Substring(0, "{\"Config\":".Length) == "{\"Config\":")
+                                SendCh('~');
+                            else if (recvdtxt.Substring(0, "{\"MainMenu\":".Length) == "{\"MainMenu\":")
+                                _Mode = Mode.Connected;
+                            else
+                            {
+                                //// Get stack trace for the exception with source file information
+                                //var st = new StackTrace(ex, true);
+                                //string thisFile = new System.Diagnostics.StackTrace(true).GetFrame(0).GetFileName();
+                                //var frame = st.GetFrame(0);
+                                //// Get the line number from the stack frame
+                                //var line = frame.GetFileLineNumber();
+                                throw new System.Exception("BluetoothSerialTerminal.cs: ReadAsync() Getting JsonConfig. Shouldn't have reached this LOC"); //: { 0 }",line);
+
+                            }
+                            recvdtxt = "";
+                        }
+                        else
+                            return;
+                    }
+
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(ex.Message);
+                    System.Diagnostics.Debug.WriteLine("ReadAsync: " + ex.Message);
                 }
+                
             }
         }
 
@@ -506,102 +715,16 @@ namespace Serial
         /// </summary>
         private void CloseDevice()
         {
-                if (serialPort != null)
-                {
-                    serialPort.Dispose();
-                }
-                serialPort = null;
-
-                _Mode = Mode.Disconnected;       
-
-        }
-
-        /// <summary>
-        /// closeDevice_Click: Action to take when 'Disconnect and Refresh List' is clicked on
-        /// - Cancel all read operations
-        /// - Close and dispose the SerialDevice object
-        /// - Enumerate connected devices
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void closeDevice_Click(object sender, RoutedEventArgs e)
-        {
-            try
+            if (serialPort != null)
             {
-                status.Text = "";
-                CancelReadTask();
-
-                refresh.IsEnabled = true;
-                sendTextButton.IsEnabled = false;
-                comPortInput.IsEnabled = true;
-                cancelSendButton.IsEnabled = false;
-                this.recvdText.Text = "";
-                
-                closeDevice.IsEnabled = false;
-                //CloseDevice(); Is closed by reader cancel
+                serialPort.Dispose();
             }
-            catch (Exception ex)
-            {
-                status.Text = ex.Message;
-            }
-        }
+            serialPort = null;
 
-
-
-        private void ConnectDevices_DoubleTapped(object sender, Windows.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
-        {
-            comPortInput_Click(null, null);
-            ////this.Frame.GoBack();
-        }
-
-        private void cancelSendTextButton_Click(object sender, RoutedEventArgs e)
-        {
+            _Mode = Mode.Disconnected;
 
         }
 
-        private void refreshDevice_Click(object sender, RoutedEventArgs e)
-        {
- 
-            listOfDevices.Clear();
-            ListAvailablePorts();
-            
-        }
 
-        bool FirstVisit = true;
-        private async void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            
-            if (FirstVisit)
-            {
-                FirstVisit = false;
-                ListAvailablePorts();
-                await AwaitS("Ack1");
-                Send("Ack1");
-                bool res = GetJson();
-                if (res)
-                {
-                    Send("Ack2");
-                    backButton_Click(null, null);
-                    Send("Ack3");
-                }
-            }
-            else
-            {
-                closeDevice_Click(null, null);
-                backButton_Click(null, null);
-            }
-        }
-
-        private async Task AwaitS(string v)
-        {
-            //throw new NotImplementedException();
-        }
-
-        private bool GetJson()
-        {
-            //throw new NotImplementedException();
-            return true;
-        }
     }
 }
-
