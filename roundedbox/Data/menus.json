@@ -1,6 +1,6 @@
 ﻿[
   {
-    "ElementConfig": [
+    "Config": [
       [
         { "Comment_": "These items are ignored" },
         { "Comment_DataTypes": "In ElementConfig, first character of name sets data type: i=integer, c=character, string" },
@@ -39,12 +39,12 @@
   },
   {
     "MainMenu": [
-      [ "Setup BT", "Load App Menu", "Setup Serial", "Setup Sockets", "Use Azure IoT Hub" ],
-      [ "_READ:", "DHTemp", "BaroTemp", "Humidity", "Pressure" ],
-      [ "_Value:", "DHTemp", "BaroTemp", "=Humidity", "Pressure" ],
-      [ "_POST:", "DHTemp", "BaroTemp", "Humidity", "Pressure" ],
-      [ "_GET:", "DHTemp", "BaroTemp", "Humidity", "Pressure" ],
-      [ "_HISTORY:", "DHTemp", "BaroTemp", "Humidity", "Pressure" ]
+      [ "Setup BT", "Load App Menu", "Setup USB Serial", "Setup Sockets", "Use Azure IoT Hub" ],
+      [ "_This is just text", "The", "Quick", "Brown", "Fox" ],
+      [ "_More text", "Jumps", "Over", "The", "Lazy" ],
+      [ "_Text", "Dog", "The quick brown", "fox jumps over", "the lazy dog" ],
+      [ "_These have leading underscore", "Start", "Back", "Next", "End" ],
+      [ "_eg _History", "DHTemp", "BaroTemp", "Humidity", "Pressure" ]
     ]
   },
   {

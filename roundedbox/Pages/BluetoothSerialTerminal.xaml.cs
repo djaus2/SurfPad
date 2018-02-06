@@ -67,8 +67,7 @@ namespace Bluetooth
             MainPage.BTTerminalPage = this;
             _Mode = Mode.Disconnected;
         }
-
-
+        
         async void InitializeRfcommDeviceService()
         {
             try
@@ -153,12 +152,7 @@ namespace Bluetooth
                 _socket = null;
             }
         }
-
-
-
-
-
-
+        
         private void ConnectDevices_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
             PairedDeviceInfo pairedDevice = (PairedDeviceInfo)ConnectDevices.SelectedItem;
@@ -166,10 +160,9 @@ namespace Bluetooth
             this.textBlockBTName.Text = pairedDevice.Name;
             ConnectDevice_Click(sender, e);
         }
-
-        //Windows.Storage.Streams.Buffer InBuff;
+        
         Windows.Storage.Streams.Buffer OutBuff;
-        //private StreamSocket _socket;
+        
         private async void button_Click(object sender, RoutedEventArgs e)
         {
             OutBuff = new Windows.Storage.Streams.Buffer(100);
@@ -230,12 +223,6 @@ namespace Bluetooth
 
         }
 
-        //If sending key's code only
-        public  void Send(int i)
-        {
-             Send(string.Format("~{0}",i));
-        }
-
         //Normally send key's text. Also some commands
         public async void Send(string msg)
         {
@@ -274,7 +261,6 @@ namespace Bluetooth
             //}
             //Task.Delay(PauseBtwSentCharsmS).Wait();
         }
-
         public async void SendCh(char ch)
         {
             //for (int i = 0; i < msg.Length; i++)
@@ -312,7 +298,7 @@ namespace Bluetooth
             //}
             //Task.Delay(PauseBtwSentCharsmS).Wait();
         }
-
+        
         /// <summary>
         /// WriteAsync: Task that asynchronously writes data from the input text box 'sendText' to the OutputStream 
         /// </summary>
@@ -382,8 +368,7 @@ namespace Bluetooth
             }
             //sendText.Text = "";
         }
-
-
+        
         string recvdtxt = "";
         /// <summary>
         /// - Create a DataReader object
@@ -441,9 +426,7 @@ namespace Bluetooth
                     dataReaderObject = null;
                 }
             }
-        }
-
-    
+        }  
 
         /// <summary>
         /// ReadAsync: Task that waits on data and reads asynchronously from the serial device InputStream
@@ -471,8 +454,8 @@ namespace Bluetooth
             {
                 try
                 {
-                    byte[] rt  = new byte[bytesRead];
-                    dataReaderObject.ReadBytes(rt);
+                    byte[] bytes  = new byte[bytesRead];
+                    dataReaderObject.ReadBytes(bytes);
 
                     //recvdtxt += Encoding.UTF8.GetString(rt);
                     //recvdtxt += dataReaderObject.ReadString(bytesRead);
@@ -486,18 +469,18 @@ namespace Bluetooth
                     //    return;
                     if (_Mode == Mode.JustConnected)
                     {
-                        if ('1' == (char)rt[0])
+                        if ('1' == (char)bytes[0])
                         //if (recvdtxt.ToUpper() == "ACK1#")
                         {
                             _Mode = Mode.AwaitJson;
                             recvdtxt = "";
                             //Send("ACK2#");
-                            SendCh('2');
                         }
+                            SendCh('2');
                     }
                     else if (_Mode == Mode.AwaitJson)
                     {
-                        if ('3' == (char)rt[0])
+                        if ('3' == (char)bytes[0])
                         //if (recvdtxt.ToUpper() == "ACK3#")
                         {
                             //    if (recvdtxt.ToUpper().Substring(0, "JSON".Length)== "JSON")
@@ -512,7 +495,7 @@ namespace Bluetooth
                     }
                     else if (_Mode == Mode.Connected)
                     {
-                        byte byt = rt[0];
+                        byte byt = bytes[0];
                         switch (byt)
                         {
                             case 47:  //'!'
@@ -521,7 +504,7 @@ namespace Bluetooth
                                 SendCh('/');
                                 break;
                             default:
-                                recvdtxt = "" + (char)rt[0];
+                                recvdtxt = "" + (char)bytes[0];
                                 await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1));
                                 recvdtxt = "";
                                 System.Diagnostics.Debug.WriteLine("bytes read successfully!");
@@ -530,14 +513,14 @@ namespace Bluetooth
                     }
                     else if (_Mode == Mode.JsonConfig)
                     {
-                        recvdtxt += Encoding.UTF8.GetString(rt);
+                        recvdtxt += Encoding.UTF8.GetString(bytes);
                         //System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
                         if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
                         {
                             System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
                             await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1))
 
-                            if (recvdtxt.Substring(0, "{\"ElementConfig\":".Length) == "{\"ElementConfig\":")
+                            if (recvdtxt.Substring(0, "{\"Config\":".Length) == "{\"Config\":")
                                 SendCh('~');
                             else if (recvdtxt.Substring(0, "{\"MainMenu\":".Length) == "{\"MainMenu\":")
                                 _Mode = Mode.Connected;
@@ -581,8 +564,7 @@ namespace Bluetooth
                 }
             }
         }
-
-
+        
         /// <summary>
         ///  Class to hold all paired device information
         /// </summary>
@@ -600,9 +582,5 @@ namespace Bluetooth
             public DeviceInformation DeviceInfo { get; private set; }
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

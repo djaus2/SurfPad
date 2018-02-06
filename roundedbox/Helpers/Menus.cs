@@ -287,7 +287,7 @@ namespace roundedbox
                                 {
                                     JsonValue jv2 = (JsonValue)ja[col];
                                     //Got command so add to list (done automatically when instantiated).
-                                    if (Menu == "ElementConfig")
+                                    if (Menu == "Config")
                                     {
 
                                         JsonObject jo2 = (JsonObject)jv2.GetObject();

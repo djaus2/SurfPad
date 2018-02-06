@@ -91,16 +91,22 @@ namespace roundedbox
             if (args == 0)
                 //Frame.Navigate(typeof(Serial.SerialTerminalPage));
                 Frame.Navigate(typeof(Bluetooth.BluetoothSerialTerminalPage));
+            else if (args == 1)
+            {
+                if (BTTerminalPage != null)
+                    BTTerminalPage.SendCh('!');
+            }
+            else if (args == 2)
+                Frame.Navigate(typeof(Serial.SerialTerminalPage));
             else
             {
-                char ch = (char)( 32 + id);
+                //characters as code for keys are A..Z and a..z
+                char ch = (char)((int)'A' + id);
+                if (ch > 'Z')
+                    ch = (char)((int)'a' + id - 26);
                 string msg = "";
-                msg += ch;
-                msg += '#';
-                //BTTerminalPage.Send(name + EOStringChar);
                 if (BTTerminalPage != null)
                     BTTerminalPage.SendCh(ch);
-                //await UpdateTextAsync(msg);
             }
         }
 
@@ -158,7 +164,7 @@ namespace roundedbox
         private void DoCommands(string jsonData)
         {
             Commands.Init();
-            GetCommands("ElementConfig", jsonData);
+            GetCommands("Config", jsonData);
             //Following settings are mandatory
             bool res = Commands.CheckKeys();
             //Next two are optional settings
@@ -174,7 +180,7 @@ namespace roundedbox
         {
             if(recvdtxt.Substring(recvdtxt.Length - 1,1) == EOStringStr)
             {
-                if (recvdtxt.Substring(0, "{\"ElementConfig\":".Length) == "{\"ElementConfig\":")
+                if (recvdtxt.Substring(0, "{\"Config\":".Length) == "{\"Config\":")
                 {
                     config = recvdtxt;
                     config = config.Replace(EOStringStr, "");
@@ -198,7 +204,10 @@ namespace roundedbox
             else
             {
                 char ch = recvdtxt[0];
-                int index = ch - ((int)' ');
+                //Indexes are A.. Z and a.. z 
+                int index = ch - ((int)'A');
+                if (ch >'Z')
+                    index = 26 + ch - ((int)'a');
                 foreach (uc.MyUserControl1[] buts in buttons)
                 {
                     var but = from n in buts where n.Id == index select n.Text;
