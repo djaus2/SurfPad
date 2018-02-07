@@ -19,6 +19,8 @@ void setup() {
 	bt.begin(9600);
 	Serial.begin(9600);
 	mode = ACK0;
+	bt.print((char)137);
+	Serial.print((char)137);
 }
 
 void loop() {

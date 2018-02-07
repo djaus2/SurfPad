@@ -34,6 +34,7 @@ namespace USBSerial
         public const string EOStringStr = "~";
         public const char EOStringChar = '~';
         public const byte EOStringByte = 126;
+        private const int cFineStructure = 137;
 
         string Title = "USB Serial Universal Windows App";
         private SerialDevice serialPort = null;
@@ -262,7 +263,6 @@ namespace USBSerial
                     this.buttonSend.IsEnabled = true;
                     this.buttonStartRecv.IsEnabled = true;
                     this.buttonStopRecv.IsEnabled = false;
-                    SendCh('0');
                     //Send("ACK0#");
                     this.buttonStartRecv.IsEnabled = false;
                     this.buttonStopRecv.IsEnabled = true;
@@ -612,14 +612,21 @@ namespace USBSerial
                     //    return;
                     if (_Mode == Mode.JustConnected)
                     {
-                        if ('1' == (char)bytes[0])
-                        //if (recvdtxt.ToUpper() == "ACK1#")
+                        if (cFineStructure == bytes[0])
                         {
-                            _Mode = Mode.AwaitJson;
-                            recvdtxt = "";
-                            //Send("ACK2#");
+                            SendCh('0');
                         }
+                        else
+                        {
+                            if ('1' == (char)bytes[0])
+                            //if (recvdtxt.ToUpper() == "ACK1#")
+                            {
+                                _Mode = Mode.AwaitJson;
+                                recvdtxt = "";
+                                //Send("ACK2#");
+                            }
                             SendCh('2');
+                        }
                     }
                     else if (_Mode == Mode.AwaitJson)
                     {
