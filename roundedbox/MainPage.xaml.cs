@@ -26,7 +26,7 @@ namespace roundedbox
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        const int DefaultCellWidth= 120;
+        const int DefaultCellWidth = 120;
         const int DefaultCellHeight = 120;
         const int DefaultCellSpacing = 10;
         const int TextSpan = 2;
@@ -34,6 +34,9 @@ namespace roundedbox
         public const char EOStringChar = '~';
         Brush Black = new SolidColorBrush(Colors.Black);
         Brush White = new SolidColorBrush(Colors.White);
+
+        public enum TerminalModes {none,BT,USBSerial };
+        public static TerminalModes TerminalMode = TerminalModes.none;  
 
 
 
@@ -43,7 +46,7 @@ namespace roundedbox
         public static Bluetooth.BluetoothSerialTerminalPage BTTerminalPage;
         public static Serial.SerialTerminalPage SerialTerminalPage;
 
-        public static USBSerialTerminalPage USBSerialTerminalPage { get; internal set; }
+        public static USBSerial.USBSerialTerminalPage USBSerialTerminalPage { get; internal set; }
 
         public MainPage()
         {
@@ -92,16 +95,27 @@ namespace roundedbox
             int id = args;
             //listView1.Items.Insert(0, name);
             if (args == 0)
-                //Frame.Navigate(typeof(Serial.SerialTerminalPage));
-                Frame.Navigate(typeof(Bluetooth.BluetoothSerialTerminalPage));
-            else if (args == 1)
             {
-                if (BTTerminalPage != null)
-                    BTTerminalPage.SendCh('!');
+                TerminalMode = TerminalModes.BT;
+                Frame.Navigate(typeof(Bluetooth.BluetoothSerialTerminalPage));
+            }
+            else if (args == 1)
+            { 
+                char ch = '!';
+                if (TerminalMode == TerminalModes.BT)
+                {
+                    if (BTTerminalPage != null)
+                        BTTerminalPage.SendCh(ch);
+                }
+                else if (TerminalMode == TerminalModes.USBSerial)
+                {
+                    if (USBSerialTerminalPage != null)
+                        USBSerialTerminalPage.SendCh(ch);
+                }
             }
             else if (args == 2)
             {
-                //var pg = new USBSerial.USBSerialTerminalPage();
+                TerminalMode = TerminalModes.USBSerial;
                 Frame.Navigate(typeof(USBSerial.USBSerialTerminalPage));
             }
             else
@@ -111,10 +125,19 @@ namespace roundedbox
                 if (ch > 'Z')
                     ch = (char)((int)'a' + id - 26);
                 string msg = "";
-                if (BTTerminalPage != null)
-                    BTTerminalPage.SendCh(ch);
+                if (TerminalMode == TerminalModes.BT)
+                {
+                    if (BTTerminalPage != null)
+                        BTTerminalPage.SendCh(ch);
+                }
+                else if (TerminalMode == TerminalModes.USBSerial)
+                {
+                    if (USBSerialTerminalPage != null)
+                        USBSerialTerminalPage.SendCh(ch);
+                }
+
             }
-        }
+}
 
         public void InitTheGrid(int x, int y, int Height = DefaultCellHeight, int Width = DefaultCellWidth, int space = DefaultCellSpacing)
         {

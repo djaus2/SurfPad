@@ -74,8 +74,8 @@ namespace Bluetooth
             {
                 DeviceInformationCollection DeviceInfoCollection = await DeviceInformation.FindAllAsync(RfcommDeviceService.GetDeviceSelector(RfcommServiceId.SerialPort));
 
-                DeviceInformationCollection DeviceInfoCollection2 = await DeviceInformation.FindAllAsync();
-                var asdf = (from n in DeviceInfoCollection2 select n.Name).Distinct();
+                //DeviceInformationCollection DeviceInfoCollection2 = await DeviceInformation.FindAllAsync();
+                //var asdf = (from n in DeviceInfoCollection2 select n.Name).Distinct();
 
                 var numDevices = DeviceInfoCollection.Count();
 
