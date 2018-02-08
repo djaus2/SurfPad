@@ -32,7 +32,7 @@
         { "Comment_About4": "Otherwise you select from the menu" },
         { "iComportConnectDeviceNo": 0 },
         { "iFTDIComportConnectDeviceNo": -1 },
-        { "Comment_sUseSerial": "Either BT for Bluetooth, or USB Serial" },
+        { "Comment_sUseSerial": "Either BT for Bluetooth, or USB for USB Serial" },
         { "sUseSerial": "USB" }
       ]
     ]
