@@ -251,7 +251,7 @@ namespace roundedbox
                     ResultData = (JsonArray)JsonArray.Parse(jsonData);
                 } catch (Exception ex)
                 {
-
+                    string exMsg = ex.Message;
                 }
             }
             if (ResultData != null)

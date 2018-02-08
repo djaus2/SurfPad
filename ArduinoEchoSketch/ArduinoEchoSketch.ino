@@ -5,6 +5,7 @@
 */
 #include <SoftwareSerial.h>
 
+const byte cFinsTructureConstant = 137;
 SoftwareSerial bt(2, 3); // RX, TX Pins
 
 char  thisByte;
@@ -19,8 +20,9 @@ void setup() {
 	bt.begin(9600);
 	Serial.begin(9600);
 	mode = ACK0;
-	bt.print((char)137);
-	Serial.print((char)137);
+	//Start sync
+	bt.print((char)cFinsTructureConstant);
+	Serial.print((char)cFinsTructureConstant);
 }
 
 void loop() {
@@ -54,10 +56,11 @@ void loop() {
 
 void loopBT() {
 	bt.listen();
-	thisByte = bt.read();
+	thisByte = bt.peek();
 
 	if (thisByte != -1)
 	{
+		thisByte = bt.read();
 		TerminalMode = BT;
 		////Debugging:
 		//Serial.print(thisByte);
@@ -110,9 +113,10 @@ void loopBT() {
 
 void loopUSBSerial() {
 	//Serial.listen();
-	thisByte = Serial.read();
+	thisByte = Serial.peek();
 	if (thisByte != -1)
 	{
+		thisByte = Serial.read();
 		TerminalMode = USBSerial;
 		////Debugging:
 		////Serial.print(thisByte);

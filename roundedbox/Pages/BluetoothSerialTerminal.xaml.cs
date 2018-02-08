@@ -35,7 +35,7 @@ namespace Bluetooth
         public const string EOStringStr = "~";
         public const char EOStringChar = '~';
         public const byte EOStringByte = 126;
-        private const int cFineStructure = 137;
+        private const int cFineStructure = 137; //ASCII Per mille sign
 
         string Title = "Generic Bluetooth Serial Universal Windows App";
         private Windows.Devices.Bluetooth.Rfcomm.RfcommDeviceService _service;

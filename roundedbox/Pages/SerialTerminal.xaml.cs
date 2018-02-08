@@ -242,7 +242,6 @@ namespace Serial
                 _Mode = Mode.JustConnected;
                 // Enable 'WRITE' button to allow sending data
                 sendTextButton.IsEnabled = true;
-                string lcdMsg = "~C" + "Serial Connected";
                 //lcdMsg += "~" + ArduinoLCDDisplay.LCD.CMD_DISPLAY_LINE_2_CH + "PressBack/Select   ";
                 //Send(lcdMsg);
                 status.Text = "Serial Connected: Press [Back] or (Select)";

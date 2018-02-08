@@ -34,7 +34,7 @@ namespace USBSerial
         public const string EOStringStr = "~";
         public const char EOStringChar = '~';
         public const byte EOStringByte = 126;
-        private const int cFineStructure = 137;
+        private const int cFineStructure = 137; //ASCII per mile sign
 
         string Title = "USB Serial Universal Windows App";
         private SerialDevice serialPort = null;
@@ -249,10 +249,9 @@ namespace USBSerial
                 _Mode = Mode.JustConnected;
                 // Enable 'WRITE' button to allow sending data
                 sendTextButton.IsEnabled = true;
-                string lcdMsg = "~C" + "Serial Connected";
                 //lcdMsg += "~" + ArduinoLCDDisplay.LCD.CMD_DISPLAY_LINE_2_CH + "PressBack/Select   ";
                 //Send(lcdMsg);
-                status.Text = "Serial Connected: Press [Back] or (Select)";
+                status.Text = "USB Serial Connected: Press [Back] or (Select)";
 
                 ///////////////////////
                 bool success = true;
@@ -413,7 +412,7 @@ namespace USBSerial
         
         Windows.Storage.Streams.Buffer OutBuff;
         
-        private async void button_Click(object sender, RoutedEventArgs e)
+        private void button_Click(object sender, RoutedEventArgs e)
         {
             OutBuff = new Windows.Storage.Streams.Buffer(100);
             Button button = (Button)sender;
@@ -431,7 +430,6 @@ namespace USBSerial
                         this.buttonStopRecv.IsEnabled = false;
                         break;
                     case "Send":
-                        //await _socket.OutputStream.WriteAsync(OutBuff);
                         string az = this.textBoxSendText.Text;
                         Send(this.textBoxSendText.Text);
                         this.textBoxSendText.Text = "";

@@ -44,8 +44,6 @@ namespace roundedbox
 
         public static MainPage MP;
         public static Bluetooth.BluetoothSerialTerminalPage BTTerminalPage;
-        public static Serial.SerialTerminalPage SerialTerminalPage;
-
         public static USBSerial.USBSerialTerminalPage USBSerialTerminalPage { get; internal set; }
 
         public MainPage()
@@ -124,7 +122,6 @@ namespace roundedbox
                 char ch = (char)((int)'A' + id);
                 if (ch > 'Z')
                     ch = (char)((int)'a' + id - 26);
-                string msg = "";
                 if (TerminalMode == TerminalModes.BT)
                 {
                     if (BTTerminalPage != null)
