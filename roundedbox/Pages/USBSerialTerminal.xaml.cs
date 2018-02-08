@@ -76,7 +76,7 @@ namespace USBSerial
         private Button refresh = new Button();
         private Button closeDevice = new Button();
         private Button sendTextButton = new Button();
-        private TextBlock sendText = new TextBlock();
+        //private TextBlock sendText = new TextBlock();
 
         /// <summary>
         /// ListAvailablePorts
@@ -449,9 +449,9 @@ namespace USBSerial
                         this.buttonStopRecv.IsEnabled = false;
                         break;
                     case "Send":
-                        string az = this.textBoxSendText.Text;
-                        Send(this.textBoxSendText.Text);
-                        this.textBoxSendText.Text = "";
+                        string az = this.sendText.Text;
+                        Send(this.sendText.Text);
+                        this.sendText.Text = "";
                         break;
                     case "Clear Send":
                         this.recvdText.Text = "";
@@ -501,7 +501,7 @@ namespace USBSerial
             Task<UInt32> storeAsyncTask;
 
             if (msg == "")
-                msg = sendText.Text; //??
+                msg = "none";// sendText.Text;
             if (msg.Length != 0)
             //if (msg.sendText.Text.Length != 0)
             {
@@ -550,6 +550,15 @@ namespace USBSerial
                 {
                     dataReaderObject = new DataReader(serialPort.InputStream);
 
+                    uint i = dataReaderObject.UnconsumedBufferLength;
+                    if (i != 0)
+                    {
+                        byte[] bytes = new byte[i];
+                        dataReaderObject.ReadBytes(bytes);
+                    }
+                    this.buttonStopRecv.IsEnabled = true;
+                    this.buttonDisconnect.IsEnabled = false;
+                    recvdtxt = "";
                     // keep reading the serial input
                     while (true)
                     {
@@ -559,20 +568,21 @@ namespace USBSerial
             }
             catch (Exception ex)
             {
-                if (ex.GetType().Name == "TaskCanceledException")
-                {
-                    status.Text = "Reading task was cancelled, closing device and cleaning up";
-                    CloseDevice();
+
                     this.buttonStopRecv.IsEnabled = false;
                     this.buttonStartRecv.IsEnabled = false;
                     this.buttonSend.IsEnabled = false;
                     this.buttonDisconnect.IsEnabled = false;
                     this.textBlockBTName.Text = "";
                     this.TxtBlock_SelectedID.Text = "";
+                if (ex.GetType().Name == "TaskCanceledException")
+                {
+                    status.Text = "Reading task was cancelled, closing device and cleaning up";
+                    CloseDevice();
                 }
                 else
                 {
-                    status.Text = ex.Message;
+                    status.Text = "Listen: " + ex.Message;
                 }
             }
             finally
@@ -648,7 +658,6 @@ namespace USBSerial
                             SendCh('2');
                             _Mode = Mode.ACK2;
                         }
-                        
                     }
                     else if (_Mode == Mode.ACK2)
                     {

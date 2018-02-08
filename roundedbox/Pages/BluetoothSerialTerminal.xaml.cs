@@ -50,6 +50,9 @@ namespace Bluetooth
         {
             Disconnected,
             JustConnected,
+            ACK0,
+            ACK2,
+            ACK4,
             Connected,
             AwaitJson,
             JsonConfig
@@ -184,9 +187,9 @@ namespace Bluetooth
                         break;
                     case "Send":
                         //await _socket.OutputStream.WriteAsync(OutBuff);
-                        string az = this.textBoxSendText.Text;
-                        Send(this.textBoxSendText.Text);
-                        this.textBoxSendText.Text = "";
+                        string az = this.sendText.Text;
+                        Send(this.sendText.Text);
+                        this.sendText.Text = "";
                         break;
                     case "Clear Send":
                         this.recvdText.Text = "";
@@ -315,7 +318,6 @@ namespace Bluetooth
                 // Load the text from the sendText input text box to the dataWriter object
                 //dataWriteObject.WriteString(msg);
                 byte[] bytes;
-                //recvdtxt += Encoding.UTF8.GetString(rt);
                 bytes = Encoding.UTF8.GetBytes(msg);
                 dataWriteObject.WriteBytes(bytes);
                 dataWriteObject.WriteByte(0);
@@ -325,48 +327,22 @@ namespace Bluetooth
                 UInt32 bytesWritten = await storeAsyncTask;
                 if (bytesWritten > 0)
                 {
-                    string status_Text = msg + ", ";
+                    status.Text = msg + ", ";
                     //status.Text = sendText.Text + ", ";
-                    status_Text += "bytes written successfully!";
-                    System.Diagnostics.Debug.WriteLine(status_Text);
+                    status.Text += "bytes written successfully!";
                 }
-                //sendText.Text = "";
+                sendText.Text = ""; //??
             }
             else
             {
-                string status_Text2 = "Enter the text you want to write and then click on 'WRITE'";
-                System.Diagnostics.Debug.WriteLine(status_Text2);
+                status.Text = "Enter the text you want to write and then click on 'WRITE'";
             }
         }
 
         private async Task WriteChar(char ch)
         {
-            Task<UInt32> storeAsyncTask;
-
-            // Load the text from the sendText input text box to the dataWriter object
-            //dataWriteObject.WriteString(msg);
-            // byte[] bytes = new byte[1];
-            byte byt = (byte)ch; ;
-            //bytes[0] = (byte) ch;
-            //recvdtxt += Encoding.UTF8.GetString(rt);
-            //bytes = Encoding.UTF8.GetBytes(msg);
-            //dataWriteObject.WriteBytes(bytes);
-            //dataWriteObject.WriteByte(0);
-            dataWriteObject.WriteByte(byt);
-           // Launch an async task to complete the write operation
-           storeAsyncTask = dataWriteObject.StoreAsync().AsTask();
-
-            UInt32 bytesWritten = await storeAsyncTask;
-            if (bytesWritten > 0)
-            {
-                string status_Text = "";
-                status_Text += ch;
-
-                //status.Text = sendText.Text + ", ";
-                status_Text += " bytes written successfully!";
-                System.Diagnostics.Debug.WriteLine(status_Text);
-            }
-            //sendText.Text = "";
+            string msg = "" + ch;
+            await WriteAsync(msg);
         }
         
         string recvdtxt = "";
@@ -378,9 +354,10 @@ namespace Bluetooth
         /// <param name="e"></param>
         private async void Listen()
         {
+
+            ReadCancellationTokenSource = new CancellationTokenSource();
             try
             {
-                ReadCancellationTokenSource = new CancellationTokenSource();
                 if (_socket.InputStream != null)
                 {
                     dataReaderObject = new DataReader(_socket.InputStream);
@@ -414,7 +391,7 @@ namespace Bluetooth
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("Listen: " +ex.Message);
+                    status.Text = "Listen: " +ex.Message;
                 }
             }
             finally
@@ -457,47 +434,43 @@ namespace Bluetooth
                     byte[] bytes  = new byte[bytesRead];
                     dataReaderObject.ReadBytes(bytes);
 
-                    //recvdtxt += Encoding.UTF8.GetString(rt);
-                    //recvdtxt += dataReaderObject.ReadString(bytesRead);
-                    //System.Diagnostics.Debug.WriteLine(recvdtxt);
-                    //if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringChar)
-                    //{
-                    //    System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
-                    //    //this.recvdText.Text += recvdtxt;
-                    //}
-                    //else
-                    //    return;
+                    string currenbtRecvdText = Encoding.UTF8.GetString(bytes);
+
+                    recvdText.Text = currenbtRecvdText;
+
                     if (_Mode == Mode.JustConnected)
                     {
                         if (cFineStructure == bytes[0])
                         {
                             SendCh('0');
-                        }
-                        else
-                        {
-                            if ('1' == (char)bytes[0])
-                            //if (recvdtxt.ToUpper() == "ACK1#")
-                            {
-                                _Mode = Mode.AwaitJson;
-                                recvdtxt = "";
-                                //Send("ACK2#");
-                            }
-                            SendCh('2');
+                            _Mode=Mode.ACK0;
                         }
                     }
-                    else if (_Mode == Mode.AwaitJson)
+                    else if (_Mode == Mode.ACK0)
+                    {
+                        if ('1' == (char)bytes[0])
+                        {
+                            recvdtxt = "";
+                            SendCh('2');
+                            _Mode = Mode.ACK2;
+                        }
+                    }
+                    else if (_Mode == Mode.ACK2)
                     {
                         if ('3' == (char)bytes[0])
-                        //if (recvdtxt.ToUpper() == "ACK3#")
                         {
-                            //    if (recvdtxt.ToUpper().Substring(0, "JSON".Length)== "JSON")
-                            //{
-                            //    recvdtxt = recvdtxt.Substring("JSON".Length);
-                            //    MainPage.MP.Setup(recvdtxt);
                             recvdtxt = "";
-                            _Mode = Mode.Connected;
-                            //Send("ACK4#");
                             SendCh('4');
+                            _Mode = Mode.ACK4;
+                        }
+                    }
+                    else if (_Mode == Mode.ACK4)
+                    {
+                        if ('5' == (char)bytes[0])
+                        {
+                            status.Text="Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
+                            _Mode = Mode.Connected;
+
                         }
                     }
                     else if (_Mode == Mode.Connected)
@@ -520,8 +493,7 @@ namespace Bluetooth
                     }
                     else if (_Mode == Mode.JsonConfig)
                     {
-                        recvdtxt += Encoding.UTF8.GetString(bytes);
-                        //System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
+                        recvdtxt += currenbtRecvdText;
                         if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
                         {
                             System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);

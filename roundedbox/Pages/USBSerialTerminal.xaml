@@ -57,7 +57,7 @@
             </ListBox>
             <StackPanel Orientation="Horizontal">
                 <TextBlock x:Name="SendText" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="NoWrap"  Text="Send: " VerticalAlignment="Top" Width="50"/>
-                <TextBox x:Name="textBoxSendText" Text="Send Me" HorizontalAlignment="Left" Height="100" Margin="10" TextWrapping="Wrap"  VerticalAlignment="Top" Width="800" ToolTipService.ToolTip="" AcceptsReturn="True"/>
+                <TextBox x:Name="sendText" Text="Send Me" HorizontalAlignment="Left" Height="100" Margin="10" TextWrapping="Wrap"  VerticalAlignment="Top" Width="800" ToolTipService.ToolTip="" AcceptsReturn="True"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock x:Name="RecvdText" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="NoWrap" Text="Recvd: " VerticalAlignment="Top" Width="50"/>
