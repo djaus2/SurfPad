@@ -63,6 +63,10 @@
                 <TextBlock x:Name="RecvdText" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="NoWrap" Text="Recvd: " VerticalAlignment="Top" Width="50"/>
                 <TextBlock x:Name="recvdText" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="Name" VerticalAlignment="Top" Width="800" Height="Auto" ToolTipService.ToolTip=""/>
             </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="Status" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="NoWrap" Text="Status: " VerticalAlignment="Top" Width="50"/>
+                <TextBlock x:Name="status" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="Name" VerticalAlignment="Top" Width="800" Height="Auto" ToolTipService.ToolTip=""/>
+            </StackPanel>
         </StackPanel>
 
     </Grid>

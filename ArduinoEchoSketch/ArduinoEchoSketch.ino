@@ -18,7 +18,7 @@ static TerminalModes TerminalMode = none;
 void setup() {
 	TerminalMode = none;
 	bt.begin(9600);
-	Serial.begin(9600);
+	Serial.begin(115200);
 	mode = ACK0;
 	//Start sync
 	bt.print((char)cFinsTructureConstant);

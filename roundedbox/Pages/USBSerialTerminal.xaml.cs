@@ -22,6 +22,7 @@ using System.Threading;
 using roundedbox;
 using System.Text;
 using System.Diagnostics;
+using Windows.UI.Core;
 
 namespace USBSerial
 {
@@ -35,7 +36,7 @@ namespace USBSerial
         public const char EOStringChar = '~';
         public const byte EOStringByte = 126;
         private const int cFineStructure = 137; //ASCII per mile sign
-
+        private const string ARDUINO_DBGMSG = "VMDPV_1|1_VMDPV\r\n";
         string Title = "USB Serial Universal Windows App";
         private SerialDevice serialPort = null;
         DataWriter dataWriteObject = null;
@@ -48,6 +49,9 @@ namespace USBSerial
         {
             Disconnected,
             JustConnected,
+            ACK0,
+            ACK2,
+            ACK4,
             Connected,
             AwaitJson,
             JsonConfig
@@ -67,7 +71,7 @@ namespace USBSerial
         }
 
         //// Remove later of reasign.
-        private TextBlock status = new TextBlock();
+        //private TextBlock status = new TextBlock();
         private Button comPortInput = new Button();
         private Button refresh = new Button();
         private Button closeDevice = new Button();
@@ -81,6 +85,8 @@ namespace USBSerial
         /// </summary>
         private async void ListAvailablePorts()
         {
+
+            bool done = false;
             try
             {
                 string aqs = SerialDevice.GetDeviceSelector();
@@ -111,7 +117,8 @@ namespace USBSerial
                 {
                     for (int i = 0; i < numDevices; i++)
                     {
-                        this.listofDevices.Add(dis[i]);
+                        if (dis[i].Name.Contains("USB"))
+                            this.listofDevices.Add(dis[i]);
                     }
 
                     DeviceListSource.Source = this.listofDevices;
@@ -126,12 +133,11 @@ namespace USBSerial
                             {
                                 ConnectDevices.SelectedIndex = i;
                                 comPortInput_Click(di, null);
-                                return;
+                                done = true;
                             }
                         }
                     }
-
-                    bool done = false;
+                    if(!done)
                     if (Commands.ElementConfigInt.ContainsKey(Commands.cComportConnectDeviceNoKey))
                     {
                         if (ConnectDevices.Items.Count > Commands.ElementConfigInt[Commands.cComportConnectDeviceNoKey])
@@ -169,6 +175,7 @@ namespace USBSerial
                                     if (di.Id == FTDIIdList.Value)
                                     {
                                         comPortInput_Click(di, null);
+                                        done = true;
                                     }
 
                                 }
@@ -180,6 +187,11 @@ namespace USBSerial
             catch (Exception ex)
             {
                 status.Text = ex.Message;
+            }
+
+            if (done)
+            {
+
             }
 
         }
@@ -209,12 +221,13 @@ namespace USBSerial
             }
 
             DeviceInformation entry = (DeviceInformation)selection[0];
-            await ConnectSerial(entry);
+            bool ret = await ConnectSerial(entry);
+            //if (ret) backButton_Click(null, null);
         }
 
-        public async Task ConnectSerial(DeviceInformation entry)
+        public async Task<bool> ConnectSerial(DeviceInformation entry)
         {
-
+            bool ret = false;
             try
             {
                 serialPort = await SerialDevice.FromIdAsync(entry.Id);
@@ -225,7 +238,7 @@ namespace USBSerial
                 // Configure serial settings
                 serialPort.WriteTimeout = TimeSpan.FromMilliseconds(1000);
                 serialPort.ReadTimeout = TimeSpan.FromMilliseconds(1000);
-                serialPort.BaudRate = 115200;
+                serialPort.BaudRate = MainPage.cBAUD;
                 serialPort.Parity = SerialParity.None;
                 serialPort.StopBits = SerialStopBitCount.One;
                 serialPort.DataBits = 8;
@@ -251,20 +264,27 @@ namespace USBSerial
                 sendTextButton.IsEnabled = true;
                 //lcdMsg += "~" + ArduinoLCDDisplay.LCD.CMD_DISPLAY_LINE_2_CH + "PressBack/Select   ";
                 //Send(lcdMsg);
-                status.Text = "USB Serial Connected: Press [Back] or (Select)";
+                status.Text = "USB Serial Connected: Press [Start Recv] then [Back]";
 
                 ///////////////////////
-                bool success = true;
-                if (success)
+                ret = true;
+                if (ret)
                 {
                     _Mode = Mode.JustConnected;
-                    this.buttonDisconnect.IsEnabled = true;
-                    this.buttonSend.IsEnabled = true;
-                    this.buttonStartRecv.IsEnabled = true;
-                    this.buttonStopRecv.IsEnabled = false;
-                    //Send("ACK0#");
-                    this.buttonStartRecv.IsEnabled = false;
-                    this.buttonStopRecv.IsEnabled = true;
+                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {                    
+                        this.buttonDisconnect.IsEnabled = true;
+                        this.buttonSend.IsEnabled = true;
+                        this.buttonStartRecv.IsEnabled = true;
+                        this.buttonStopRecv.IsEnabled = false;
+                        //SendCh('0');
+                        //this.buttonStartRecv.IsEnabled = false;
+                        //this.buttonStopRecv.IsEnabled = true;
+                        DeviceInformation di = (DeviceInformation)ConnectDevices.SelectedItem;
+                        this.TxtBlock_SelectedID.Text = di.Id;
+                        this.textBlockBTName.Text = di.Name;
+                        
+                    });
                     ///////////////////////
                 }
             }
@@ -274,6 +294,7 @@ namespace USBSerial
                 comPortInput.IsEnabled = true;
                 sendTextButton.IsEnabled = false;
             }
+            return ret;
         }
 
         public async void Send(string msg) //2
@@ -398,15 +419,13 @@ namespace USBSerial
             }
 
             DeviceInformation entry = (DeviceInformation)selection[0];
-            await ConnectSerial(entry);
-            
+            bool res = await ConnectSerial(entry);
+
         }
         
         private void ConnectDevices_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
-            DeviceInformation di = (DeviceInformation)ConnectDevices.SelectedItem;
-            this.TxtBlock_SelectedID.Text = di.Id;
-            this.textBlockBTName.Text = di.Name;
+
             ConnectDevice_Click(sender, e);
         }
         
@@ -567,7 +586,9 @@ namespace USBSerial
             }
 
             
-        }  
+        }
+
+       
 
         /// <summary>
         /// ReadAsync: Task that waits on data and reads asynchronously from the serial device InputStream
@@ -597,48 +618,54 @@ namespace USBSerial
                 {
                     byte[] bytes  = new byte[bytesRead];
                     dataReaderObject.ReadBytes(bytes);
+                    //VMDPV_1|1_VMDPV
+                    string currenbtRecvdText = Encoding.UTF8.GetString(bytes);
+                    //Need to remove the Arduino breakpoint looping messages
+                    int ARDUINO_dbgMsg_Len = ARDUINO_DBGMSG.Length;
+                    if (bytesRead >= ARDUINO_dbgMsg_Len)
+                    {
+                        if (currenbtRecvdText.Substring(0, ARDUINO_dbgMsg_Len) == ARDUINO_DBGMSG)
+                        {
+                            currenbtRecvdText = currenbtRecvdText.Substring(ARDUINO_dbgMsg_Len);
+                            bytes = bytes.Skip(ARDUINO_dbgMsg_Len).Take((int)bytesRead - ARDUINO_dbgMsg_Len).ToArray();
+                        }
+                    }
+                    recvdText.Text = currenbtRecvdText;
 
-                    //recvdtxt += Encoding.UTF8.GetString(rt);
-                    //recvdtxt += dataReaderObject.ReadString(bytesRead);
-                    //System.Diagnostics.Debug.WriteLine(recvdtxt);
-                    //if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringChar)
-                    //{
-                    //    System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
-                    //    //this.recvdText.Text += recvdtxt;
-                    //}
-                    //else
-                    //    return;
                     if (_Mode == Mode.JustConnected)
                     {
                         if (cFineStructure == bytes[0])
                         {
                             SendCh('0');
-                        }
-                        else
-                        {
-                            if ('1' == (char)bytes[0])
-                            //if (recvdtxt.ToUpper() == "ACK1#")
-                            {
-                                _Mode = Mode.AwaitJson;
-                                recvdtxt = "";
-                                //Send("ACK2#");
-                            }
-                            SendCh('2');
+                            _Mode=Mode.ACK0;
                         }
                     }
-                    else if (_Mode == Mode.AwaitJson)
+                    else if (_Mode == Mode.ACK0)
+                    {
+                        if ('1' == (char)bytes[0])
+                        {
+                            recvdtxt = "";
+                            SendCh('2');
+                            _Mode = Mode.ACK2;
+                        }
+                        
+                    }
+                    else if (_Mode == Mode.ACK2)
                     {
                         if ('3' == (char)bytes[0])
-                        //if (recvdtxt.ToUpper() == "ACK3#")
                         {
-                            //    if (recvdtxt.ToUpper().Substring(0, "JSON".Length)== "JSON")
-                            //{
-                            //    recvdtxt = recvdtxt.Substring("JSON".Length);
-                            //    MainPage.MP.Setup(recvdtxt);
                             recvdtxt = "";
-                            _Mode = Mode.Connected;
-                            //Send("ACK4#");
                             SendCh('4');
+                            _Mode = Mode.ACK4;
+                        }
+                    }
+                    else if (_Mode == Mode.ACK4)
+                    {
+                        if ('5' == (char)bytes[0])
+                        {
+                            status.Text="Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
+                            _Mode = Mode.Connected;
+
                         }
                     }
                     else if (_Mode == Mode.Connected)
@@ -661,8 +688,7 @@ namespace USBSerial
                     }
                     else if (_Mode == Mode.JsonConfig)
                     {
-                        recvdtxt += Encoding.UTF8.GetString(bytes);
-                        //System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
+                        recvdtxt += currenbtRecvdText;
                         if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
                         {
                             System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
