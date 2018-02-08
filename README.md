@@ -2,7 +2,7 @@
 Turn your old Surface into into a large touchpad.
 
 ## Wiki: 
-Now has links to articles about this project: [[Wiki|WikiLink]].
+Now has links to articles about this project: [Wiki](https://github.com/djaus2/SurfPad/wiki)
 
 ## Status:
 - Fifth Version: coms over BT and USB Serial both now works with Arduino remote app:
@@ -15,7 +15,7 @@ https://github.com/djaus2/SurfPad/tree/9cc2bc99bcd19f9ee547906375b6ea28d3fe3279
 https://github.com/djaus2/SurfPad/tree/38e4b990b59c7f5e5efcbf02d2c02670b423e370
 
 ## Articles:
-- See the Wiki: [Wiki]()
+- See the Wiki: [Wiki](https://github.com/djaus2/SurfPad/wiki)
 
 ## ToDo
 - Sockets
