@@ -2,7 +2,7 @@
 Turn your old Surface into into a large touchpad.
 
 ## Wiki: 
-Now has links to articles about this project
+Now has links to articles about this project: [[Wiki|WikiLink]].
 
 ## Status:
 - Fifth Version: coms over BT and USB Serial both now works with Arduino remote app:
