@@ -2,7 +2,7 @@
   {
     "Config": [
       [
-        { "Comment_": "These items are ignored" },
+        { "Comment_": "These Comment items are ignored" },
         { "Comment_DataTypes": "In ElementConfig, first character of name sets data type: i=integer, c=character, string" },
         { "Comment_ignore": "=======================================================================================" },
         { "Comment_Next5": "These are UI element properties:" },
@@ -12,16 +12,8 @@
         { "iCornerRadius": 10 },
         { "iRows": 6 },
         { "iColumns": 5 },
-        { "Comment_iSensorsRowIndex": "MainMenu: A row in MainMenu that contains the names of the sensors." },
-        { "iSensorsRowIndex": 1 },
-        { "Comment_iValuesRowIndex": "Main:Menu The row in the UI that shows the individual sensor values." },
-        { "iValuesRowIndex": 2 },
-        { "Comment_iCommandActionsColIndex": "MainMenu: The column that has the names of the actions, usually 0" },
-        { "iCommandActionsColIndex": 0 },
         { "Comment_cTextBlockPrefix": "MainMenu: If the UI element name is prefixed with this then its a TextBlock." },
         { "cTextBlockPrefix": "_" },
-        { "Comment_cTextBoxPrefix": "MainMenu: If the UI element name is prefixed wth this then its a TextBox." },
-        { "cTextBoxPrefix": "=" },
         { "Comment_ignore2 ": "=======================================================================================" },
         { "Comment_sComPortId": "SerialPort: The serial port's Id string." },
         { "sComPortId": "\\\\?\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}" },
