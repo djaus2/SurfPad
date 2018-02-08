@@ -19,7 +19,7 @@ https://github.com/djaus2/SurfPad/tree/38e4b990b59c7f5e5efcbf02d2c02670b423e370
 ## ToDo
 - Sockets
 - RPI version of remote app
-- Add some sensor to teh remote app
+- Add some sensors to the remote app
 - RT Surface 2 (Win 8.1) version of the UWP app.
 
 Have you got an old RT Surface 1 or 2 gathering dust and don't know what to do with it?
