@@ -14,10 +14,13 @@ https://github.com/djaus2/SurfPad/tree/9cc2bc99bcd19f9ee547906375b6ea28d3fe3279
 https://github.com/djaus2/SurfPad/tree/38e4b990b59c7f5e5efcbf02d2c02670b423e370
 
 ## Articles:
-- Coming: Bluetooth Serial Connectivity.
-- [SurfPad - Your old Surface as a Remote App Touchpad: Text Output](http://embedded101.com/Blogs/David-Jones/entryid/799/SurfPad-Your-old-Surface-as-a-Remote-App-Touchpad-Text-Output)
-- [SurfPad -  Your old Surface as a Remote App Touchpad: The UI](http://embedded101.com/Blogs/David-Jones/entryid/797/SurfPad-Your-old-Surface-as-a-Remote-App-Touchpad)
-- [SurfPad - Your old Surface as a Remote App Touchpad: Json Configuration](http://embedded101.com/Blogs/David-Jones/entryid/798/SurfPad-Your-old-Surface-as-a-Remote-App-Touchpad-Json-Configuration)
+- See the Wiki
+
+## ToDo
+- Sockets
+- RPI version of remote app
+- Add some sensor to teh remote app
+- RT Surface 2 (Win 8.1) version of the UWP app.
 
 Have you got an old RT Surface 1 or 2 gathering dust and don't know what to do with it?
 
