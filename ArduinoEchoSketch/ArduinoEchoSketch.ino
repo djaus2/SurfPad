@@ -5,7 +5,7 @@
 */
 #include <SoftwareSerial.h>
 
-const byte cFinsTructureConstant = 137;
+const byte cFineStructureConstant = 137;
 SoftwareSerial bt(2, 3); // RX, TX Pins
 
 char  thisByte;
@@ -16,13 +16,27 @@ enum TerminalModes { none, BT, USBSerial };
 static TerminalModes TerminalMode = none;
 
 void setup() {
-	TerminalMode = none;
-	bt.begin(9600);
-	Serial.begin(115200);
+	TerminalMode = USBSerial;
+	
 	mode = ACK0;
 	//Start sync
-	bt.print((char)cFinsTructureConstant);
-	Serial.print((char)cFinsTructureConstant);
+	if (TerminalMode == BT)
+	{
+		bt.begin(9600);
+		Serial.begin(9600);
+		while (!bt)
+		{
+		}
+		bt.print((char)cFineStructureConstant);
+	}
+	else
+	{
+		Serial.begin(9600);
+		while (!Serial)
+		{
+		}
+		Serial.print((char)cFineStructureConstant);
+	}
 }
 
 void loop() {
@@ -55,12 +69,10 @@ void loop() {
 }
 
 void loopBT() {
-	bt.listen();
-	thisByte = bt.peek();
-
+	thisByte = bt.read();
 	if (thisByte != -1)
 	{
-		thisByte = bt.read();
+		Serial.print(thisByte);
 		TerminalMode = BT;
 		////Debugging:
 		//Serial.print(thisByte);
@@ -102,17 +114,16 @@ void loopBT() {
 						bt.print("{\"MainMenu\":[ [ \"Setup BT Serial\", \"Load App Menu\", \"Setup USB Serial\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
 						mode = Running;
 						break;
-					default:
-						mode = Running;
+					//default:
+					//	mode = Running;
+					//	break;
 				}
 			}
-			break;
 		}
 	}
 }
 
 void loopUSBSerial() {
-	//Serial.listen();
 	thisByte = Serial.peek();
 	if (thisByte != -1)
 	{
@@ -158,11 +169,11 @@ void loopUSBSerial() {
 					Serial.print("{\"MainMenu\":[ [ \"Setup Serial Serial\", \"Load App Menu\", \"Setup USB Serial\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
 					mode = Running;
 					break;
-				default:
-					mode = Running;
+				//default:
+				//	mode = Running;
+				//	break;
 				}
 			}
-			break;
 		}
 	}
 }

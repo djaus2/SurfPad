@@ -264,7 +264,7 @@ namespace USBSerial
                 sendTextButton.IsEnabled = true;
                 //lcdMsg += "~" + ArduinoLCDDisplay.LCD.CMD_DISPLAY_LINE_2_CH + "PressBack/Select   ";
                 //Send(lcdMsg);
-                status.Text = "USB Serial Connected: Press [Start Recv] then [Back]";
+
 
                 ///////////////////////
                 ret = true;
@@ -272,7 +272,8 @@ namespace USBSerial
                 {
                     _Mode = Mode.JustConnected;
                     await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                    {                    
+                    {
+                        status.Text = "USB Serial Connected: Press [Start Recv]";
                         this.buttonDisconnect.IsEnabled = true;
                         this.buttonSend.IsEnabled = true;
                         this.buttonStartRecv.IsEnabled = true;
@@ -449,11 +450,22 @@ namespace USBSerial
                         this.buttonStopRecv.IsEnabled = false;
                         break;
                     case "Send":
-                        string az = this.sendText.Text;
-                        Send(this.sendText.Text);
-                        this.sendText.Text = "";
+ 
+                        if (sendChar.Text.Length > 0)
+                        {
+                            char ch = sendChar.Text[0];
+                            SendCh(ch);
+                            sendChar.Text = "";
+                        }
+                        else
+                        {
+                            Send(this.sendText.Text);
+                            this.sendText.Text = "";
+                        }
                         break;
                     case "Clear Send":
+                        this.status.Text = "";
+                        this.SendText.Text = "";
                         this.recvdText.Text = "";
                         break;
                     case "Start Recv":
@@ -628,18 +640,27 @@ namespace USBSerial
                 {
                     byte[] bytes  = new byte[bytesRead];
                     dataReaderObject.ReadBytes(bytes);
-                    //VMDPV_1|1_VMDPV
-                    string currenbtRecvdText = Encoding.UTF8.GetString(bytes);
-                    //Need to remove the Arduino breakpoint looping messages
-                    int ARDUINO_dbgMsg_Len = ARDUINO_DBGMSG.Length;
-                    if (bytesRead >= ARDUINO_dbgMsg_Len)
+                    var fs = from n in bytes where n == 137 select n;
+                    if (fs.Count() > 0)
+                        bytes = fs.ToArray<byte>();
+                    else
                     {
-                        if (currenbtRecvdText.Substring(0, ARDUINO_dbgMsg_Len) == ARDUINO_DBGMSG)
+                        //VMDPV_1|1_VMDPV
+                        string currenbtRecvdText1 = Encoding.UTF8.GetString(bytes);
+                        //Need to remove the Arduino breakpoint looping messages
+                        int ARDUINO_dbgMsg_Len = ARDUINO_DBGMSG.Length;
+                        if (bytesRead >= ARDUINO_dbgMsg_Len)
                         {
-                            currenbtRecvdText = currenbtRecvdText.Substring(ARDUINO_dbgMsg_Len);
-                            bytes = bytes.Skip(ARDUINO_dbgMsg_Len).Take((int)bytesRead - ARDUINO_dbgMsg_Len).ToArray();
+                            if (currenbtRecvdText1.Substring(0, ARDUINO_dbgMsg_Len) == ARDUINO_DBGMSG)
+                            {
+                                currenbtRecvdText1 = currenbtRecvdText1.Substring(ARDUINO_dbgMsg_Len);
+                                bytes = bytes.Skip(ARDUINO_dbgMsg_Len).Take((int)bytesRead - ARDUINO_dbgMsg_Len).ToArray();
+                            }
                         }
                     }
+                    string currenbtRecvdText = Encoding.UTF8.GetString(bytes);
+
+
                     recvdText.Text = currenbtRecvdText;
 
                     if (_Mode == Mode.JustConnected)
