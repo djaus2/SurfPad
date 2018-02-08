@@ -15,7 +15,7 @@ https://github.com/djaus2/SurfPad/tree/9cc2bc99bcd19f9ee547906375b6ea28d3fe3279
 https://github.com/djaus2/SurfPad/tree/38e4b990b59c7f5e5efcbf02d2c02670b423e370
 
 ## Articles:
-- See the Wiki: [Wiki|Home]].
+- See the Wiki: [[Wiki|Home]].
 
 ## ToDo
 - Sockets
