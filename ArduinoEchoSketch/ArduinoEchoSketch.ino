@@ -3,7 +3,11 @@
  Created:	1/31/2018 11:27:21 PM
  Author:	DavidJones
 */
+#include <Keypad.h>
+#include <Key.h>
 #include <SoftwareSerial.h>
+//#include <avr/pgmspoace>
+
 
 const byte cFineStructureConstant = 137;
 SoftwareSerial bt(2, 3); // RX, TX Pins
@@ -12,16 +16,19 @@ char  thisByte;
 enum Mode { ACK0, ACK1, ACK2,ACK4, Running, GetJson, GetString };
 Mode mode = ACK0;
 
-enum TerminalModes { none, BT, USBSerial };
+enum TerminalModes { none, BT, USBSerial,Socket };
 static TerminalModes TerminalMode = none;
 
 void setup() {
-	TerminalMode = USBSerial;
+	TerminalMode = Socket;
+
+
 	
-	mode = ACK0;
+
 	//Start sync
 	if (TerminalMode == BT)
 	{
+		mode = ACK0;
 		bt.begin(9600);
 		Serial.begin(9600);
 		while (!bt)
@@ -29,13 +36,19 @@ void setup() {
 		}
 		bt.print((char)cFineStructureConstant);
 	}
-	else
+	else if (TerminalMode == USBSerial)
 	{
+		mode = ACK0;
 		Serial.begin(9600);
 		while (!Serial)
 		{
 		}
 		Serial.print((char)cFineStructureConstant);
+	}
+	else if (TerminalMode == Socket)
+	{
+		setupSocket();
+		
 	}
 }
 
@@ -59,6 +72,8 @@ void loop() {
 		loopBT();
 	else if (TerminalMode == USBSerial)
 		loopUSBSerial();
+	else if (TerminalMode == Socket)
+		loopSocket();
 	else
 	{
 		//Keep trying
@@ -107,11 +122,11 @@ void loopBT() {
 				switch (thisByte)
 				{
 					case '/':  //App sends this back
-						bt.print("{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~");
+						bt.print(F("{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~"));
 						break;
 					case '~':  //Then when it gets above then sends this back as confirmation
 							   //bt.print("Hello World~");
-						bt.print("{\"MainMenu\":[ [ \"Setup BT Serial\", \"Load App Menu\", \"Setup USB Serial\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
+						bt.print(F("{\"MainMenu\":[ [ \"Setup BT Serial\", \"Load App Menu\", \"Setup USB Serial\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~"));
 						mode = Running;
 						break;
 					//default:
@@ -177,3 +192,4 @@ void loopUSBSerial() {
 		}
 	}
 }
+
