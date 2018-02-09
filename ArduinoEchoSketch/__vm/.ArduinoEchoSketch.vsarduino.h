@@ -79,6 +79,5 @@ typedef void *__builtin_va_list;
 
 #include "ArduinoEchoSketch.ino"
 #include "..\ClientSvrSockets\ClientSvrSockets.ino"
-#include "..\ClientSvrSockets\EventKeypad.ino"
 #endif
 #endif

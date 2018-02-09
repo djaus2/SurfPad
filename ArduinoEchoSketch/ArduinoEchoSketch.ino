@@ -20,7 +20,7 @@ enum TerminalModes { none, BT, USBSerial,Socket };
 static TerminalModes TerminalMode = none;
 
 void setup() {
-	TerminalMode = Socket;
+	TerminalMode = USBSerial;
 
 
 	
