@@ -32,8 +32,8 @@ namespace SoxStreams
             this.Suspending += OnSuspending;
         }
 
-        public static string Port { get; internal set; } = "22112";
-        public static string RemoteListenerName { get; internal set; } = "192.168.0.27";
+        public static string Port { get; internal set; } = "1234";
+        public static string RemoteListenerName { get; internal set; } = "192.168.0.137";
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points

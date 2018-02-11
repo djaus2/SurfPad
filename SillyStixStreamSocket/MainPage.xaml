@@ -47,8 +47,8 @@
             <TextBox x:Name="PasskeyTb"  Grid.Row="1" Grid.Column="3" HorizontalAlignment="Left" Height="35"  TextWrapping="NoWrap" Text="22113A22113" VerticalAlignment="Top" Margin="55,5,-109,0" Width="104" FontSize="12" TextChanged="PasskeyTb_TextChanged" />
 
         </Grid>
-        <TextBox x:Name="PortTb" HorizontalAlignment="Left" Height="35" Margin="170,75,0,0" TextWrapping="Wrap" Text="22112" VerticalAlignment="Top" Width="140" TextChanged="Port_TextChanged"/>
-        <TextBox x:Name="RemoteListenerTb" HorizontalAlignment="Left" Height="35" Margin="170,35,0,0" TextWrapping="Wrap" Text="192.168.0.27" VerticalAlignment="Top" Width="140" TextChanged="RemoteListenerTb_TextChanged"/>
+        <TextBox x:Name="PortTb" HorizontalAlignment="Left" Height="35" Margin="170,75,0,0" TextWrapping="Wrap" Text="1234" VerticalAlignment="Top" Width="140" TextChanged="Port_TextChanged"/>
+        <TextBox x:Name="RemoteListenerTb" HorizontalAlignment="Left" Height="35" Margin="170,35,0,0" TextWrapping="Wrap" Text="192.168.0.137" VerticalAlignment="Top" Width="140" TextChanged="RemoteListenerTb_TextChanged"/>
         <TextBox x:Name="LogTb" HorizontalAlignment="Left" Height="150" Margin="0,45,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="315" AcceptsReturn="True" Grid.Row="1" />
         <TextBlock x:Name="RemotePortLabel" TextAlignment="Right" HorizontalAlignment="Left" Height="40" Margin="15,70,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="150" >
             <Run Text="Local &amp; Remote "/>

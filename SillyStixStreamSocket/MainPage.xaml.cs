@@ -84,14 +84,27 @@ namespace SoxStreams
 
             if (icp != null && icp.NetworkAdapter != null)
             {
+
+
+                //Retrieve the ConnectionProfile
+                string connectionProfileInfo = string.Empty;
+                ConnectionProfile InternetConnectionProfile = NetworkInformation.GetInternetConnectionProfile();
+
+                //Pass the returned object to a function that accesses the connection data  
+                //connectionProfileInfo = GetConnectionProfileInfo(InternetConnectionProfile);
+
                 var hostname2 =     NetworkInformation.GetHostNames();
                 int count = hostname2.Count();
                 foreach (Windows.Networking.HostName hnn in hostname2)
                 {
+                    //var rt = hnn.IPInformation.NetworkAdapter;
                 }
                 var hostname = from hn in hostname2 where ((hn.IPInformation != null) 
                                && (hn.Type== Windows.Networking.HostNameType.Ipv4) 
+                               && (hn.IPInformation.NetworkAdapter.NetworkAdapterId == InternetConnectionProfile.NetworkAdapter.NetworkAdapterId)
                                && (hn.IPInformation.NetworkAdapter != null)) select hn;
+
+                
 
                 if (hostname != null)
                 {
@@ -178,7 +191,8 @@ namespace SoxStreams
                         {
                             string action = KeypadKeys[tag];
                             if (!DoNotsend.Contains(tag))
-                                SendAction(action);
+                                SendAction(tag);
+                                //SendAction(action);
                             else
                             {
                                 switch (tag)

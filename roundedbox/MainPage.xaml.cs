@@ -37,7 +37,9 @@ namespace roundedbox
         Brush White = new SolidColorBrush(Colors.White);
 
         public enum TerminalModes {none,BT,USBSerial };
-        public static TerminalModes TerminalMode = TerminalModes.none;  
+        public static TerminalModes TerminalMode = TerminalModes.none;
+
+        public  ListView clientListBox;
 
 
 
@@ -88,7 +90,7 @@ namespace roundedbox
             buttons[row][col] = new uc.MyUserControl1(row,col,text,TheGrid,name,background,id,cnrRad, colSpan, rowSpan);
         }
 
-        private void MainPage_ButtonTapped1(string sender, int args)
+        private async void MainPage_ButtonTapped1(string sender, int args)
         {
             string name = sender;
             int id = args;
@@ -116,6 +118,10 @@ namespace roundedbox
             {
                 TerminalMode = TerminalModes.USBSerial;
                 Frame.Navigate(typeof(USBSerial.USBSerialTerminalPage));
+            }
+            else if (args == 3)
+            {
+                await SynchronousSocketListener.StartClient();
             }
             else
             {
@@ -180,10 +186,12 @@ namespace roundedbox
             //bdr.Child = tb;
             listView1 = new ListView()
             {
+                Name="MyList",
                 IsEnabled = false,
                 
             };
             bdr.Child = listView1;
+            clientListBox = listView1;
         }
 
         ListView listView1;
