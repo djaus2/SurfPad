@@ -1,0 +1,68 @@
+﻿<Page
+    x:Class="Socket.SocketTerminalPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:roundedbox"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <CollectionViewSource x:Name="PairedDevices"/>
+    </Page.Resources>
+
+    <Grid x:Name="Layout">
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="White" Offset="1"/>
+                <GradientStop Color="LightSeaGreen" Offset="0.75"/>
+                <GradientStop Color="LightYellow" Offset="0.5"/>
+                <GradientStop Color="LightYellow" Offset="0.25"/>
+                <GradientStop Color="LightSteelBlue" Offset="0"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <StackPanel Orientation="Vertical">
+            <TextBlock x:Name="MyTitle" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="Wrap" Text="Universal Windows Socket Terminal" VerticalAlignment="Top" Width="800"/>
+            <TextBlock  x:Name="uartTitle" Text="Socket Setup" Style="{StaticResource HeaderTextBlockStyle}" 
+                        IsHitTestVisible="false" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,10,0,0"/>
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="ID" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="Wrap" Text="Id: " VerticalAlignment="Top" Width="28"/>
+                    <TextBlock x:Name="TxtBlock_SelectedID" HorizontalAlignment="Left" Height="25" Margin="10" TextWrapping="Wrap" Text="Id" VerticalAlignment="Top" Width="956"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="BTName" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="Wrap" Text="Name: " VerticalAlignment="Top" Width="50"/>
+                    <TextBox x:Name="textBlockBTName" HorizontalAlignment="Left" Height="35" Margin="10,10,0,10" TextWrapping="Wrap" Text="192.168.0.137" VerticalAlignment="Top" Width="1004" ToolTipService.ToolTip=""/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="TBPort" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="Wrap" Text="Port: " VerticalAlignment="Top" Width="50"/>
+                    <TextBox x:Name="tbPort" HorizontalAlignment="Left" Height="35" Margin="10,10,0,10" TextWrapping="Wrap" Text="1234" VerticalAlignment="Top" Width="1004" ToolTipService.ToolTip=""/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="buttonRefresh" Content="Connect" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>
+                <Button x:Name="buttonDisconnect" Content="Disconnect" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
+                <Button x:Name="buttonSend" Content="Send" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click"  IsEnabled="False"/>
+                <Button x:Name="buttonClearSendText" Content="Clear Send" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>
+                <Button x:Name="buttonStartRecv" Content="Start Recv" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
+                <Button x:Name="buttonStopRecv" Content="Stop Recv" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
+                <Button x:Name="buttonBack" Content="Back" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="SendText" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="NoWrap"  Text="Send: " VerticalAlignment="Top" Width="50"/>
+                <TextBox x:Name="sendText" Text="Send Me" HorizontalAlignment="Left" Height="100" Margin="10" TextWrapping="Wrap"  VerticalAlignment="Top" Width="800" ToolTipService.ToolTip="" AcceptsReturn="True"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="RecvdText" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="NoWrap" Text="Recvd: " VerticalAlignment="Top" Width="50"/>
+                <TextBlock x:Name="recvdText" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="Name" VerticalAlignment="Top" Width="800" Height="Auto" ToolTipService.ToolTip=""/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="Status" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="NoWrap" Text="Status: " VerticalAlignment="Top" Width="50"/>
+                <TextBlock x:Name="status" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="Name" VerticalAlignment="Top" Width="800" Height="Auto" ToolTipService.ToolTip=""/>
+            </StackPanel>
+        </StackPanel>
+
+    </Grid>
+</Page>

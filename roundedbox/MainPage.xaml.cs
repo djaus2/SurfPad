@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Socket;
 using USBSerial;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -36,7 +37,7 @@ namespace roundedbox
         Brush Black = new SolidColorBrush(Colors.Black);
         Brush White = new SolidColorBrush(Colors.White);
 
-        public enum TerminalModes {none,BT,USBSerial };
+        public enum TerminalModes {none,BT,USBSerial, Socket };
         public static TerminalModes TerminalMode = TerminalModes.none;
 
         public  ListView clientListBox;
@@ -48,6 +49,7 @@ namespace roundedbox
         public static MainPage MP;
         public static Bluetooth.BluetoothSerialTerminalPage BTTerminalPage;
         public static USBSerial.USBSerialTerminalPage USBSerialTerminalPage { get; internal set; }
+        public static SocketTerminalPage SocketTerminalPage { get; internal set; }
 
         public MainPage()
         {
@@ -121,7 +123,8 @@ namespace roundedbox
             }
             else if (args == 3)
             {
-                await SynchronousSocketListener.StartClient();
+                TerminalMode = TerminalModes.Socket;
+                Frame.Navigate(typeof(Socket.SocketTerminalPage));
             }
             else
             {
