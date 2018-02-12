@@ -5,7 +5,8 @@ Turn your old Surface into into a large touchpad.
 Now has links to articles about this project: [Wiki](https://github.com/djaus2/SurfPad/wiki)
 
 ## Status:
-- Sixth Version: Introducing Sockets option. Arduino end works. UWP to follow (not yet) But apps set to default to USB Serial. So USB Serial and BT are still operational with latest version. Just has extra socket code in it.
+- Sixth Version: Introducing Sockets option. Works now. USB and Sockets auto load menu once received. BT might not work at the moment:
+https://github.com/djaus2/SurfPad/tree/923b4b77efa493c3fd6adcc8581331e32e08ce57
 - Fifth Version: coms over BT and USB Serial both now works with Arduino remote app:
 https://github.com/djaus2/SurfPad/tree/7024ce0f8e49d93fa88430bafe6b60732c7e81a3
 - Fourth version (now available): Adds Arduino app as the remote app. Adds an Arduino app into the solution (needs VMicro Arduino Vs 2017 plugin.). Currently UWP app does some initial handshaking with remote app. Only. Keypresses are echoed (code sent to remote app and then its Text is looked up upon return. Also if second key is pressed, ie [Set up Serial] then get Hello World" message sent from remote app! [Setup BT] goes to BT setup page. Just double click on the BT device. (*More on this in my blog (see Wiki)*): https://github.com/djaus2/SurfPad/tree/2254af7aad5777ac74d87f13f7c349bc78d1e40e
