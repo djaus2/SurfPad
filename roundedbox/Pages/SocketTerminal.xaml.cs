@@ -111,7 +111,7 @@ namespace Socket
                         break;
                     case "Connect":
                         //await roundedbox.Helpers.SynchronousSocketListener.StartClient();
-                        this.StartSocketClient();
+                        await this.StartSocketClient();
                         //Listen();
                         break;
                     case "Back":
@@ -401,7 +401,12 @@ namespace Socket
             }
         }
         private Windows.Networking.Sockets.StreamSocket streamSocket= null;
-        private async void StartSocketClient()
+        private Stream outputStream = null;
+        private StreamWriter streamWriter = null;
+        private Stream inputStream;
+        private StreamReader streamReader = null;
+
+        private async Task  StartSocketClient()
         {
             try
             {
@@ -410,115 +415,80 @@ namespace Socket
                 //{
                 streamSocket = new Windows.Networking.Sockets.StreamSocket();
                     // The server hostname that we will be establishing a connection to. In this example, the server and client are in the same process.
-                    var hostName = new Windows.Networking.HostName("192.168.0.137");
+                var hostName = new Windows.Networking.HostName("192.168.0.137");
 
-                    MainPage.MP.clientListBox.Items.Add("client is trying to connect...");
+                MainPage.MP.clientListBox.Items.Add("client is trying to connect...");
 
-                    await streamSocket.ConnectAsync(hostName, "1234");
+                await streamSocket.ConnectAsync(hostName, "1234");
 
-                    MainPage.MP.clientListBox.Items.Add("client connected");
+                MainPage.MP.clientListBox.Items.Add("client connected");
 
-                    // Send a request to the echo server.
-                    string request = "Hello, World";
-                    using (Stream outputStream = streamSocket.OutputStream.AsStreamForWrite())
-                    {
-                        using (var streamWriter = new StreamWriter(outputStream))
-                        {
-                            await streamWriter.WriteLineAsync(request);
-                            await streamWriter.FlushAsync();
+                string request = "Hello, World";
+                outputStream = streamSocket.OutputStream.AsStreamForWrite();
+                streamWriter = new StreamWriter(outputStream);
+                await streamWriter.WriteLineAsync(request);
+                await streamWriter.FlushAsync();
 
+                MainPage.MP.clientListBox.Items.Add(string.Format("client sent the request: \"{0}\"", request));
 
+                // Read data from the echo server.
+                string response;
+                string json1 = "";
+                int ch;
+                string json2 = "";
+                char[] chars = new char[2];
+                chars[1] = 'Z';
+                int responseLength;
 
-                            MainPage.MP.clientListBox.Items.Add(string.Format("client sent the request: \"{0}\"", request));
-
-                            // Read data from the echo server.
-                            string response;
-                            string json1 = "";
-                            int ch;
-                            string json2 = "";
-                            char[] chars = new char[2];
-                            chars[1] = 'Z';
-                            int responseLength;
-                            using (Stream inputStream = streamSocket.InputStream.AsStreamForRead())
-                            {
-                                using (StreamReader streamReader = new StreamReader(inputStream))
-                                {
-                                    response = await streamReader.ReadLineAsync();
-                                    //do
-                                    //{
-                                    //    ch = streamReader.Read();
-                                    //} while (ch > 255);
-                                    responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                inputStream = streamSocket.InputStream.AsStreamForRead();
+                streamReader = new StreamReader(inputStream);
+                response = await streamReader.ReadLineAsync();   
+                responseLength = await streamReader.ReadAsync(chars, 0, 1);
 
 
+                if (chars[0] == '@')
+                {
+                    await streamWriter.WriteAsync('0');
+                    await streamWriter.FlushAsync();
+                }
 
-                                    if (chars[0] == '@')
-                                    {
-                                        await streamWriter.WriteAsync('0');
-                                        await streamWriter.FlushAsync();
-                                    }
+                responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                if (chars[0] == '1')
+                {
+                    await streamWriter.WriteAsync('2');
+                    await streamWriter.FlushAsync();
+                }
 
-                                    responseLength = await streamReader.ReadAsync(chars, 0, 1);
-                                    if (chars[0] == '1')
-                                    {
-                                        await streamWriter.WriteAsync('2');
-                                        await streamWriter.FlushAsync();
-                                    }
+                responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                if (chars[0] == '3')
+                {
+                    await streamWriter.WriteAsync('4');
+                    await streamWriter.FlushAsync();
+                }
 
-                                    responseLength = await streamReader.ReadAsync(chars, 0, 1);
-                                    if (chars[0] == '3')
-                                    {
-                                        await streamWriter.WriteAsync('4');
-                                        await streamWriter.FlushAsync();
-                                    }
+                responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                if (chars[0] == '5')
+                {
+                    await streamWriter.WriteAsync('!');
+                    await streamWriter.FlushAsync();
+                }
 
-                                    responseLength = await streamReader.ReadAsync(chars, 0, 1);
-                                    if (chars[0] == '5')
-                                    {
-                                        await streamWriter.WriteAsync('!');
-                                        await streamWriter.FlushAsync();
-                                    }
+                responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                if (chars[0] == '/')
+                {
+                    await streamWriter.WriteAsync('/');
+                    await streamWriter.FlushAsync();
 
-                                    responseLength = await streamReader.ReadAsync(chars, 0, 1);
-                                    if (chars[0] == '/')
-                                    {
-                                        await streamWriter.WriteAsync('/');
-                                        await streamWriter.FlushAsync();
+                    json1 = await streamReader.ReadLineAsync();
+                    await MainPage.MP.UpdateTextAsync(json1);
 
-                                        json1 = await streamReader.ReadLineAsync();
+                    await streamWriter.WriteAsync('~');
+                    await streamWriter.FlushAsync();
 
-
-                                        await streamWriter.WriteAsync('~');
-                                        await streamWriter.FlushAsync();
-
-                                        json2 = await streamReader.ReadLineAsync();
-                                    }
-
-
-                                    
-
-                                }
-                            }
-                        
-
-                        }
-                    }
-
-                   // MainPage.MP.clientListBox.Items.Add(string.Format("client received the response: \"{0}\" ", response));
-
-                   
-                    //using (Stream inputStream = streamSocket.InputStream.AsStreamForRead())
-                    //{
-                    //    using (StreamReader streamReader = new StreamReader(inputStream))
-                    //    {
-                    //        ch = streamReader.Read();
-                    //    }
-                    //}
-
-                    //MainPage.MP.clientListBox.Items.Add(string.Format("client received the response: \"{0}\" ", chars[0]));
-               // }//
-
-                //MainPage.MP.clientListBox.Items.Add("client closed its socket");
+                    json2 = await streamReader.ReadLineAsync();
+                    await MainPage.MP.UpdateTextAsync(json2);
+                }
+                MainPage.MP.clientListBox.Items.Add(string.Format("client received the response: \"{0}\" ", "Got Json"));
             }
             catch (Exception ex)
             {
@@ -526,6 +496,60 @@ namespace Socket
                 MainPage.MP.clientListBox.Items.Add(webErrorStatus.ToString() != "Unknown" ? webErrorStatus.ToString() : ex.Message);
             }
         }
+
+        private async Task StartSocketClient2()
+        {
+            string json1 = "";
+            string json2 = "";
+            char[] chars = new char[2];
+            try
+            {
+  
+                //using (Stream outputStream = streamSocket.OutputStream.AsStreamForWrite())
+                //{
+                //    using (var streamWriter = new StreamWriter(outputStream))
+                //    {
+
+                //        using (Stream inputStream = streamSocket.InputStream.AsStreamForRead())
+                //        {
+                //            using (StreamReader streamReader = new StreamReader(inputStream))
+                //            {
+                      
+
+                                int responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                                if (chars[0] == '/')
+                                {
+                                    await streamWriter.WriteAsync('/');
+                                    await streamWriter.FlushAsync();
+
+                                    json1 = await streamReader.ReadLineAsync();
+
+
+                                    await streamWriter.WriteAsync('~');
+                                    await streamWriter.FlushAsync();
+
+                                    json2 = await streamReader.ReadLineAsync();
+                                }
+
+
+
+
+                            //}
+                        //}
+
+
+                   // }
+                //}
+
+
+            }
+            catch (Exception ex)
+            {
+                Windows.Networking.Sockets.SocketErrorStatus webErrorStatus = Windows.Networking.Sockets.SocketError.GetStatus(ex.GetBaseException().HResult);
+                MainPage.MP.clientListBox.Items.Add(webErrorStatus.ToString() != "Unknown" ? webErrorStatus.ToString() : ex.Message);
+            }
+        }
+
 
     }
 }
