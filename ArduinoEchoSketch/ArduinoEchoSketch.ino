@@ -32,7 +32,7 @@ void setup() {
 	a1 = digitalRead(A1);
 	a2 = digitalRead(A2);
 	if (a0 == 0)
-		TerminalMode = BT;
+		TerminalMode = BT; 
 	else if (a1 == 0)
 		TerminalMode = USBSerial;
 	else  if (a2 == 0)
