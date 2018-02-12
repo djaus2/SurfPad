@@ -37,9 +37,7 @@ namespace Socket
         public const byte EOStringByte = 126;
         private const int cFineStructure = 137; //ASCII Per mille sign
 
-        string Title = "Universal Windows Socket Terminal";
-        private Windows.Devices.Bluetooth.Rfcomm.RfcommDeviceService _service;
-
+        private string Title = "Universal Windows Socket Terminal";
 
         private CancellationTokenSource ReadCancellationTokenSource;
 
@@ -62,16 +60,16 @@ namespace Socket
                     Windows.UI.Xaml.Navigation.NavigationCacheMode.Required;
             this.InitializeComponent();
             MyTitle.Text = Title;
-           
+
             //_pairedDevices = new ObservableCollection<PairedDeviceInfo>();
             MainPage.SocketTerminalPage = this;
             _Mode = Mode.Disconnected;
         }
-        
 
-        
+
+
         Windows.Storage.Streams.Buffer OutBuff;
-        
+
         private async void button_Click(object sender, RoutedEventArgs e)
         {
             OutBuff = new Windows.Storage.Streams.Buffer(100);
@@ -93,7 +91,7 @@ namespace Socket
                     case "Send":
                         //await _socket.OutputStream.WriteAsync(OutBuff);
                         string az = this.sendText.Text;
-                        Send(this.sendText.Text);
+                        await Send(this.sendText.Text);
                         this.sendText.Text = "";
                         break;
                     case "Clear Send":
@@ -110,9 +108,9 @@ namespace Socket
                         CancelReadTask();
                         break;
                     case "Connect":
-                        //await roundedbox.Helpers.SynchronousSocketListener.StartClient();
                         await this.StartSocketClient();
-                        //Listen();
+                        this.buttonStartRecv.IsEnabled = true;
+                        this.buttonStopRecv.IsEnabled = false;
                         break;
                     case "Back":
                         //this.Frame.GoBack();
@@ -122,103 +120,21 @@ namespace Socket
             }
         }
 
-        private  void backButton_Click(object sender, RoutedEventArgs e)
+        private void backButton_Click(object sender, RoutedEventArgs e)
         {
             if (_Mode == Mode.JustConnected)
             {
                 _Mode = Mode.Connected;
                 //Send("ACK1#");
             }
-            this.Frame.GoBack();;
+            this.Frame.GoBack(); ;
 
         }
 
         //Normally send key's text. Also some commands
-        public async void Send(string msg)
-        {
-            //for (int i = 0; i < msg.Length; i++)
-            //{
-                try
-                {
-                    ////if (_socket.OutputStream != null)
-                    ////{
-                    ////    // Create the DataWriter object and attach to OutputStream
-                    ////    dataWriteObject = new DataWriter(_socket.OutputStream);
-
-                    ////    //Launch the WriteAsync task to perform the write
-                    ////    await WriteAsync(msg); //.Substring(i, 1));
-                    ////}
-                    ////else
-                    ////{
-                    ////    //status.Text = "Select a device and connect";
-                    ////}
-                }
-                catch (Exception ex)
-                {
-                    //status.Text = "Send(): " + ex.Message;
-                    System.Diagnostics.Debug.WriteLine(ex.Message);
-                }
-                finally
-                {
-                    // Cleanup once complete
-                    ////if (dataWriteObject != null)
-                    ////{
-                    ////    dataWriteObject.DetachStream();
-                    ////    dataWriteObject = null;
-                    ////}
-                }
-
-            //}
-            //Task.Delay(PauseBtwSentCharsmS).Wait();
-        }
-        public async void SendCh(char ch)
-        {
-            try
-            {
-                await roundedbox.Helpers.SynchronousSocketListener.SendCh(ch);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex.Message);
-            }
-            finally
-            {
 
 
-            }
-        }
-        
-        /// <summary>
-        /// WriteAsync: Task that asynchronously writes data from the input text box 'sendText' to the OutputStream 
-        /// </summary>
-        /// <returns></returns>
-        private async Task WriteAsync(string msg)
-        {
-            if (msg.Length != 0)
-            {
-                char[] charArr = msg.ToCharArray();
-                int bytesWritten = await roundedbox.Helpers.SynchronousSocketListener.WriteAsync(charArr);
-                if (bytesWritten > 0)
-                {
-                    status.Text = msg + ", ";
-                    //status.Text = sendText.Text + ", ";
-                    status.Text += "bytes written successfully!";
-                }
-                sendText.Text = ""; //??
-            }
-            else
-            {
-                status.Text = "Enter the text you want to write and then click on 'WRITE'";
-            }
-        }
 
-        private async Task WriteChar(char ch)
-        {
-            string msg = "" + ch;
-            await WriteAsync(msg);
-        }
-        
-        string recvdtxt = "";
         /// <summary>
         /// - Create a DataReader object
         /// - Create an async task to read from the SerialDevice InputStream
@@ -234,13 +150,11 @@ namespace Socket
 
                 this.buttonStopRecv.IsEnabled = true;
                 this.buttonDisconnect.IsEnabled = false;
-                recvdtxt = "";
-                // keep reading the serial input
                 while (true) //!ReadCancellationTokenSource.Token.IsCancellationRequested)
-                {                 
+                {
                     await ReadAsync(ReadCancellationTokenSource.Token);
                 }
-    
+
             }
             catch (Exception ex)
             {
@@ -252,11 +166,11 @@ namespace Socket
                 this.TxtBlock_SelectedID.Text = "";
                 if (ex.GetType().Name == "TaskCanceledException")
                 {
-                    System.Diagnostics.Debug.WriteLine( "Listen: Reading task was cancelled, closing device and cleaning up");
+                    System.Diagnostics.Debug.WriteLine("Listen: Reading task was cancelled, closing device and cleaning up");
                 }
                 else
                 {
-                    status.Text = "Listen: " +ex.Message;
+                    status.Text = "Listen: " + ex.Message;
                 }
             }
             finally
@@ -268,123 +182,9 @@ namespace Socket
                 //    dataReaderObject = null;
                 //}
             }
-        }  
-
-        /// <summary>
-        /// ReadAsync: Task that waits on data and reads asynchronously from the serial device InputStream
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        private async Task ReadAsync(CancellationToken cancellationToken)
-        {
-
-
-            // If task cancellation was requested, comply
-            cancellationToken.ThrowIfCancellationRequested();
-
-            // Set InputStreamOptions to complete the asynchronous read operation when one or more bytes is available
-
-            byte[] bytes = await roundedbox.Helpers.SynchronousSocketListener.ReadAsync();
-            UInt32 bytesRead = (uint) bytes.Length;
-            if (bytesRead > 0)
-            {
-                try
-                {
-
-                    string currenbtRecvdText = Encoding.UTF8.GetString(bytes);
-
-                    recvdText.Text = currenbtRecvdText;
-
-                    if (_Mode == Mode.JustConnected)
-                    {
-                        if (cFineStructure == bytes[0])
-                        {
-                            SendCh('0');
-                            _Mode=Mode.ACK0;
-                        }
-                    }
-                    else if (_Mode == Mode.ACK0)
-                    {
-                        if ('1' == (char)bytes[0])
-                        {
-                            recvdtxt = "";
-                            SendCh('2');
-                            _Mode = Mode.ACK2;
-                        }
-                    }
-                    else if (_Mode == Mode.ACK2)
-                    {
-                        if ('3' == (char)bytes[0])
-                        {
-                            recvdtxt = "";
-                            SendCh('4');
-                            _Mode = Mode.ACK4;
-                        }
-                    }
-                    else if (_Mode == Mode.ACK4)
-                    {
-                        if ('5' == (char)bytes[0])
-                        {
-                            status.Text="Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
-                            _Mode = Mode.Connected;
-
-                        }
-                    }
-                    else if (_Mode == Mode.Connected)
-                    {
-                        byte byt = bytes[0];
-                        switch (byt)
-                        {
-                            case 47:  //'!'
-                                _Mode = Mode.JsonConfig;
-                                recvdtxt = "";
-                                SendCh('/');
-                                break;
-                            default:
-                                recvdtxt = "" + (char)bytes[0];
-                                await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1));
-                                recvdtxt = "";
-                                System.Diagnostics.Debug.WriteLine("bytes read successfully!");
-                                break;
-                        }
-                    }
-                    else if (_Mode == Mode.JsonConfig)
-                    {
-                        recvdtxt += currenbtRecvdText;
-                        if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
-                        {
-                            System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
-                            await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1))
-
-                            if (recvdtxt.Substring(0, "{\"Config\":".Length) == "{\"Config\":")
-                                SendCh('~');
-                            else if (recvdtxt.Substring(0, "{\"MainMenu\":".Length) == "{\"MainMenu\":")
-                                _Mode = Mode.Connected;
-                            else
-                            {
-                                //// Get stack trace for the exception with source file information
-                                //var st = new StackTrace(ex, true);
-                                //string thisFile = new System.Diagnostics.StackTrace(true).GetFrame(0).GetFileName();
-                                //var frame = st.GetFrame(0);
-                                //// Get the line number from the stack frame
-                                //var line = frame.GetFileLineNumber();
-                                throw new System.Exception("BluetoothSerialTerminal.cs: ReadAsync() Getting JsonConfig. Shouldn't have reached this LOC"); //: { 0 }",line);
-
-                            }
-                            recvdtxt = "";
-                        }
-                        else
-                            return;
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine("ReadAsync: " + ex.Message);
-                }
-                
-            }
         }
+
+
 
         /// <summary>
         /// CancelReadTask:
@@ -400,13 +200,13 @@ namespace Socket
                 }
             }
         }
-        private Windows.Networking.Sockets.StreamSocket streamSocket= null;
+        private Windows.Networking.Sockets.StreamSocket streamSocket = null;
         private Stream outputStream = null;
         private StreamWriter streamWriter = null;
         private Stream inputStream;
         private StreamReader streamReader = null;
 
-        private async Task  StartSocketClient()
+        private async Task StartSocketClient()
         {
             try
             {
@@ -414,12 +214,14 @@ namespace Socket
                 //using (var streamSocket = new Windows.Networking.Sockets.StreamSocket())
                 //{
                 streamSocket = new Windows.Networking.Sockets.StreamSocket();
-                    // The server hostname that we will be establishing a connection to. In this example, the server and client are in the same process.
+                // The server hostname that we will be establishing a connection to. In this example, the server and client are in the same process.
                 var hostName = new Windows.Networking.HostName("192.168.0.137");
 
                 MainPage.MP.clientListBox.Items.Add("client is trying to connect...");
 
                 await streamSocket.ConnectAsync(hostName, "1234");
+
+                _Mode = Mode.JustConnected;
 
                 MainPage.MP.clientListBox.Items.Add("client connected");
 
@@ -434,7 +236,6 @@ namespace Socket
                 // Read data from the echo server.
                 string response;
                 string json1 = "";
-                int ch;
                 string json2 = "";
                 char[] chars = new char[2];
                 chars[1] = 'Z';
@@ -442,7 +243,7 @@ namespace Socket
 
                 inputStream = streamSocket.InputStream.AsStreamForRead();
                 streamReader = new StreamReader(inputStream);
-                response = await streamReader.ReadLineAsync();   
+                response = await streamReader.ReadLineAsync();
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
 
 
@@ -451,6 +252,7 @@ namespace Socket
                     await streamWriter.WriteAsync('0');
                     await streamWriter.FlushAsync();
                 }
+                _Mode = Mode.ACK0;
 
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
                 if (chars[0] == '1')
@@ -459,12 +261,15 @@ namespace Socket
                     await streamWriter.FlushAsync();
                 }
 
+                _Mode = Mode.ACK2;
+
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
                 if (chars[0] == '3')
                 {
                     await streamWriter.WriteAsync('4');
                     await streamWriter.FlushAsync();
                 }
+                _Mode = Mode.ACK4;
 
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
                 if (chars[0] == '5')
@@ -473,11 +278,16 @@ namespace Socket
                     await streamWriter.FlushAsync();
                 }
 
+                _Mode = Mode.AwaitJson;
+                
+
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
                 if (chars[0] == '/')
                 {
                     await streamWriter.WriteAsync('/');
                     await streamWriter.FlushAsync();
+
+                    _Mode = Mode.JsonConfig;
 
                     json1 = await streamReader.ReadLineAsync();
                     await MainPage.MP.UpdateTextAsync(json1);
@@ -487,6 +297,7 @@ namespace Socket
 
                     json2 = await streamReader.ReadLineAsync();
                     await MainPage.MP.UpdateTextAsync(json2);
+                    _Mode = Mode.Connected;
                 }
                 MainPage.MP.clientListBox.Items.Add(string.Format("client received the response: \"{0}\" ", "Got Json"));
             }
@@ -504,7 +315,7 @@ namespace Socket
             char[] chars = new char[2];
             try
             {
-  
+
                 //using (Stream outputStream = streamSocket.OutputStream.AsStreamForWrite())
                 //{
                 //    using (var streamWriter = new StreamWriter(outputStream))
@@ -514,31 +325,31 @@ namespace Socket
                 //        {
                 //            using (StreamReader streamReader = new StreamReader(inputStream))
                 //            {
-                      
-
-                                int responseLength = await streamReader.ReadAsync(chars, 0, 1);
-                                if (chars[0] == '/')
-                                {
-                                    await streamWriter.WriteAsync('/');
-                                    await streamWriter.FlushAsync();
-
-                                    json1 = await streamReader.ReadLineAsync();
 
 
-                                    await streamWriter.WriteAsync('~');
-                                    await streamWriter.FlushAsync();
+                int responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                if (chars[0] == '/')
+                {
+                    await streamWriter.WriteAsync('/');
+                    await streamWriter.FlushAsync();
 
-                                    json2 = await streamReader.ReadLineAsync();
-                                }
-
-
-
-
-                            //}
-                        //}
+                    json1 = await streamReader.ReadLineAsync();
 
 
-                   // }
+                    await streamWriter.WriteAsync('~');
+                    await streamWriter.FlushAsync();
+
+                    json2 = await streamReader.ReadLineAsync();
+                }
+
+
+
+
+                //}
+                //}
+
+
+                // }
                 //}
 
 
@@ -550,6 +361,86 @@ namespace Socket
             }
         }
 
+        public async Task SendCh(char ch)
+        {
 
+            char[] chars = new char[2];
+            chars[0] = ch;
+            try
+            {
+                await streamWriter.WriteAsync(ch);
+                await streamWriter.FlushAsync();
+            }
+            catch (Exception ex)
+            {
+                Windows.Networking.Sockets.SocketErrorStatus webErrorStatus = Windows.Networking.Sockets.SocketError.GetStatus(ex.GetBaseException().HResult);
+                MainPage.MP.clientListBox.Items.Add(webErrorStatus.ToString() != "Unknown" ? webErrorStatus.ToString() : ex.Message);
+            }
+        }
+
+        public async Task Send(string request)
+        {
+            try
+            {
+                await streamWriter.WriteLineAsync(request);
+                await streamWriter.FlushAsync();
+            }
+            catch (Exception ex)
+            {
+                Windows.Networking.Sockets.SocketErrorStatus webErrorStatus = Windows.Networking.Sockets.SocketError.GetStatus(ex.GetBaseException().HResult);
+                MainPage.MP.clientListBox.Items.Add(webErrorStatus.ToString() != "Unknown" ? webErrorStatus.ToString() : ex.Message);
+            }
+        }
+
+
+        public async Task<char> ReceiveCh()
+        {
+            char ch = ' ';
+            char[] chars = new char[2];
+            try
+            {
+                int responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                if (responseLength == 1)
+                    ch = chars[0];
+            }
+            catch (Exception ex)
+            {
+                Windows.Networking.Sockets.SocketErrorStatus webErrorStatus = Windows.Networking.Sockets.SocketError.GetStatus(ex.GetBaseException().HResult);
+                MainPage.MP.clientListBox.Items.Add(webErrorStatus.ToString() != "Unknown" ? webErrorStatus.ToString() : ex.Message);
+            }
+            MainPage.MP.clientListBox.Items.Add("Sent " + ch + "\r\n");
+            return ch;
+        }
+
+        public async Task<string> ReceiveLn()
+        {
+            string ret = "";
+            char[] chars = new char[2];
+            try
+            {
+                ret = await streamReader.ReadLineAsync();
+            }
+            catch (Exception ex)
+            {
+                Windows.Networking.Sockets.SocketErrorStatus webErrorStatus = Windows.Networking.Sockets.SocketError.GetStatus(ex.GetBaseException().HResult);
+                MainPage.MP.clientListBox.Items.Add(webErrorStatus.ToString() != "Unknown" ? webErrorStatus.ToString() : ex.Message);
+            }
+            return ret;
+        }
+
+        public async Task ReadAsync(CancellationToken cancellationToken)
+        {
+            char[] chars = new char[1024]; // streamReader.BaseStream.Length];
+            int responseLength =  await streamReader.ReadAsync(chars,0,1024);
+            byte[] bytes = Encoding.Unicode.GetBytes(chars);
+            bytes = bytes = bytes.Skip(0).Take(responseLength).ToArray();
+            string recvdtxt = System.Text.Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+
+            if (_Mode == Mode.Connected)
+            {
+                await MainPage.MP.UpdateTextAsync(recvdtxt);                      
+                
+            }
+        }
     }
 }

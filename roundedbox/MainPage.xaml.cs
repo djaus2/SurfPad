@@ -92,15 +92,23 @@ namespace roundedbox
             buttons[row][col] = new uc.MyUserControl1(row,col,text,TheGrid,name,background,id,cnrRad, colSpan, rowSpan);
         }
 
-        private async void MainPage_ButtonTapped1(string sender, int args)
+        private  async void MainPage_ButtonTapped1(string sender, int args)
         {
             string name = sender;
             int id = args;
+            bool notDone = false;
             //listView1.Items.Insert(0, name);
             if (args == 0)
             {
-                TerminalMode = TerminalModes.BT;
-                Frame.Navigate(typeof(Bluetooth.BluetoothSerialTerminalPage));
+                if (TerminalMode == TerminalModes.none)
+                {
+                    TerminalMode = TerminalModes.BT;
+                    Frame.Navigate(typeof(Bluetooth.BluetoothSerialTerminalPage));
+                }
+                else
+                {
+                    notDone = true;
+                }
             }
             else if (args == 1)
             { 
@@ -118,15 +126,32 @@ namespace roundedbox
             }
             else if (args == 2)
             {
-                TerminalMode = TerminalModes.USBSerial;
-                Frame.Navigate(typeof(USBSerial.USBSerialTerminalPage));
+                if (TerminalMode == TerminalModes.none)
+                {
+                    TerminalMode = TerminalModes.USBSerial;
+                    Frame.Navigate(typeof(USBSerial.USBSerialTerminalPage));
+                }
+                else
+                {
+                    notDone = true;
+                }
             }
             else if (args == 3)
             {
-                TerminalMode = TerminalModes.Socket;
-                Frame.Navigate(typeof(Socket.SocketTerminalPage));
+
+
+                if (TerminalMode == TerminalModes.none)
+                {
+                    TerminalMode = TerminalModes.Socket;
+                    Frame.Navigate(typeof(Socket.SocketTerminalPage));
+                }
+                else
+                {
+                    notDone = true;
+                }
             }
-            else
+            
+            if ((args > 3) || notDone)
             {
                 //characters as code for keys are A..Z and a..z
                 char ch = (char)((int)'A' + id);
@@ -142,9 +167,14 @@ namespace roundedbox
                     if (USBSerialTerminalPage != null)
                         USBSerialTerminalPage.SendCh(ch);
                 }
+                else if (TerminalMode == TerminalModes.Socket)
+                {
+                    if (SocketTerminalPage != null)
+                        await SocketTerminalPage.SendCh(ch);
+                }
 
             }
-}
+        }
 
         public void InitTheGrid(int x, int y, int Height = DefaultCellHeight, int Width = DefaultCellWidth, int space = DefaultCellSpacing)
         {

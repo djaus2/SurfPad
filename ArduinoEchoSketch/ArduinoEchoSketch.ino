@@ -15,15 +15,30 @@ SoftwareSerial bt(2, 3); // RX, TX Pins
 char  thisByte;
 enum Mode { ACK0, ACK1, ACK2,ACK4, Running, GetJson, GetString };
 Mode mode = ACK0;
+int a0, a1, a2, a3;
 
 enum TerminalModes { none, BT, USBSerial,Socket };
 static TerminalModes TerminalMode = none;
 
 void setup() {
-	TerminalMode = Socket;
+	TerminalMode = none;
+	pinMode(A0, INPUT);
+	digitalWrite(A0, INPUT_PULLUP);
+	pinMode(A1, INPUT);
+	digitalWrite(A1, INPUT_PULLUP);
+	pinMode(A2, INPUT);
+	digitalWrite(A2, INPUT_PULLUP);
+	a0 = digitalRead(A0);
+	a1 = digitalRead(A1);
+	a2 = digitalRead(A2);
+	if (a0 == 0)
+		TerminalMode = BT;
+	else if (a1 == 0)
+		TerminalMode = USBSerial;
+	else  if (a2 == 0)
+		TerminalMode = Socket;
 
-
-	
+	//a3 = a0 + a1 + a2;
 
 	//Start sync
 	if (TerminalMode == BT)
@@ -126,7 +141,7 @@ void loopBT() {
 						break;
 					case '~':  //Then when it gets above then sends this back as confirmation
 							   //bt.print("Hello World~");
-						bt.print(F("{\"MainMenu\":[ [ \"Setup BT Serial\", \"Load App Menu\", \"Setup USB Serial\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~"));
+						bt.print(F("{\"MainMenu\":[ [ \"Set up BT Serial\", \"Unload\", \"Something else\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~"));
 						mode = Running;
 						break;
 					//default:
@@ -181,7 +196,7 @@ void loopUSBSerial() {
 					break;
 				case '~':  //Then when it gets above then sends this back as confirmation
 						   //Serial.print("Hello World~");
-					Serial.print("{\"MainMenu\":[ [ \"Setup Serial Serial\", \"Load App Menu\", \"Setup USB Serial\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
+					Serial.print("{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Setup USB Serial\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
 					mode = Running;
 					break;
 				//default:

@@ -150,7 +150,7 @@ void loopSocket() {
 						break;
 					case '~':  //Then when it gets above then sends this back as confirmation
 							   //bt.print("Hello World~");
-						client.println(F("{\"MainMenu\":[ [ \"Setup BT Serial\", \"Load App Menu\", \"Setup USB Serial\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~"));
+						client.println(F("{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Show full list\", \"Setup Sockets\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~"));
 						mode = Running;
 						break;
 						//default:
