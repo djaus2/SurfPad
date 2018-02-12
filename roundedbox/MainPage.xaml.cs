@@ -123,6 +123,12 @@ namespace roundedbox
                     if (USBSerialTerminalPage != null)
                         USBSerialTerminalPage.SendCh(ch);
                 }
+                else if (TerminalMode == TerminalModes.Socket)
+                {
+                    if (SocketTerminalPage != null)
+                        SocketTerminalPage.CloseSocket();
+                    TerminalMode = TerminalModes.none;
+                }
             }
             else if (args == 2)
             {

@@ -693,9 +693,21 @@ namespace USBSerial
                     {
                         if ('5' == (char)bytes[0])
                         {
-                            status.Text="Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
-                            _Mode = Mode.Connected;
+                            recvdtxt = "";
+                            SendCh('!');
+                            status.Text="1Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
+                            _Mode = Mode.AwaitJson;
 
+                        }
+                    }
+                    else if (_Mode == Mode.AwaitJson)
+                    {
+                        if ('/' == (char)bytes[0])
+                        {
+                            status.Text = "2Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
+                            _Mode = Mode.JsonConfig;
+                            recvdtxt = "";
+                            SendCh('/');
                         }
                     }
                     else if (_Mode == Mode.Connected)
@@ -703,11 +715,6 @@ namespace USBSerial
                         byte byt = bytes[0];
                         switch (byt)
                         {
-                            case 47:  //'!'
-                                _Mode = Mode.JsonConfig;
-                                recvdtxt = "";
-                                SendCh('/');
-                                break;
                             default:
                                 recvdtxt = "" + (char)bytes[0];
                                 await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1));

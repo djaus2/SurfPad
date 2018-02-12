@@ -112,7 +112,7 @@
       <DependentUpon>USBSerialTerminal.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Helpers\SynchronousSocket.cs" />
+    <None Include="Helpers\SynchronousSocket.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -121,7 +121,6 @@
     <Content Include="Data\menus.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Data\json.json" />
     <None Include="roundedbox_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

@@ -23,6 +23,7 @@ using System.Threading;
 using roundedbox;
 using System.Text;
 using System.Diagnostics;
+using Windows.UI.Core;
 
 namespace Socket
 {
@@ -79,7 +80,7 @@ namespace Socket
                 switch ((string)button.Content)
                 {
                     case "Disconnect":
-                        roundedbox.Helpers.SynchronousSocketListener.CloseSocket();
+                        this.CloseSocket();
 
                         this.textBlockBTName.Text = "";
                         this.TxtBlock_SelectedID.Text = "";
@@ -97,12 +98,20 @@ namespace Socket
                     case "Clear Send":
                         this.recvdText.Text = "";
                         break;
-                    case "Start Recv":
+                    case "Start Listen":
                         this.buttonStartRecv.IsEnabled = false;
                         this.buttonStopRecv.IsEnabled = true;
+                        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                        {
+                            status.Text = "Starting Listen";
+                        });
                         Listen();
+                        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                        {
+                            status.Text = "Conncted and Listening: Press [Back]";
+                        });
                         break;
-                    case "Stop Recv":
+                    case "Stop Listen":
                         this.buttonStartRecv.IsEnabled = false;
                         this.buttonStopRecv.IsEnabled = false;
                         CancelReadTask();
@@ -182,6 +191,7 @@ namespace Socket
                 //    dataReaderObject = null;
                 //}
             }
+            
         }
 
 
@@ -203,7 +213,7 @@ namespace Socket
         private Windows.Networking.Sockets.StreamSocket streamSocket = null;
         private Stream outputStream = null;
         private StreamWriter streamWriter = null;
-        private Stream inputStream;
+        private Stream inputStream=null;
         private StreamReader streamReader = null;
 
         private async Task StartSocketClient()
@@ -222,6 +232,10 @@ namespace Socket
                 await streamSocket.ConnectAsync(hostName, "1234");
 
                 _Mode = Mode.JustConnected;
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    status.Text = "Socket Connected. Getting config data";
+                });
 
                 MainPage.MP.clientListBox.Items.Add("client connected");
 
@@ -298,6 +312,10 @@ namespace Socket
                     json2 = await streamReader.ReadLineAsync();
                     await MainPage.MP.UpdateTextAsync(json2);
                     _Mode = Mode.Connected;
+                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        status.Text = "Config data received: Press [Start Listen]";
+                    });
                 }
                 MainPage.MP.clientListBox.Items.Add(string.Format("client received the response: \"{0}\" ", "Got Json"));
             }
@@ -308,59 +326,7 @@ namespace Socket
             }
         }
 
-        private async Task StartSocketClient2()
-        {
-            string json1 = "";
-            string json2 = "";
-            char[] chars = new char[2];
-            try
-            {
-
-                //using (Stream outputStream = streamSocket.OutputStream.AsStreamForWrite())
-                //{
-                //    using (var streamWriter = new StreamWriter(outputStream))
-                //    {
-
-                //        using (Stream inputStream = streamSocket.InputStream.AsStreamForRead())
-                //        {
-                //            using (StreamReader streamReader = new StreamReader(inputStream))
-                //            {
-
-
-                int responseLength = await streamReader.ReadAsync(chars, 0, 1);
-                if (chars[0] == '/')
-                {
-                    await streamWriter.WriteAsync('/');
-                    await streamWriter.FlushAsync();
-
-                    json1 = await streamReader.ReadLineAsync();
-
-
-                    await streamWriter.WriteAsync('~');
-                    await streamWriter.FlushAsync();
-
-                    json2 = await streamReader.ReadLineAsync();
-                }
-
-
-
-
-                //}
-                //}
-
-
-                // }
-                //}
-
-
-            }
-            catch (Exception ex)
-            {
-                Windows.Networking.Sockets.SocketErrorStatus webErrorStatus = Windows.Networking.Sockets.SocketError.GetStatus(ex.GetBaseException().HResult);
-                MainPage.MP.clientListBox.Items.Add(webErrorStatus.ToString() != "Unknown" ? webErrorStatus.ToString() : ex.Message);
-            }
-        }
-
+   
         public async Task SendCh(char ch)
         {
 
@@ -441,6 +407,35 @@ namespace Socket
                 await MainPage.MP.UpdateTextAsync(recvdtxt);                      
                 
             }
+        }
+
+
+        public  void CloseSocket()
+        {
+            try
+            {
+                outputStream = null;
+                streamWriter = null;
+                inputStream = null;
+                streamReader = null;
+
+                streamSocket.Dispose();
+                _Mode = Mode.Disconnected;
+                Status.Text = "Socekt Disconnected";
+            }
+            catch (Exception ex)
+            {
+                Windows.Networking.Sockets.SocketErrorStatus webErrorStatus = Windows.Networking.Sockets.SocketError.GetStatus(ex.GetBaseException().HResult);
+                MainPage.MP.clientListBox.Items.Add(webErrorStatus.ToString() != "Unknown" ? webErrorStatus.ToString() : ex.Message);
+            }
+        }
+
+        private async void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                status.Text = "Set Arduino IP and Port then Press [Connect]";
+            });
         }
     }
 }

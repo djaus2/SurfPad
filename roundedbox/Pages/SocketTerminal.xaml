@@ -5,6 +5,7 @@
     xmlns:local="using:roundedbox"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Page.Loaded ="Page_Loaded"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -45,8 +46,8 @@
                 <Button x:Name="buttonDisconnect" Content="Disconnect" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
                 <Button x:Name="buttonSend" Content="Send" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click"  IsEnabled="False"/>
                 <Button x:Name="buttonClearSendText" Content="Clear Send" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>
-                <Button x:Name="buttonStartRecv" Content="Start Recv" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
-                <Button x:Name="buttonStopRecv" Content="Stop Recv" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
+                <Button x:Name="buttonStartRecv" Content="Start Listen" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
+                <Button x:Name="buttonStopRecv" Content="Stop Listen" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
                 <Button x:Name="buttonBack" Content="Back" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>
             </StackPanel>
 

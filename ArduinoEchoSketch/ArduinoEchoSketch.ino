@@ -21,6 +21,8 @@ enum TerminalModes { none, BT, USBSerial,Socket };
 static TerminalModes TerminalMode = none;
 
 void setup() {
+	//Set the terminal mode by grounding either A0, A1 or A2  (only one thereof):
+	// = BT, USB, Socket mode respectively
 	TerminalMode = none;
 	pinMode(A0, INPUT);
 	digitalWrite(A0, INPUT_PULLUP);

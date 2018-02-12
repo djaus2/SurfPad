@@ -130,12 +130,6 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SocketClientServer\SocketClientServer.csproj">
-      <Project>{daffffd7-4d57-4a54-a63b-f828aebd7195}</Project>
-      <Name>SocketClientServer</Name>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

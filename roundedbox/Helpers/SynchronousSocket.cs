@@ -1,4 +1,5 @@
 ﻿
+//This is not used by teh project by was use as the starting point for the Socket code development in Pages\SocketTerminal.xaml.cs
 using System;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,7 @@ using Windows.Networking;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 
-namespace roundedbox.Helpers {
+namespace roundedbox.Helpers { 
 
 
     public static class SynchronousSocketListener
