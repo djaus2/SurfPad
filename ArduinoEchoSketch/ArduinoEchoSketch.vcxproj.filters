@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ArduinoEchoSketch.ino" />
-    <None Include="..\ClientSvrSockets\ClientSvrSockets.ino" />
+    <None Include="ServerSocket.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.ArduinoEchoSketch.vsarduino.h">

@@ -8,6 +8,9 @@
 #include <SoftwareSerial.h>
 //#include <avr/pgmspoace>
 
+void setupSocket();
+void loopSocket();
+
 
 const byte cFineStructureConstant = 137;
 SoftwareSerial bt(2, 3); // RX, TX Pins
@@ -132,8 +135,13 @@ void loopBT() {
 			mode = GetJson;
 			break;
 		default:
-			if (mode==Running)
+			if (mode == Running)
+			{
+				//Do app functions here depending upon thisByte.
+				//For now just echo it.
+				DoApp(thisByte);
 				bt.print(thisByte);
+			}
 			else if (mode = GetJson)
 			{
 				switch (thisByte)
@@ -188,7 +196,12 @@ void loopUSBSerial() {
 			break;
 		default:
 			if (mode == Running)
+			{
+				//Do app functions here depending upon thisByte.
+				//For now just echo it.
+				DoApp(thisByte);
 				Serial.print(thisByte);
+			}
 			else if (mode = GetJson)
 			{
 				switch (thisByte)
@@ -208,5 +221,10 @@ void loopUSBSerial() {
 			}
 		}
 	}
+}
+
+void DoApp(char thisByte)
+{
+
 }
 
