@@ -80,6 +80,11 @@ namespace SurfPadIoT
         private async void StreamSocketListener_ConnectionReceived(Windows.Networking.Sockets.StreamSocketListener sender, Windows.Networking.Sockets.StreamSocketListenerConnectionReceivedEventArgs args)
         {
             string request="";
+            string response;
+            char[] chars = new char[10];
+            chars[1] = 'Z';
+            int responseLength;
+
             try
             { 
                 using (var streamReader = new StreamReader(args.Socket.InputStream.AsStreamForRead()))
@@ -90,16 +95,15 @@ namespace SurfPadIoT
                         {
                             if (_Mode == Mode.JustConnected)
                             {
+                                response = await streamReader.ReadLineAsync();
+
+                                await streamWriter.WriteLineAsync(response);
+                                await streamWriter.FlushAsync();
+
                                 await streamWriter.WriteAsync('@');
                                 await streamWriter.FlushAsync();
 
 
-
-                                char[] chars = new char[10];
-                                chars[1] = 'Z';
-                                int responseLength;
-
-                                string response = await streamReader.ReadLineAsync();
                                 responseLength = await streamReader.ReadAsync(chars, 0, 10);
                                 if (chars[0] == '0')
                                 {
@@ -217,7 +221,7 @@ namespace SurfPadIoT
             //await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => status.Text = "server closed its socket"); ;
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
+        private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
             this.buttonStartRecv.IsEnabled = true;
             this.buttonStopRecv.IsEnabled = false;
@@ -244,6 +248,11 @@ namespace SurfPadIoT
                     }
                 }
             }
+
+            PortNumber = tbPort.Text;
+            await StartServer();
+            this.buttonStartRecv.IsEnabled = false;
+            this.buttonStopRecv.IsEnabled = true;
         }
 
         private async void button_Click(object sender, RoutedEventArgs e)
