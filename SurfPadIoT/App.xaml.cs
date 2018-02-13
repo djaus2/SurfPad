@@ -15,7 +15,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-namespace SoxStreams
+namespace SurfPadIoT
 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
@@ -32,9 +32,6 @@ namespace SoxStreams
             this.Suspending += OnSuspending;
         }
 
-        public static string Port { get; internal set; } = "1234";
-        public static string RemoteListenerName { get; internal set; } = "192.168.0.137";
-
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used such as when the application is launched to open a specific file.
@@ -42,12 +39,6 @@ namespace SoxStreams
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-//#if DEBUG
-//            if (System.Diagnostics.Debugger.IsAttached)
-//            {
-//                this.DebugSettings.EnableFrameRateCounter = true;
-//            }
-//#endif
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
