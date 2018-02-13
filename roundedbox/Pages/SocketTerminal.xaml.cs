@@ -227,11 +227,13 @@ namespace Socket
                 //{
                 streamSocket = new Windows.Networking.Sockets.StreamSocket();
                 // The server hostname that we will be establishing a connection to. In this example, the server and client are in the same process.
-                var hostName = new Windows.Networking.HostName("192.168.0.137");
+                string host = tbSvrName.Text;
+                port = tbPort.Text;
+                var hostName = new Windows.Networking.HostName(host);
 
                 MainPage.MP.clientListBox.Items.Add("client is trying to connect...");
 
-                await streamSocket.ConnectAsync(hostName, "1234");
+                await streamSocket.ConnectAsync(hostName, port);
 
                 _Mode = Mode.JustConnected;
                 await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
@@ -438,6 +440,11 @@ namespace Socket
             {
                 status.Text = "Set Arduino IP and Port then Press [Connect]";
             });
+        }
+
+        private void tbSvrName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
         }
     }
 }

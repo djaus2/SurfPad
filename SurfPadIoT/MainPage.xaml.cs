@@ -28,7 +28,7 @@ namespace SurfPadIoT
     public sealed partial class MainPage : Page
     {
         private CancellationTokenSource ReadCancellationTokenSource;
-        private bool testing = true;
+        private bool testing = false;
 
         enum Mode
         {
