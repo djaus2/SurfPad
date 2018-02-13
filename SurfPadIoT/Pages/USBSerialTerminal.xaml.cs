@@ -19,12 +19,11 @@ using System.Collections.ObjectModel;
 using Windows.UI.Popups;
 using System.Threading.Tasks;
 using System.Threading;
-using roundedbox;
 using System.Text;
 using System.Diagnostics;
 using Windows.UI.Core;
 
-namespace USBSerial
+namespace SurfPadIoT.Pages
 {
     /// <summary>
     /// The Bluetooth Serial page for the app
@@ -124,64 +123,7 @@ namespace USBSerial
                     DeviceListSource.Source = this.listofDevices;
                     comPortInput.IsEnabled = true;
                     ConnectDevices.SelectedIndex = -1;
-                    if (Commands.CheckComportIdSettingExists())
-                    {
-                        for (int i = 0; i < ConnectDevices.Items.Count; i++)
-                        {
-                            DeviceInformation di = (DeviceInformation)ConnectDevices.Items[i];
-                            if (di.Id == Commands.ElementConfigStr[Commands.cComPortIdKey])
-                            {
-                                ConnectDevices.SelectedIndex = i;
-                                comPortInput_Click(di, null);
-                                done = true;
-                            }
-                        }
-                    }
-                    if(!done)
-                    if (Commands.ElementConfigInt.ContainsKey(Commands.cComportConnectDeviceNoKey))
-                    {
-                        if (ConnectDevices.Items.Count > Commands.ElementConfigInt[Commands.cComportConnectDeviceNoKey])
-                        {
-                            int index = Commands.ElementConfigInt[Commands.cComportConnectDeviceNoKey];
-                            if (index >= 0)
-                            {
-                                //If only one item then connect to it.
-                                ConnectDevices.SelectedIndex = index;
-                                DeviceInformation di = (DeviceInformation)ConnectDevices.SelectedItem;
-                                if (di.Id == Commands.ElementConfigStr[Commands.cComPortIdKey])
-                                {
-                                    comPortInput_Click(di, null);
-                                    done = true;
-                                }
-                            }
-                            //Doesn't return to here
-                        }
-                    }
-                    if (!done)
-                        if (Commands.ElementConfigInt.ContainsKey(Commands.cFTDIComportConnectDeviceNoKey))
-                        {
-                            if (ConnectDevices.Items.Count > Commands.ElementConfigInt[Commands.cFTDIComportConnectDeviceNoKey])
-                            {
-                                int index = Commands.ElementConfigInt[Commands.cFTDIComportConnectDeviceNoKey];
-                                if (index >= 0)
-                                {
-                                    //If only one item then connect to it.
-                                    ConnectDevices.SelectedIndex = index;
-                                    //var FTDIIdList = from n in Commands.ElementConfigStr where n.Key == Commands.cFTDIComPortIdKey select n;
-                                    var FTDIIdList = Commands.ElementConfigStr.ElementAt(1);
-
-                                    DeviceInformation di = (DeviceInformation)ConnectDevices.SelectedItem;
-                                    //if (di.Id == Commands.ElementConfigStr[Commands.cFTDIComPortIdKey]) //This fails
-                                    if (di.Id == FTDIIdList.Value)
-                                    {
-                                        comPortInput_Click(di, null);
-                                        done = true;
-                                    }
-
-                                }
-                                //Doesn't return to here
-                            }
-                        }
+  
                 }
             }
             catch (Exception ex)
@@ -567,6 +509,8 @@ namespace USBSerial
                 {
                     dataReaderObject = new DataReader(serialPort.InputStream);
 
+                    SendCh((char)137);
+
                     uint i = dataReaderObject.UnconsumedBufferLength;
                     if (i != 0)
                     {
@@ -645,24 +589,24 @@ namespace USBSerial
                 {
                     byte[] bytes  = new byte[bytesRead];
                     dataReaderObject.ReadBytes(bytes);
-                    var fs = from n in bytes where n == 137 select n;
-                    if (fs.Count() > 0)
-                        bytes = fs.ToArray<byte>();
-                    else
-                    {
-                        //VMDPV_1|1_VMDPV
-                        string currenbtRecvdText1 = Encoding.UTF8.GetString(bytes);
-                        //Need to remove the Arduino breakpoint looping messages
-                        int ARDUINO_dbgMsg_Len = ARDUINO_DBGMSG.Length;
-                        if (bytesRead >= ARDUINO_dbgMsg_Len)
-                        {
-                            if (currenbtRecvdText1.Substring(0, ARDUINO_dbgMsg_Len) == ARDUINO_DBGMSG)
-                            {
-                                currenbtRecvdText1 = currenbtRecvdText1.Substring(ARDUINO_dbgMsg_Len);
-                                bytes = bytes.Skip(ARDUINO_dbgMsg_Len).Take((int)bytesRead - ARDUINO_dbgMsg_Len).ToArray();
-                            }
-                        }
-                    }
+                    //var fs = from n in bytes where n == 137 select n;
+                    //if (fs.Count() > 0)
+                    //    bytes = fs.ToArray<byte>();
+                    //else
+                    //{
+                    //    //VMDPV_1|1_VMDPV
+                    //    string currenbtRecvdText1 = Encoding.UTF8.GetString(bytes);
+                    //    //Need to remove the Arduino breakpoint looping messages
+                    //    int ARDUINO_dbgMsg_Len = ARDUINO_DBGMSG.Length;
+                    //    if (bytesRead >= ARDUINO_dbgMsg_Len)
+                    //    {
+                    //        if (currenbtRecvdText1.Substring(0, ARDUINO_dbgMsg_Len) == ARDUINO_DBGMSG)
+                    //        {
+                    //            currenbtRecvdText1 = currenbtRecvdText1.Substring(ARDUINO_dbgMsg_Len);
+                    //            bytes = bytes.Skip(ARDUINO_dbgMsg_Len).Take((int)bytesRead - ARDUINO_dbgMsg_Len).ToArray();
+                    //        }
+                    //    }
+                    //}
                     string currenbtRecvdText = Encoding.UTF8.GetString(bytes);
 
 
@@ -670,36 +614,36 @@ namespace USBSerial
 
                     if (_Mode == Mode.JustConnected)
                     {
-                        if (cFineStructure == bytes[0])
+                        if ('0' == bytes[0])
                         {
-                            SendCh('0');
+                            SendCh('1');
                             _Mode=Mode.ACK0;
                         }
                     }
                     else if (_Mode == Mode.ACK0)
                     {
-                        if ('1' == (char)bytes[0])
+                        if ('2' == (char)bytes[0])
                         {
                             recvdtxt = "";
-                            SendCh('2');
+                            SendCh('3');
                             _Mode = Mode.ACK2;
                         }
                     }
                     else if (_Mode == Mode.ACK2)
                     {
-                        if ('3' == (char)bytes[0])
+                        if ('4' == (char)bytes[0])
                         {
                             recvdtxt = "";
-                            SendCh('4');
+                            SendCh('5');
                             _Mode = Mode.ACK4;
                         }
                     }
                     else if (_Mode == Mode.ACK4)
                     {
-                        if ('5' == (char)bytes[0])
+                        if ('!' == (char)bytes[0])
                         {
                             recvdtxt = "";
-                            SendCh('!');
+                            SendCh('/');
                             status.Text="1Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
                             _Mode = Mode.AwaitJson;
 

@@ -5,69 +5,41 @@
     xmlns:local="using:SurfPadIoT"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Page.Loaded ="Page_Loaded"
+    Page.Loaded="Page_Loaded"
     mc:Ignorable="d">
 
-
-    <Page.Resources>
-        <CollectionViewSource x:Name="PairedDevices"/>
-    </Page.Resources>
-
-    <Grid x:Name="Layout">
+    <Grid>
         <Grid.Background>
             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                <GradientStop Color="Red" Offset="1"/>
-                <GradientStop Color="Orange" Offset="0.80"/>
-                <GradientStop Color="Yellow" Offset="0.70"/>
-                <GradientStop Color="Green" Offset="0.60"/>
-                <GradientStop Color="Blue" Offset="0.4"/>
-                <GradientStop Color="Indigo" Offset="0.2"/>
-                <GradientStop Color="Violet" Offset="0"/>
+                <GradientStop Color="Violet" Offset="1"/>
+                <GradientStop Color="Indigo" Offset="0.85"/>
+                <GradientStop Color="Blue" Offset="0.70"/>
+                <GradientStop Color="Green" Offset="0.55"/>
+                <GradientStop Color="Yellow" Offset="0.4"/>
+                <GradientStop Color="Orange" Offset="0.25"/>
+                <GradientStop Color="Red" Offset="0"/>
             </LinearGradientBrush>
         </Grid.Background>
-
-        <StackPanel Orientation="Vertical">
-            <TextBlock x:Name="MyTitle" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="Wrap" Text="Universal Windows Socket Terminal" VerticalAlignment="Top" Width="800"/>
-            <TextBlock  x:Name="uartTitle" Text="Socket Server Setup" Style="{StaticResource HeaderTextBlockStyle}" 
-                        IsHitTestVisible="false" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,10,0,0"/>
-            <StackPanel Orientation="Vertical">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock x:Name="ID" HorizontalAlignment="Left" Height="23" Margin="10" TextAlignment="Right" Text="Id: " VerticalAlignment="Top" Width="110"/>
-                    <TextBlock x:Name="TxtBlock_SelectedID" HorizontalAlignment="Left" Height="25" Margin="10" Text="Id" VerticalAlignment="Top" Width="956"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock x:Name="TBSvrName" Foreground="Yellow" FontStyle="Italic" HorizontalAlignment="Left" Height="23" Margin="10,10,0,10" TextAlignment="Right" Text="This IP Address: " VerticalAlignment="Top" Width="110"/>
-                    <TextBlock x:Name="tbSvrName" Foreground="Yellow" FontWeight="Bold" HorizontalAlignment="Left" Height="35" Margin="10,10,0,10" Text="192.168.0.137" VerticalAlignment="Top" Width="100" ToolTipService.ToolTip="" Opacity="1" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock x:Name="TBPort" Foreground="Yellow" FontStyle="Italic" HorizontalAlignment="Left" Height="23" Margin="10" TextAlignment="Right" Text="Port: " VerticalAlignment="Top" Width="110" />
-                    <TextBox x:Name="tbPort" HorizontalAlignment="Left" Height="35" Margin="10,10,0,10"  Text="1234" VerticalAlignment="Top" Width="100" ToolTipService.ToolTip="" Opacity="1" />
-                </StackPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100" />
+            <RowDefinition Height="120" />
+            <RowDefinition Height="100" />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="1">
+            <TextBlock x:Name="MyTitle" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="Wrap" Text="Sportronics" VerticalAlignment="Top" Width="800"/>
+            <TextBlock  x:Name="uartTitle" Text="Universal Windows SurfPadIoT App" Style="{StaticResource HeaderTextBlockStyle}" 
+                        IsHitTestVisible="false" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Button x:Name="buttonRefresh" Content="Connect" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click"  IsEnabled="True"/>
-                <Button x:Name="buttonDisconnect" Content="Disconnect" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
-                <Button x:Name="buttonSend" Content="Send" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click"  IsEnabled="False"/>
-                <Button x:Name="buttonClearSendText" Content="Clear Send" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>
-                <Button x:Name="buttonStartRecv" Content="Start Listen" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
-                <Button x:Name="buttonStopRecv" Content="Stop Listen" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
-                <Button x:Name="buttonBack" Content="Back" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>
-            </StackPanel>
-
-            <StackPanel Orientation="Horizontal">
-                <TextBlock x:Name="SendText" HorizontalAlignment="Left" Height="23" Margin="10" TextAlignment="Right"  Text="Send: " VerticalAlignment="Top" Width="110"/>
-                <TextBox x:Name="sendText" Text="" HorizontalAlignment="Left" Height="100" Margin="10" TextWrapping="Wrap"  VerticalAlignment="Top" Width="800" ToolTipService.ToolTip="" AcceptsReturn="True"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock x:Name="RecvdText" HorizontalAlignment="Left" Height="23" Margin="10" TextAlignment="Right" Text="Recvd: " VerticalAlignment="Top" Width="110"/>
-                <TextBlock x:Name="recvdText" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="800" Height="Auto" ToolTipService.ToolTip=""/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock x:Name="Status" HorizontalAlignment="Left" Height="23" Margin="10" TextAlignment="Right" Text="Status: " VerticalAlignment="Top" Width="110"/>
-                <TextBlock x:Name="status" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="800" Height="Auto" ToolTipService.ToolTip=""/>
-            </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="3">
+            <Button x:Name="buttonSocket" Content="Socket Server" Opacity="1" Background="Blue" Foreground="White" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="120" Click="button_Click" IsEnabled="True"/>
+            <Button x:Name="buttonUSBSerial" Content="USB Serial" Opacity="1" Background="DarkGreen" Foreground="Pink" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>
+            <Button x:Name="buttonBluetooth" Content="Bluetooth" Opacity="1" Background="Purple" Foreground="Yellow" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click"  IsEnabled="True"/>
+            <!--<Button x:Name="buttonClearSendText" Content="Clear Send" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>
+            <Button x:Name="buttonStartRecv" Content="Start Recv" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
+            <Button x:Name="buttonStopRecv" Content="Stop Recv" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
+            <Button x:Name="buttonBack" Content="Back" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>-->
         </StackPanel>
-
     </Grid>
 </Page>
-
