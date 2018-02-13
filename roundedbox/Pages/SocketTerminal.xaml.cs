@@ -82,7 +82,7 @@ namespace Socket
                     case "Disconnect":
                         this.CloseSocket();
 
-                        this.textBlockBTName.Text = "";
+                        this.tbSvrName.Text = "";
                         this.TxtBlock_SelectedID.Text = "";
                         this.buttonDisconnect.IsEnabled = false;
                         this.buttonSend.IsEnabled = false;
@@ -171,7 +171,7 @@ namespace Socket
                 this.buttonStartRecv.IsEnabled = false;
                 this.buttonSend.IsEnabled = false;
                 this.buttonDisconnect.IsEnabled = false;
-                this.textBlockBTName.Text = "";
+                this.tbSvrName.Text = "";
                 this.TxtBlock_SelectedID.Text = "";
                 if (ex.GetType().Name == "TaskCanceledException")
                 {
@@ -220,6 +220,8 @@ namespace Socket
         {
             try
             {
+                string port = tbPort.Text;
+                string svr = tbSvrName.Text;
                 //// Create the StreamSocket and establish a connection to the echo server.
                 //using (var streamSocket = new Windows.Networking.Sockets.StreamSocket())
                 //{

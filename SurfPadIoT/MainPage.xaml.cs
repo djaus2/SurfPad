@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Networking;
+using Windows.Networking.Connectivity;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -23,65 +27,249 @@ namespace SurfPadIoT
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private CancellationTokenSource ReadCancellationTokenSource;
+        private bool testing = true;
+
+        enum Mode
+        {
+            NotStarted,
+            Listening,
+            Disconnected,
+            JustConnected,
+            ACK0,
+            ACK2,
+            ACK4,
+            Connected,
+            AwaitJson,
+            JsonConfig
+        }
+        Mode _Mode = Mode.NotStarted;
+
         public MainPage()
         {
             this.InitializeComponent();
         }
 
+        Windows.Networking.Sockets.StreamSocketListener streamSocketListener = null;
         public static string PortNumber { get; private set; } = "1234";
 
-        private async void StartServer()
+        private async Task StartServer()
         {
             try
             {
-                var streamSocketListener = new Windows.Networking.Sockets.StreamSocketListener();
+                streamSocketListener = new Windows.Networking.Sockets.StreamSocketListener();
 
                 // The ConnectionReceived event is raised when connections are received.
                 streamSocketListener.ConnectionReceived += this.StreamSocketListener_ConnectionReceived;
 
                 // Start listening for incoming TCP connections on the specified port. You can specify any port that's not currently in use.
                 await streamSocketListener.BindServiceNameAsync(MainPage.PortNumber);
+                _Mode = Mode.JustConnected;
 
-                //this.serverListBox.Items.Add("server is listening...");
+                status.Text = "Server is listening...";
             }
             catch (Exception ex)
             {
                 Windows.Networking.Sockets.SocketErrorStatus webErrorStatus = Windows.Networking.Sockets.SocketError.GetStatus(ex.GetBaseException().HResult);
-                //this.serverListBox.Items.Add(webErrorStatus.ToString() != "Unknown" ? webErrorStatus.ToString() : ex.Message);
+                status.Text = webErrorStatus.ToString() != "Unknown" ? webErrorStatus.ToString() : ex.Message;
             }
         }
+
+
 
         private async void StreamSocketListener_ConnectionReceived(Windows.Networking.Sockets.StreamSocketListener sender, Windows.Networking.Sockets.StreamSocketListenerConnectionReceivedEventArgs args)
         {
-            string request;
-            using (var streamReader = new StreamReader(args.Socket.InputStream.AsStreamForRead()))
-            {
-                using (Stream outputStream = args.Socket.OutputStream.AsStreamForWrite())
+            string request="";
+            try
+            { 
+                using (var streamReader = new StreamReader(args.Socket.InputStream.AsStreamForRead()))
                 {
-                    using (var streamWriter = new StreamWriter(outputStream))
+                    using (Stream outputStream = args.Socket.OutputStream.AsStreamForWrite())
                     {
-                        await streamWriter.WriteAsync('@');
-                        await streamWriter.FlushAsync();
+                        using (var streamWriter = new StreamWriter(outputStream))
+                        {
+                            if (_Mode == Mode.JustConnected)
+                            {
+                                await streamWriter.WriteAsync('@');
+                                await streamWriter.FlushAsync();
 
-                        request = await streamReader.ReadLineAsync();
-                        //}
 
-                        //await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => this.serverListBox.Items.Add(string.Format("server received the request: \"{0}\"", request)));
 
-                        // Echo the request back as the response.
+                                char[] chars = new char[10];
+                                chars[1] = 'Z';
+                                int responseLength;
 
-                        await streamWriter.WriteLineAsync(request);
-                        await streamWriter.FlushAsync();
+                                string response = await streamReader.ReadLineAsync();
+                                responseLength = await streamReader.ReadAsync(chars, 0, 10);
+                                if (chars[0] == '0')
+                                {
+                                    await streamWriter.WriteAsync('1');
+                                    await streamWriter.FlushAsync();
+                                }
+                                _Mode = Mode.ACK0;
+
+                                if (testing)
+                                    response = await streamReader.ReadLineAsync();
+                                responseLength = await streamReader.ReadAsync(chars, 0, 10);
+                                if (chars[0] == '2')
+                                {
+                                    await streamWriter.WriteAsync('3');
+                                    await streamWriter.FlushAsync();
+                                }
+
+                                _Mode = Mode.ACK2;
+
+                                if (testing)
+                                    response = await streamReader.ReadLineAsync();
+                                responseLength = await streamReader.ReadAsync(chars, 0, 10);
+                                if (chars[0] == '4')
+                                {
+                                    await streamWriter.WriteAsync('5');
+                                    await streamWriter.FlushAsync();
+                                }
+                                _Mode = Mode.ACK4;
+
+                                if (testing)
+                                    response = await streamReader.ReadLineAsync();
+                                responseLength = await streamReader.ReadAsync(chars, 0, 10);
+                                if (chars[0] == '!')
+                                {
+                                    await streamWriter.WriteAsync('/');
+                                    await streamWriter.FlushAsync();
+                                }
+
+                                _Mode = Mode.AwaitJson;
+
+                                if (testing)
+                                    response = await streamReader.ReadLineAsync();
+                                responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                                if (chars[0] == '/')
+                                {
+                                    _Mode = Mode.JsonConfig;
+                                    await streamWriter.WriteLineAsync(
+        "{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~");
+                                    await streamWriter.FlushAsync();
+
+                                    if (testing)
+                                        response = await streamReader.ReadLineAsync();
+                                    responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                                    {
+                                        if (chars[0] == '~')
+                                        {
+                                            await streamWriter.WriteLineAsync(
+        "{\"MainMenu\":[ [ \"Set up BT Serial\", \"Unload\", \"Something else\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
+                                            await streamWriter.FlushAsync();
+                                        }
+                                    }
+                                }
+
+                                bool listening = true;
+                                _Mode = Mode.Listening;
+                                while (listening)
+                                {
+                                    try
+                                    {
+                                        if (testing)
+                                            response = await streamReader.ReadLineAsync();
+                                        responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => status.Text += "\r\n" + "Lost connection:\r\n" + ex.Message);
+                                        listening = false;
+                                    }
+
+                                    if (listening)
+                                        switch (chars[0])
+                                        {
+                                            case '^':
+                                                listening = false;
+                                                break;
+                                            default:
+                                                //Do app stuff here. For now just echo chars sent
+                                                await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => status.Text += "" + chars[0]);
+                                                try
+                                                {
+                                                    await streamWriter.WriteAsync(chars[0]);
+                                                    await streamWriter.FlushAsync();
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => status.Text += "\r\n" + "Lost connection:\r\n" + ex.Message);
+                                                    listening = false;
+                                                }
+                                                break;
+                                        }
+                                }
+                            }
+                        }
+                    }
+                }
+            }      
+            catch (Exception ex)
+            {
+                await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => status.Text += "\r\n" + "Lost connection:\r\n" + ex.Message);
+            }
+
+            //await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => status.Text = string.Format("server sent back the response: \"{0}\"", request));
+            sender.Dispose();
+
+            //await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => status.Text = "server closed its socket"); ;
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.buttonStartRecv.IsEnabled = true;
+            this.buttonStopRecv.IsEnabled = false;
+            
+            //Retrieve the ConnectionProfile
+            //We want the internet connection
+            string connectionProfileInfo = string.Empty;
+            ConnectionProfile InternetConnectionProfile = NetworkInformation.GetInternetConnectionProfile();
+            var id = InternetConnectionProfile.NetworkAdapter.NetworkAdapterId;
+            //Pass the returned object to a function that accesses the connection data  
+            //connectionProfileInfo = GetConnectionProfileInfo(InternetConnectionProfile);
+
+            foreach (HostName localHostName in NetworkInformation.GetHostNames())
+            {
+                if (localHostName.IPInformation != null)
+                {
+                    if (localHostName.Type == HostNameType.Ipv4)
+                    {
+                        if (localHostName.IPInformation.NetworkAdapter.NetworkAdapterId == id)
+                        {
+                            tbSvrName.Text = localHostName.ToString();
+                            break;
+                        }
                     }
                 }
             }
-
-            //await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => this.serverListBox.Items.Add(string.Format("server sent back the response: \"{0}\"", request)));
-
-            sender.Dispose();
-
-            //await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => this.serverListBox.Items.Add("server closed its socket"));
         }
 
+        private async void button_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button)
+            {
+                string content = (string)((Button)sender).Content;
+                if (content != "")
+                {
+                    switch (content)
+                    {
+                        case "Start Listen":
+                            PortNumber = tbPort.Text;
+                            await StartServer();
+                            this.buttonStartRecv.IsEnabled = false;
+                            this.buttonStopRecv.IsEnabled = true;
+                            break;
+                        case "Stop Listen":
+                            await streamSocketListener.CancelIOAsync();
+                            streamSocketListener.Dispose();
+                            this.buttonStartRecv.IsEnabled = true;
+                            this.buttonStopRecv.IsEnabled = false;
+                            break;
+                    }
+                }
+            }
+        }
     }
 }
