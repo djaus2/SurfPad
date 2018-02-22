@@ -139,6 +139,9 @@ void loopBT() {
 				bt.print(F("{\"MainMenu\":[ [ \"Set up BT Serial\", \"Unload\", \"Something else\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~"));
 				mode = Running;
 			}
+		 case '^':  //Retart
+			 mode = Connected;
+			 break;
 		default:
 			if (mode == Running)
 			{
@@ -208,6 +211,9 @@ void loopUSBSerial() {
 				Serial.print("{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Setup USB Serial\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
 				mode = Running;
 			}
+			break;
+		case '^':  //Retart
+			mode = Connected;
 			break;
 		default:
 			if (mode == Running)

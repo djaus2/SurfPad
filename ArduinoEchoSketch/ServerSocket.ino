@@ -135,6 +135,9 @@ void loopSocket() {
 					client.println(F("{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Show full list\", \"Setup Sockets\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~"));
 					mode = Running;
 				}
+			case '^':  //Retart
+				mode = Connected;
+				break;
 			default:
 				if (mode == Running)
 				{
