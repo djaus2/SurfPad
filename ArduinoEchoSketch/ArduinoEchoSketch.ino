@@ -16,8 +16,8 @@ const byte cFineStructureConstant = 137;
 SoftwareSerial bt(2, 3); // RX, TX Pins
 
 char  thisByte;
-enum Mode { ACK0, ACK1, ACK2,ACK4, Running, GetJson, GetString };
-Mode mode = ACK0;
+enum Mode { Disconnected, Connected, ACK0, ACK2,ACK4, Json1, Json2, Running };
+Mode mode = Disconnected;
 int a0, a1, a2, a3;
 
 enum TerminalModes { none, BT, USBSerial,Socket };
@@ -55,6 +55,7 @@ void setup() {
 		{
 		}
 		bt.print((char)cFineStructureConstant);
+		mode = Connected;
 	}
 	else if (TerminalMode == USBSerial)
 	{
@@ -64,6 +65,7 @@ void setup() {
 		{
 		}
 		Serial.print((char)cFineStructureConstant);
+		mode = Connected;
 	}
 	else if (TerminalMode == Socket)
 	{
@@ -73,34 +75,12 @@ void setup() {
 }
 
 void loop() {
-	// Read BT Serial char by char
-	// At start read messages to sync
-	// Expect '0'
-	// Send '1' as ack
-	// Expect '2'
-	// Send '3' as ack
-	// Expect '4'
-	// Send '5 as ack
-	// If char = '!' 
-	//   Send back '/' as ack ready to send json
-	//   Expect '/'
-	//   Send first json string (Config)
-	//   Expect '~'
-	//   Send back single line json string (MainMenu)
-	// Default: Just echo the character back
 	if (TerminalMode == BT)
 		loopBT();
 	else if (TerminalMode == USBSerial)
 		loopUSBSerial();
 	else if (TerminalMode == Socket)
 		loopSocket();
-	else
-	{
-		//Keep trying
-		loopBT();
-		if (TerminalMode != BT)
-			loopUSBSerial();;
-	}
 }
 
 void loopBT() {
@@ -119,21 +99,46 @@ void loopBT() {
 		switch (thisByte)
 		{
 		case '0':
-			bt.print('1');
-			mode = ACK1;
-			break;
+			if (mode == Connected)
+			{
+				bt.print('1');
+				mode = ACK0;
+				break;
+			}
 		case '2':
-			bt.print('3');
-			mode = ACK2;
+			if (mode == ACK0)
+			{
+				bt.print('3');
+				mode = ACK2;
+			}
 			break;
 		case '4':
-			bt.print('5');
-			mode = ACK4;
+			if (mode == ACK2)
+			{
+				bt.print('5');
+				mode = ACK4;
+			}
 			break;
-		case '!': //Get Exclamation mark as indicator of request for Json
-			bt.print('/'); //Send back / meaning it will follow
-			mode = GetJson;
+		case '!':
+			if (mode == ACK4)
+			{
+				bt.print('!');
+				mode = Json1;
+			}
 			break;
+		case '/':  //App sends this back
+			if (mode = Json1)
+			{
+				bt.print(F("{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~"));
+				mode = Json2;
+			}
+			break;
+		 case '~':  //Then when it gets above then sends this back as confirmation
+			if (mode = Json2)
+			{
+				bt.print(F("{\"MainMenu\":[ [ \"Set up BT Serial\", \"Unload\", \"Something else\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~"));
+				mode = Running;
+			}
 		default:
 			if (mode == Running)
 			{
@@ -142,23 +147,7 @@ void loopBT() {
 				DoApp(thisByte);
 				bt.print(thisByte);
 			}
-			else if (mode = GetJson)
-			{
-				switch (thisByte)
-				{
-					case '/':  //App sends this back
-						bt.print(F("{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~"));
-						break;
-					case '~':  //Then when it gets above then sends this back as confirmation
-							   //bt.print("Hello World~");
-						bt.print(F("{\"MainMenu\":[ [ \"Set up BT Serial\", \"Unload\", \"Something else\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~"));
-						mode = Running;
-						break;
-					//default:
-					//	mode = Running;
-					//	break;
-				}
-			}
+
 		}
 	}
 }
@@ -179,20 +168,46 @@ void loopUSBSerial() {
 		switch (thisByte)
 		{
 		case '0':
-			Serial.print('1');
-			mode = ACK1;
+			if (mode == Connected)
+			{
+				Serial.print('1');
+				mode = ACK0;
+			}
 			break;
 		case '2':
-			Serial.print('3');
-			mode = ACK2;
+			if (mode == ACK0)
+			{
+				Serial.print('3');
+				mode = ACK2;
+			}
 			break;
 		case '4':
-			Serial.print('5');
-			mode = ACK4;
+			if (mode == ACK2)
+			{
+				Serial.print('5');
+				mode = ACK4;
+			}
 			break;
 		case '!': //Get Exclamation mark as indicator of request for Json
-			Serial.print('/'); //Send back / meaning it will follow
-			mode = GetJson;
+			if (mode == ACK4)
+			{
+				Serial.print('/'); //Send back / meaning it will follow
+				mode = Json1;
+			}
+			break;
+		case '/':  //App sends this back
+			if (mode == Json1)
+			{
+				Serial.print("{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"Serial\" } ] ] }~");
+				mode = Json2;
+			}
+			break;
+		case '~':  //Then when it gets above then sends this back as confirmation
+			if (mode == Json2)
+			{
+				Serial.print("{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Setup USB Serial\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
+				mode = Running;
+			}
 			break;
 		default:
 			if (mode == Running)
@@ -201,23 +216,6 @@ void loopUSBSerial() {
 				//For now just echo it.
 				DoApp(thisByte);
 				Serial.print(thisByte);
-			}
-			else if (mode = GetJson)
-			{
-				switch (thisByte)
-				{
-				case '/':  //App sends this back
-					Serial.print("{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"Serial\" } ] ] }~");
-					break;
-				case '~':  //Then when it gets above then sends this back as confirmation
-						   //Serial.print("Hello World~");
-					Serial.print("{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Setup USB Serial\", \"Show full list\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
-					mode = Running;
-					break;
-				//default:
-				//	mode = Running;
-				//	break;
-				}
 			}
 		}
 	}
