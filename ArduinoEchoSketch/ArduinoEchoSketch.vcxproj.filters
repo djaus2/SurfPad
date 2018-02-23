@@ -17,6 +17,8 @@
   <ItemGroup>
     <None Include="ArduinoEchoSketch.ino" />
     <None Include="ServerSocket.ino" />
+    <None Include="USBSerial.ino" />
+    <None Include="BTSerial.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.ArduinoEchoSketch.vsarduino.h">

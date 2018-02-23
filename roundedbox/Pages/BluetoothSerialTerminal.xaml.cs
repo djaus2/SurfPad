@@ -50,12 +50,14 @@ namespace Bluetooth
         {
             Disconnected,
             JustConnected,
-            ACK0,
-            ACK2,
-            ACK4,
             Connected,
+            ACK1,
+            ACK3,
+            ACK5,
             AwaitJson,
-            JsonConfig
+            JsonConfig,
+            Config,
+            Running
         }
         Mode _Mode = Mode.Disconnected;
 
@@ -217,13 +219,7 @@ namespace Bluetooth
 
         private  void backButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_Mode == Mode.JustConnected)
-            {
-                _Mode = Mode.Connected;
-                //Send("ACK1#");
-            }
             this.Frame.GoBack();;
-
         }
 
         //Normally send key's text. Also some commands
@@ -431,7 +427,7 @@ namespace Bluetooth
             {
                 try
                 {
-                    byte[] bytes  = new byte[bytesRead];
+                    byte[] bytes = new byte[bytesRead];
                     dataReaderObject.ReadBytes(bytes);
 
                     string currenbtRecvdText = Encoding.UTF8.GetString(bytes);
@@ -442,53 +438,56 @@ namespace Bluetooth
                     {
                         if (cFineStructure == bytes[0])
                         {
-                            SendCh('0');
-                            _Mode=Mode.ACK0;
-                        }
-                    }
-                    else if (_Mode == Mode.ACK0)
-                    {
-                        if ('1' == (char)bytes[0])
-                        {
-                            recvdtxt = "";
-                            SendCh('2');
-                            _Mode = Mode.ACK2;
-                        }
-                    }
-                    else if (_Mode == Mode.ACK2)
-                    {
-                        if ('3' == (char)bytes[0])
-                        {
-                            recvdtxt = "";
-                            SendCh('4');
-                            _Mode = Mode.ACK4;
-                        }
-                    }
-                    else if (_Mode == Mode.ACK4)
-                    {
-                        if ('5' == (char)bytes[0])
-                        {
-                            status.Text="Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
                             _Mode = Mode.Connected;
-
+                            SendCh('0');
                         }
                     }
                     else if (_Mode == Mode.Connected)
                     {
-                        byte byt = bytes[0];
-                        switch (byt)
+                        if ('1' == (char)bytes[0])
                         {
-                            case 47:  //'!'
-                                _Mode = Mode.JsonConfig;
-                                recvdtxt = "";
-                                SendCh('/');
-                                break;
-                            default:
-                                recvdtxt = "" + (char)bytes[0];
-                                await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1));
-                                recvdtxt = "";
-                                System.Diagnostics.Debug.WriteLine("bytes read successfully!");
-                                break;
+                            _Mode = Mode.ACK1;
+                            recvdtxt = "";
+                            SendCh('2');
+                        }
+                    }
+                    else if (_Mode == Mode.ACK1)
+                    {
+                        if ('3' == (char)bytes[0])
+                        {
+                            _Mode = Mode.ACK3;
+                            recvdtxt = "";
+                            SendCh('4');
+                        }
+                    }
+                    else if (_Mode == Mode.ACK3)
+                    {
+                        if ('5' == (char)bytes[0])
+                        {
+                            _Mode = Mode.ACK5;
+                            SendCh('!');
+                            //status.Text="Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
+                        }
+                    }
+                    else if (_Mode == Mode.ACK5)
+                    {
+                        if ('/' == (char)bytes[0])
+                        {
+                            _Mode = Mode.AwaitJson;
+                            recvdtxt = "";
+                            SendCh('/');
+                        }
+                    }
+                    else if (_Mode == Mode.AwaitJson)
+                    {
+
+                        recvdtxt += currenbtRecvdText;
+                        if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
+                        {
+                            await MainPage.MP.UpdateTextAsync(recvdtxt);
+                            recvdtxt = "";
+                            _Mode = Mode.JsonConfig;
+                            SendCh('~');
                         }
                     }
                     else if (_Mode == Mode.JsonConfig)
@@ -497,27 +496,20 @@ namespace Bluetooth
                         if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
                         {
                             System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
+                            _Mode = Mode.Config;
                             await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1))
-
-                            if (recvdtxt.Substring(0, "{\"Config\":".Length) == "{\"Config\":")
-                                SendCh('~');
-                            else if (recvdtxt.Substring(0, "{\"MainMenu\":".Length) == "{\"MainMenu\":")
-                                _Mode = Mode.Connected;
-                            else
-                            {
-                                //// Get stack trace for the exception with source file information
-                                //var st = new StackTrace(ex, true);
-                                //string thisFile = new System.Diagnostics.StackTrace(true).GetFrame(0).GetFileName();
-                                //var frame = st.GetFrame(0);
-                                //// Get the line number from the stack frame
-                                //var line = frame.GetFileLineNumber();
-                                throw new System.Exception("BluetoothSerialTerminal.cs: ReadAsync() Getting JsonConfig. Shouldn't have reached this LOC"); //: { 0 }",line);
-
-                            }
+                            _Mode = Mode.Running;
+                            status.Text = "Config done. Press [Back]";
                             recvdtxt = "";
                         }
+
                         else
                             return;
+                    }
+                    else if (_Mode == Mode.Running)
+                    {
+                        recvdtxt = currenbtRecvdText;
+                        await MainPage.MP.UpdateTextAsync(recvdtxt);
                     }
 
                 }

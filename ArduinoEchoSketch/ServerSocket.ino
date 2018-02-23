@@ -24,7 +24,7 @@ by Tom Igoe
 #define PORT 1234
 
 
-void DoApp(char ch);
+void DoAppEther(char ch);
 
 
 
