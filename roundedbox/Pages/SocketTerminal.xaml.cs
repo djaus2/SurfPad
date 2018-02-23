@@ -119,8 +119,6 @@ namespace Socket
                         break;
                     case "Connect":
                         await this.StartSocketClient();
-                        this.buttonStartRecv.IsEnabled = true;
-                        this.buttonStopRecv.IsEnabled = false;
                         break;
                     case "Back":
                         //this.Frame.GoBack();
@@ -323,7 +321,8 @@ namespace Socket
                     await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                     {
                         status.Text = "Config data received: Press [Start Listen]";
-
+                        this.buttonStartRecv.IsEnabled = true;
+                        this.buttonStopRecv.IsEnabled = false;
                     });
                 }
                 MainPage.MP.clientListBox.Items.Add(string.Format("client received the response: \"{0}\" ", "Got Json"));
@@ -447,9 +446,6 @@ namespace Socket
             });
         }
 
-        private void tbSvrName_TextChanged(object sender, TextChangedEventArgs e)
-        {
 
-        }
     }
 }

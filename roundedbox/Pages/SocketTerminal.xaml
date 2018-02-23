@@ -34,7 +34,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock x:Name="TBSvrName" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="Wrap" Text="Name: " VerticalAlignment="Top" Width="50"/>
-                    <TextBox x:Name="tbSvrName" HorizontalAlignment="Left" Height="35" Margin="10,10,0,10" TextWrapping="Wrap" Text="192.168.0.12" VerticalAlignment="Top" Width="1004" ToolTipService.ToolTip="" TextChanged="tbSvrName_TextChanged"/>
+                    <TextBox x:Name="tbSvrName" HorizontalAlignment="Left" Height="35" Margin="10,10,0,10" TextWrapping="Wrap" Text="192.168.0.137" VerticalAlignment="Top" Width="1004" ToolTipService.ToolTip=""/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock x:Name="TBPort" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="Wrap" Text="Port: " VerticalAlignment="Top" Width="50"/>

@@ -23,6 +23,7 @@ by Tom Igoe
 
 #define PORT 1234
 
+
 void DoApp(char ch);
 
 
@@ -60,6 +61,8 @@ void setupSocket() {
 
 }
 
+
+
 void loopSocket() {
 	// wait for a new client:
 	EthernetClient client = server.available();
@@ -81,7 +84,6 @@ void loopSocket() {
 		if (client.available() > 0) {
 			// read the bytes incoming from the client:
 			thisByte = client.read();
-			Serial.write(thisByte);
 		}
 
 		if (thisByte != -1)
@@ -92,62 +94,65 @@ void loopSocket() {
 			//return;
 			//Each char is interpretted as byte representing a keypress
 			//The byte is the id of button pressed + ' ' (so are printable
-			switch (thisByte)
+			if (mode != Running)
 			{
-			case '0':
-				if (mode == Connected)
+				switch (thisByte)
 				{
-					client.write('1');
-					mode = ACK0;
+				case '0':
+					if (mode == Connected)
+					{
+						mode = ACK0;
+						client.write('1');
+					}
+					break;
+				case '2':
+					if (mode == ACK0)
+					{
+						mode = ACK2;
+						client.write('3');
+					}
+					break;
+				case '4':
+					if (mode == ACK2)
+					{
+						mode = ACK4;
+						client.write('5');
+					}
+					break;
+				case '!': //Get Exclamation mark as indicator of request for Json
+					if (mode == ACK4)
+					{
+						mode = Json1;
+						client.write('/'); //Send back / meaning it will follow
+					}
+					break;
+				case '/':  //App sends this back
+					if (mode = Json1)
+					{
+						mode = Json2;
+						client.println(F("{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~"));
+					}
+					break;
+				case '~':  //Then when it gets above then sends this back as confirmation
+					if (mode = Json2)
+					{
+						mode = Running;
+						Serial.println("Now run");
+						client.println(F("{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Show full list\", \"Setup Sockets\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~"));
+					}
+					break;
+				case '^':  //Retart
+					mode = Connected;
+					break;
 				}
-				break;
-			case '2':
-				if (mode == ACK0)
-				{
-					client.write('3');
-					mode = ACK2;
-				}
-				break;
-			case '4':
-				if (mode == ACK2)
-				{
-					client.write('5');
-					mode = ACK4;
-				}
-				break;
-			case '!': //Get Exclamation mark as indicator of request for Json
-				if (mode == ACK4)
-				{
-					client.write('/'); //Send back / meaning it will follow
-					mode = Json1;
-				}
-				break;
-			case '/':  //App sends this back
-				if (mode = Json1)
-				{
-					client.println(F("{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~"));
-					mode = Json2;
-				}
-				break;
-			case '~':  //Then when it gets above then sends this back as confirmation
-				if (mode = Json2)
-				{
-					client.println(F("{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Show full list\", \"Setup Sockets\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~"));
-					mode = Running;
-				}
-			case '^':  //Retart
-				mode = Connected;
-				break;
-			default:
-				if (mode == Running)
-				{
-					//Do app functions here depending upon thisByte.
-					//For now just echo it.
-					DoApp(thisByte);
-					client.write(thisByte);
-				}
-				break;
 			}
+			else
+			{
+				//Do app functions here depending upon thisByte.
+				//For now just echo it.
+				DoAppEther(thisByte,client);
+			}
+
 		}
 	}
 }
