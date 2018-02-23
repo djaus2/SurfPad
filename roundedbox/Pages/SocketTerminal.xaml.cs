@@ -46,12 +46,13 @@ namespace Socket
         {
             Disconnected,
             JustConnected,
-            ACK0,
-            ACK2,
-            ACK4,
-            Connected,
+            ACK1,
+            ACK3,
+            ACK5,
             AwaitJson,
-            JsonConfig
+            JsonConfig,
+            Running,
+            Config
         }
         Mode _Mode = Mode.Disconnected;
 
@@ -133,8 +134,6 @@ namespace Socket
         {
             if (_Mode == Mode.JustConnected)
             {
-                _Mode = Mode.Connected;
-                //Send("ACK1#");
             }
             this.Frame.GoBack(); ;
 
@@ -267,36 +266,36 @@ namespace Socket
 
                 if (chars[0] == '@')
                 {
+                    _Mode = Mode.JustConnected;
                     await streamWriter.WriteAsync('0');
                     await streamWriter.FlushAsync();
                 }
-                _Mode = Mode.ACK0;
+                
 
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
                 if (chars[0] == '1')
                 {
+                    _Mode = Mode.ACK1;
                     await streamWriter.WriteAsync('2');
                     await streamWriter.FlushAsync();
                 }
 
-                _Mode = Mode.ACK2;
 
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
                 if (chars[0] == '3')
                 {
+                    _Mode = Mode.ACK3;
                     await streamWriter.WriteAsync('4');
-                    await streamWriter.FlushAsync();
+                    await streamWriter.FlushAsync();                  
                 }
-                _Mode = Mode.ACK4;
 
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
                 if (chars[0] == '5')
                 {
+                    _Mode = Mode.ACK5;
                     await streamWriter.WriteAsync('!');
                     await streamWriter.FlushAsync();
                 }
-
-                _Mode = Mode.AwaitJson;
                 
 
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
@@ -305,20 +304,26 @@ namespace Socket
                     await streamWriter.WriteAsync('/');
                     await streamWriter.FlushAsync();
 
-                    _Mode = Mode.JsonConfig;
+                    _Mode = Mode.AwaitJson;
 
                     json1 = await streamReader.ReadLineAsync();
+                    _Mode = Mode.JsonConfig;
+
                     await MainPage.MP.UpdateTextAsync(json1);
 
                     await streamWriter.WriteAsync('~');
                     await streamWriter.FlushAsync();
 
                     json2 = await streamReader.ReadLineAsync();
+                    _Mode = Mode.Config;
+
                     await MainPage.MP.UpdateTextAsync(json2);
-                    _Mode = Mode.Connected;
+                    _Mode = Mode.Running;
+
                     await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                     {
                         status.Text = "Config data received: Press [Start Listen]";
+
                     });
                 }
                 MainPage.MP.clientListBox.Items.Add(string.Format("client received the response: \"{0}\" ", "Got Json"));
@@ -406,7 +411,7 @@ namespace Socket
             bytes = bytes = bytes.Skip(0).Take(responseLength).ToArray();
             string recvdtxt = System.Text.Encoding.UTF8.GetString(bytes, 0, bytes.Length);
 
-            if (_Mode == Mode.Connected)
+            if (_Mode == Mode.Running)
             {
                 await MainPage.MP.UpdateTextAsync(recvdtxt);                      
                 

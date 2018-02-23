@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "roundedbox", "roundedbox.csproj", "{D45B429C-A11D-4333-9469-EE4AD4D2A688}"
 EndProject
@@ -27,6 +27,8 @@ Global
 		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|x64.Build.0 = Debug|x64
 		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|x64.Deploy.0 = Debug|x64
 		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|x86.ActiveCfg = Debug|x86
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|x86.Build.0 = Debug|x86
+		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Debug|x86.Deploy.0 = Debug|x86
 		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Release|Any CPU.ActiveCfg = Release|x86
 		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Release|ARM.ActiveCfg = Release|ARM
 		{D45B429C-A11D-4333-9469-EE4AD4D2A688}.Release|x64.ActiveCfg = Release|x64
@@ -51,8 +53,6 @@ Global
 		{4420825D-B492-416C-BBA4-BF5BFA269BEB}.Debug|x64.Build.0 = Debug|x64
 		{4420825D-B492-416C-BBA4-BF5BFA269BEB}.Debug|x64.Deploy.0 = Debug|x64
 		{4420825D-B492-416C-BBA4-BF5BFA269BEB}.Debug|x86.ActiveCfg = Debug|x86
-		{4420825D-B492-416C-BBA4-BF5BFA269BEB}.Debug|x86.Build.0 = Debug|x86
-		{4420825D-B492-416C-BBA4-BF5BFA269BEB}.Debug|x86.Deploy.0 = Debug|x86
 		{4420825D-B492-416C-BBA4-BF5BFA269BEB}.Release|Any CPU.ActiveCfg = Release|x86
 		{4420825D-B492-416C-BBA4-BF5BFA269BEB}.Release|ARM.ActiveCfg = Release|ARM
 		{4420825D-B492-416C-BBA4-BF5BFA269BEB}.Release|ARM.Build.0 = Release|ARM
