@@ -711,11 +711,15 @@ namespace USBSerial
                     }
                     else if (_Mode == Mode.AwaitJson)
                     {
-                        _Mode = Mode.JsonConfig;
-                        recvdtxt = currenbtRecvdText;
-                        await MainPage.MP.UpdateTextAsync(recvdtxt);
-                        recvdtxt = "";
-                        SendCh('~');
+
+                        recvdtxt += currenbtRecvdText;
+                        if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
+                        {
+                            _Mode = Mode.JsonConfig;
+                            await MainPage.MP.UpdateTextAsync(recvdtxt);
+                            recvdtxt = "";
+                            SendCh('~');
+                        }
                     }
                     else if (_Mode == Mode.JsonConfig)
                     {

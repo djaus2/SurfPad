@@ -20,7 +20,7 @@ const byte cFineStructureConstant = 137;
 SoftwareSerial bt(2, 3); // RX, TX Pins
 
 char  thisByte;
-enum Mode { Disconnected, Connected, ACK0, ACK2, ACK4, Json1, Json2, Running };
+enum Mode { Disconnected, Connected, ACK0, ACK2, ACK4, Ready, Json1, Json2, Running };
 Mode mode = Disconnected;
 int a0, a1, a2, a3;
 

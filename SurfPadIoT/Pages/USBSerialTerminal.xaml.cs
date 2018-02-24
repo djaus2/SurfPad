@@ -48,10 +48,10 @@ namespace SurfPadIoT.Pages
         {
             Disconnected,
             JustConnected,
-            ACK0,
-            ACK2,
-            ACK4,
-            Connected,
+            ACK1,
+            ACK3,
+            ACK5,
+            Running,
             AwaitJson,
             JsonConfig
         }
@@ -440,7 +440,7 @@ namespace SurfPadIoT.Pages
         {
             if (_Mode == Mode.JustConnected)
             {
-                _Mode = Mode.Connected;
+                _Mode = Mode.Running;
                 //Send("ACK1#");
             }
             this.Frame.GoBack();;
@@ -614,76 +614,64 @@ namespace SurfPadIoT.Pages
 
                     if (_Mode == Mode.JustConnected)
                     {
-                        if ('0' == bytes[0])
+                        if ('1' == bytes[0])
                         {
-                            SendCh('1');
-                            _Mode=Mode.ACK0;
+                            _Mode = Mode.ACK1;
+                            SendCh('2');
                         }
                     }
-                    else if (_Mode == Mode.ACK0)
+                    else if (_Mode == Mode.ACK1)
                     {
-                        if ('2' == (char)bytes[0])
+                        if ('3' == (char)bytes[0])
                         {
+                            _Mode = Mode.ACK3;
                             recvdtxt = "";
-                            SendCh('3');
-                            _Mode = Mode.ACK2;
+                            SendCh('4');
                         }
                     }
-                    else if (_Mode == Mode.ACK2)
+                    else if (_Mode == Mode.ACK3)
                     {
-                        if ('4' == (char)bytes[0])
+                        if ('5' == (char)bytes[0])
                         {
+                            _Mode = Mode.ACK5;
                             recvdtxt = "";
-                            SendCh('5');
-                            _Mode = Mode.ACK4;
+                            SendCh('!');
                         }
                     }
-                    else if (_Mode == Mode.ACK4)
+                    else if (_Mode == Mode.ACK5)
                     {
                         if ('!' == (char)bytes[0])
                         {
+                            _Mode = Mode.AwaitJson;
                             recvdtxt = "";
                             SendCh('/');
-                            status.Text="1Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
-                            _Mode = Mode.AwaitJson;
+                            status.Text="Ready for Config 1.";
 
                         }
                     }
+
                     else if (_Mode == Mode.AwaitJson)
-                    {
-                        if ('/' == (char)bytes[0])
-                        {
-                            status.Text = "2Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
-                            _Mode = Mode.JsonConfig;
-                            recvdtxt = "";
-                            SendCh('/');
-                        }
-                    }
-                    else if (_Mode == Mode.Connected)
-                    {
-                        byte byt = bytes[0];
-                        switch (byt)
-                        {
-                            default:
-                                recvdtxt = "" + (char)bytes[0];
-                                await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1));
-                                recvdtxt = "";
-                                System.Diagnostics.Debug.WriteLine("bytes read successfully!");
-                                break;
-                        }
-                    }
-                    else if (_Mode == Mode.JsonConfig)
                     {
                         recvdtxt += currenbtRecvdText;
                         if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
                         {
                             System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
-                            await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1))
+                            //.Substring(0,recvdtxt.Length - 1))
 
                             if (recvdtxt.Substring(0, "{\"Config\":".Length) == "{\"Config\":")
+                            {
+                                _Mode = Mode.JsonConfig;
+                                await MainPage.MP.UpdateTextAsync(recvdtxt);
+                                recvdtxt = "";
                                 SendCh('~');
+                            }
                             else if (recvdtxt.Substring(0, "{\"MainMenu\":".Length) == "{\"MainMenu\":")
-                                _Mode = Mode.Connected;
+                            {
+                                _Mode = Mode.JsonConfig;
+                                await MainPage.MP.UpdateTextAsync(recvdtxt);
+                                _Mode = Mode.Running;
+                                recvdtxt = "";
+                            }
                             else
                             {
                                 //// Get stack trace for the exception with source file information
@@ -699,6 +687,19 @@ namespace SurfPadIoT.Pages
                         }
                         else
                             return;
+                    }
+                    else if (_Mode == Mode.Running)
+                    {
+                        byte byt = bytes[0];
+                        switch (byt)
+                        {
+                            default:
+                                recvdtxt = "" + (char)bytes[0];
+                                await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1));
+                                recvdtxt = "";
+                                System.Diagnostics.Debug.WriteLine("bytes read successfully!");
+                                break;
+                        }
                     }
 
                 }

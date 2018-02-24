@@ -33,7 +33,7 @@ namespace SurfPadIoT.Pages
         enum Mode
         {
             NotStarted,
-            Listening,
+            Running,
             Disconnected,
             JustConnected,
             ACK0,
@@ -135,6 +135,7 @@ namespace SurfPadIoT.Pages
 
 
                                 responseLength = await streamReader.ReadAsync(chars, 0, 10);
+                                recvdText.Text = "" + chars;
                                 if (chars[0] == '0')
                                 {
                                     await streamWriter.WriteAsync('1');
@@ -145,6 +146,7 @@ namespace SurfPadIoT.Pages
                                 if (testing)
                                     response = await streamReader.ReadLineAsync();
                                 responseLength = await streamReader.ReadAsync(chars, 0, 10);
+                                recvdText.Text = "" + chars[0];
                                 if (chars[0] == '2')
                                 {
                                     await streamWriter.WriteAsync('3');
@@ -156,6 +158,7 @@ namespace SurfPadIoT.Pages
                                 if (testing)
                                     response = await streamReader.ReadLineAsync();
                                 responseLength = await streamReader.ReadAsync(chars, 0, 10);
+                                recvdText.Text = "" + chars[0];
                                 if (chars[0] == '4')
                                 {
                                     await streamWriter.WriteAsync('5');
@@ -166,6 +169,7 @@ namespace SurfPadIoT.Pages
                                 if (testing)
                                     response = await streamReader.ReadLineAsync();
                                 responseLength = await streamReader.ReadAsync(chars, 0, 10);
+                                recvdText.Text = "" + chars[0];
                                 if (chars[0] == '!')
                                 {
                                     await streamWriter.WriteAsync('/');
@@ -174,9 +178,9 @@ namespace SurfPadIoT.Pages
 
                                 _Mode = Mode.AwaitJson;
 
-                                if (testing)
-                                    response = await streamReader.ReadLineAsync();
+           
                                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                                recvdText.Text = "" + chars[0];
                                 if (chars[0] == '/')
                                 {
                                     _Mode = Mode.JsonConfig;
@@ -198,7 +202,7 @@ namespace SurfPadIoT.Pages
                                 }
 
                                 bool listening = true;
-                                _Mode = Mode.Listening;
+                                _Mode = Mode.Running;
                                 while (listening)
                                 {
                                     try

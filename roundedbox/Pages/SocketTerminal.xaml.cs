@@ -252,14 +252,17 @@ namespace Socket
                 string response;
                 string json1 = "";
                 string json2 = "";
-                char[] chars = new char[2];
+                char[] chars = new char[1000];
                 chars[1] = 'Z';
                 int responseLength;
 
                 inputStream = streamSocket.InputStream.AsStreamForRead();
                 streamReader = new StreamReader(inputStream);
                 response = await streamReader.ReadLineAsync();
-                responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                recvdText.Text = "" + response;
+
+                responseLength = await streamReader.ReadAsync(chars, 0, 1000);
+                recvdText.Text = "" + chars[0];
 
 
                 if (chars[0] == '@')
@@ -271,6 +274,7 @@ namespace Socket
                 
 
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                recvdText.Text = "" + chars[0];
                 if (chars[0] == '1')
                 {
                     _Mode = Mode.ACK1;
@@ -280,6 +284,7 @@ namespace Socket
 
 
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                recvdText.Text = "" + chars[0];
                 if (chars[0] == '3')
                 {
                     _Mode = Mode.ACK3;
@@ -288,6 +293,7 @@ namespace Socket
                 }
 
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                recvdText.Text = "" + chars[0];
                 if (chars[0] == '5')
                 {
                     _Mode = Mode.ACK5;
@@ -297,6 +303,7 @@ namespace Socket
                 
 
                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                recvdText.Text = "" + chars[0];
                 if (chars[0] == '/')
                 {
                     await streamWriter.WriteAsync('/');
@@ -305,6 +312,7 @@ namespace Socket
                     _Mode = Mode.AwaitJson;
 
                     json1 = await streamReader.ReadLineAsync();
+                    recvdText.Text = json1;
                     _Mode = Mode.JsonConfig;
 
                     await MainPage.MP.UpdateTextAsync(json1);
@@ -313,15 +321,20 @@ namespace Socket
                     await streamWriter.FlushAsync();
 
                     json2 = await streamReader.ReadLineAsync();
+                    recvdText.Text = "" + json2;
                     _Mode = Mode.Config;
 
                     await MainPage.MP.UpdateTextAsync(json2);
+                    recvdText.Text = "";
                     _Mode = Mode.Running;
+
+
+                    Listen();
 
                     await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                     {
-                        status.Text = "Config data received: Press [Start Listen]";
-                        this.buttonStartRecv.IsEnabled = true;
+                        status.Text = "Config data received: Press [Back]";
+                        this.buttonStartRecv.IsEnabled = false;
                         this.buttonStopRecv.IsEnabled = false;
                     });
                 }

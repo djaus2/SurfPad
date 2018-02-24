@@ -76,6 +76,7 @@ void loopSocket() {
 			client.println(F("Hello, client!"));
 			char ch = '@'; //StartMsg
 			client.write(ch);
+			Serial.println('@');
 			alreadyConnected = true;
 			mode = Connected;
 			return;
@@ -122,23 +123,24 @@ void loopSocket() {
 				case '!': //Get Exclamation mark as indicator of request for Json
 					if (mode == ACK4)
 					{
-						mode = Json1;
+						mode = Ready;
 						client.write('/'); //Send back / meaning it will follow
 					}
 					break;
 				case '/':  //App sends this back
-					if (mode = Json1)
+					if (mode == Ready)
 					{
-						mode = Json2;
+						mode = Json1;
 						client.println(F("{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~"));
 					}
 					break;
 				case '~':  //Then when it gets above then sends this back as confirmation
-					if (mode = Json2)
+					if (mode == Json1)
 					{
-						mode = Running;
-						Serial.println("Now run");
+						mode = Json2;
+						Serial.println("Now running.:)");
 						client.println(F("{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Show full list\", \"Setup Sockets\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~"));
+						mode = Running;
 					}
 					break;
 				case '^':  //Retart
