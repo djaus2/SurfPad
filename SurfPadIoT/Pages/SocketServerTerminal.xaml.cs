@@ -30,20 +30,11 @@ namespace SurfPadIoT.Pages
         private CancellationTokenSource ReadCancellationTokenSource;
         private bool testing = false;
 
-        enum Mode
-        {
-            NotStarted,
-            Running,
-            Disconnected,
-            JustConnected,
-            ACK0,
-            ACK2,
-            ACK4,
-            Connected,
-            AwaitJson,
-            JsonConfig
-        }
-        Mode _Mode = Mode.NotStarted;
+ 
+
+        enum Mode { Disconnected, Connected, ACK0, ACK2, ACK4, Ready, Json1, Json2, Running };
+        Mode _Mode = Mode.Disconnected;
+        int a0, a1, a2, a3;
 
         public SocketServerTerminalPage()
         {
@@ -94,7 +85,7 @@ namespace SurfPadIoT.Pages
 
                 // Start listening for incoming TCP connections on the specified port. You can specify any port that's not currently in use.
                 await streamSocketListener.BindServiceNameAsync(SocketServerTerminalPage.PortNumber);
-                _Mode = Mode.JustConnected;
+                //_Mode = Mode.JustConnected;
 
                 status.Text = "Server is listening...";
             }
@@ -114,6 +105,7 @@ namespace SurfPadIoT.Pages
             char[] chars = new char[10];
             chars[1] = 'Z';
             int responseLength;
+            byte cFineStructureConstant = 137;
 
             try
             { 
@@ -123,11 +115,11 @@ namespace SurfPadIoT.Pages
                     {
                         using (var streamWriter = new StreamWriter(outputStream))
                         {
-                            if (_Mode == Mode.JustConnected)
+                            if (_Mode == Mode.Disconnected)
                             {
                                 response = await streamReader.ReadLineAsync();
 
-                                await streamWriter.WriteLineAsync(response);
+                                await streamWriter.WriteLineAsync("Hello World");
                                 await streamWriter.FlushAsync();
 
                                 await streamWriter.WriteAsync('@');
@@ -135,7 +127,7 @@ namespace SurfPadIoT.Pages
 
 
                                 responseLength = await streamReader.ReadAsync(chars, 0, 10);
-                                recvdText.Text = "" + chars;
+                                await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => recvdText.Text = "" + chars);
                                 if (chars[0] == '0')
                                 {
                                     await streamWriter.WriteAsync('1');
@@ -143,10 +135,9 @@ namespace SurfPadIoT.Pages
                                 }
                                 _Mode = Mode.ACK0;
 
-                                if (testing)
-                                    response = await streamReader.ReadLineAsync();
+
                                 responseLength = await streamReader.ReadAsync(chars, 0, 10);
-                                recvdText.Text = "" + chars[0];
+                                await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => recvdText.Text = "" + chars[0]);
                                 if (chars[0] == '2')
                                 {
                                     await streamWriter.WriteAsync('3');
@@ -155,10 +146,8 @@ namespace SurfPadIoT.Pages
 
                                 _Mode = Mode.ACK2;
 
-                                if (testing)
-                                    response = await streamReader.ReadLineAsync();
                                 responseLength = await streamReader.ReadAsync(chars, 0, 10);
-                                recvdText.Text = "" + chars[0];
+                                await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => recvdText.Text = "" + chars[0]);
                                 if (chars[0] == '4')
                                 {
                                     await streamWriter.WriteAsync('5');
@@ -166,38 +155,37 @@ namespace SurfPadIoT.Pages
                                 }
                                 _Mode = Mode.ACK4;
 
-                                if (testing)
-                                    response = await streamReader.ReadLineAsync();
                                 responseLength = await streamReader.ReadAsync(chars, 0, 10);
-                                recvdText.Text = "" + chars[0];
+                                await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => recvdText.Text = "" + chars[0]);
                                 if (chars[0] == '!')
                                 {
                                     await streamWriter.WriteAsync('/');
                                     await streamWriter.FlushAsync();
                                 }
 
-                                _Mode = Mode.AwaitJson;
+                                _Mode = Mode.Ready;
 
            
                                 responseLength = await streamReader.ReadAsync(chars, 0, 1);
-                                recvdText.Text = "" + chars[0];
+                                await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => recvdText.Text = "" + chars[0]);
                                 if (chars[0] == '/')
                                 {
-                                    _Mode = Mode.JsonConfig;
+                                    _Mode = Mode.Json1;
                                     await streamWriter.WriteLineAsync(
         "{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~");
                                     await streamWriter.FlushAsync();
 
-                                    if (testing)
-                                        response = await streamReader.ReadLineAsync();
                                     responseLength = await streamReader.ReadAsync(chars, 0, 1);
+                                    await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => recvdText.Text = "" + chars[0]);
                                     {
                                         if (chars[0] == '~')
                                         {
+                                            _Mode = Mode.Json2;
                                             await streamWriter.WriteLineAsync(
         "{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Show full list\", \"Setup Sockets\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
                                             await streamWriter.FlushAsync();
-                                        }
+                                            _Mode = Mode.Running;
+                                        };
                                     }
                                 }
 
@@ -207,8 +195,6 @@ namespace SurfPadIoT.Pages
                                 {
                                     try
                                     {
-                                        if (testing)
-                                            response = await streamReader.ReadLineAsync();
                                         responseLength = await streamReader.ReadAsync(chars, 0, 1);
                                     }
                                     catch (Exception ex)
