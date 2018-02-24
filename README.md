@@ -5,6 +5,7 @@ Turn your old Surface into into a large touchpad.
 Now has links to articles about this project: [Wiki](https://github.com/djaus2/SurfPad/wiki)
 
 ## Status:
+- Eigth Version: Remote app as Win 10 IoT-Core (eg RPI) now works over Sockets: 
 - Seventh Version: Reworking state machines in all 3 comms modes to match Staes documented at: [embedded101.com](http://embedded101.com/Blogs/David-Jones/entryid/807/SurfPad-Your-old-Surface-as-a-Remote-App-Touchpad-SurfPad-States): https://github.com/djaus2/SurfPad/tree/7260dcff14f3be082b71af84d848945f8dc11b90
 - Sixth Version: Introducing Sockets option. Works now. USB and Sockets auto load menu once received. BT might not work at the moment. Arduino mode is now set by jumper (See Wiki):
 https://github.com/djaus2/SurfPad/tree/923b4b77efa493c3fd6adcc8581331e32e08ce57
