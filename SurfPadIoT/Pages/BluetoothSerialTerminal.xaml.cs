@@ -20,9 +20,13 @@ using Windows.Storage.Streams;
 using Windows.UI.Popups;
 using System.Threading.Tasks;
 using System.Threading;
-using roundedbox;
 using System.Text;
 using System.Diagnostics;
+using SurfPadIoT;
+using Windows.UI.Core;
+using Windows.Devices.Bluetooth;
+using Windows.Networking;
+using System.IO.Ports;
 using Windows.Devices.SerialCommunication;
 
 namespace Bluetooth
@@ -38,7 +42,7 @@ namespace Bluetooth
         public const byte EOStringByte = 126;
         private const int cFineStructure = 137; //ASCII Per mille sign
 
-        string Title = "Bluetooth Serial Terminal UI App - UWP";
+        string Title = "Bluetooth Serial Terminal REMOTE - UWP";
         private Windows.Devices.Bluetooth.Rfcomm.RfcommDeviceService _service;
         private StreamSocket _socket;
         DataWriter dataWriteObject = null;
@@ -52,23 +56,25 @@ namespace Bluetooth
             Disconnected,
             JustConnected,
             Connected,
-            ACK1,
-            ACK3,
-            ACK5,
+            ACK0,
+            ACK2,
+            ACK4,
             AwaitJson,
             JsonConfig,
             Config,
-            Running
+            Running,
+            Ready,
+            Json1,
+            Json2
         }
         Mode _Mode = Mode.Disconnected;
 
         public BluetoothSerialTerminalPage()
         {
-            this.NavigationCacheMode =
-                    Windows.UI.Xaml.Navigation.NavigationCacheMode.Required;
+            this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Required;
             this.InitializeComponent();
             MyTitle.Text = Title;
-            uartTitle.Text = Title;
+            uartTitle.Text =Title;
             _pairedDevices = new ObservableCollection<PairedDeviceInfo>();
  			InitializeRfcommDeviceService();
             MainPage.BTTerminalPage = this;
@@ -79,15 +85,20 @@ namespace Bluetooth
         {
             try
             {
-                string aqs = SerialDevice.GetDeviceSelector();
-                var dis = await DeviceInformation.FindAllAsync(aqs);
-
-                var numDevices1 = dis.Count;
+                //var aqsDevices = SerialDevice.GetDeviceSelector();
+                //    //.GetDeviceSelector(RfcommServiceId.SerialPort);
+                //DeviceInformationCollection devices = await DeviceInformation.FindAllAsync(aqsDevices);
 
                 DeviceInformationCollection DeviceInfoCollection = await DeviceInformation.FindAllAsync(RfcommDeviceService.GetDeviceSelector(RfcommServiceId.SerialPort));
 
-                DeviceInformationCollection DeviceInfoCollection2 = await DeviceInformation.FindAllAsync();
-                var asdf = (from n in DeviceInfoCollection2 select n.Name).Distinct();
+                //HostName hostname = new HostName( "DESKTOP-GCCKFIE");
+                //var BTdev = await BluetoothDevice.FromIdAsync("Bluetooth#Bluetooth00:02:72:40:c1:d6-00:15:83:ea:77:4d#RFCOMM:00000000:{00001101-0000-1000-8000-00805f9b34fb}");
+
+                ////DeviceInformationCollection DeviceInfoCollection2 = await DeviceInformation.FindAllAsync(RfcommDeviceService.GetDeviceSelectorForBluetoothDevice(BTdev));
+                //DeviceInformationCollection DeviceInfoCollection2 = await DeviceInformation.FindAllAsync();
+                //var asdf = (from n in DeviceInfoCollection2 select n.Name).Distinct();
+
+
 
                 var numDevices = DeviceInfoCollection.Count();
 
@@ -348,6 +359,7 @@ namespace Bluetooth
         }
         
         string recvdtxt = "";
+        bool listening = false;
         /// <summary>
         /// - Create a DataReader object
         /// - Create an async task to read from the SerialDevice InputStream
@@ -362,6 +374,10 @@ namespace Bluetooth
             {
                 if (_socket.InputStream != null)
                 {
+                    //Once the first trasmission, form this end, is received, this end IS connected.
+                    SendCh((char)137);
+                    _Mode = Mode.Connected;
+
                     dataReaderObject = new DataReader(_socket.InputStream);
                     uint i = dataReaderObject.UnconsumedBufferLength;
                     if (i != 0)
@@ -372,8 +388,9 @@ namespace Bluetooth
                     this.buttonStopRecv.IsEnabled = true;
                     this.buttonDisconnect.IsEnabled = false;
                     recvdtxt = "";
+                    listening = true;
                     // keep reading the serial input
-                    while (true) //!ReadCancellationTokenSource.Token.IsCancellationRequested)
+                    while (listening) //!ReadCancellationTokenSource.Token.IsCancellationRequested)
                     {                 
                         await ReadAsync(ReadCancellationTokenSource.Token);
                     }
@@ -437,6 +454,7 @@ namespace Bluetooth
                     dataReaderObject.ReadBytes(bytes);
 
                     string currenbtRecvdText = Encoding.UTF8.GetString(bytes);
+                    await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => recvdText.Text = "" + ((char)bytes[0]));
 
                     recvdText.Text = currenbtRecvdText;
 
@@ -450,78 +468,83 @@ namespace Bluetooth
                     }
                     else if (_Mode == Mode.Connected)
                     {
-                        if ('1' == (char)bytes[0])
+                        if ('0' == (char)bytes[0])
                         {
-                            _Mode = Mode.ACK1;
+                            _Mode = Mode.ACK0;
                             recvdtxt = "";
-                            SendCh('2');
+                            SendCh('1');
                         }
                     }
-                    else if (_Mode == Mode.ACK1)
+                    else if (_Mode == Mode.ACK0)
                     {
-                        if ('3' == (char)bytes[0])
+                        if ('2' == (char)bytes[0])
                         {
-                            _Mode = Mode.ACK3;
+                            _Mode = Mode.ACK2;
                             recvdtxt = "";
-                            SendCh('4');
+                            SendCh('3');
                         }
                     }
-                    else if (_Mode == Mode.ACK3)
+                    else if (_Mode == Mode.ACK2)
                     {
-                        if ('5' == (char)bytes[0])
+                        if ('4' == (char)bytes[0])
                         {
-                            _Mode = Mode.ACK5;
-                            SendCh('!');
+                            _Mode = Mode.ACK4;
+                            SendCh('5');
                             //status.Text="Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
                         }
                     }
-                    else if (_Mode == Mode.ACK5)
+                    else if (_Mode == Mode.ACK4)
+                    {
+                        if ('!' == (char)bytes[0])
+                        {
+                            _Mode = Mode.Ready;
+                            SendCh('/');
+                            //status.Text="Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
+                        }
+                    }
+                    else if (_Mode == Mode.Ready)
                     {
                         if ('/' == (char)bytes[0])
                         {
-                            _Mode = Mode.AwaitJson;
-                            recvdtxt = "";
-                            SendCh('/');
+                            _Mode = Mode.Json1;
+                            //Send Config
+                            await WriteAsync(
+"{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~");
                         }
                     }
-                    else if (_Mode == Mode.AwaitJson)
+                    else if (_Mode == Mode.Json1)
                     {
-
-                        recvdtxt += currenbtRecvdText;
-                        if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
+                        if ('~' == (char)bytes[0])
                         {
-                            await MainPage.MP.UpdateTextAsync(recvdtxt);
-                            recvdtxt = "";
-                            _Mode = Mode.JsonConfig;
-                            SendCh('~');
-                        }
-                    }
-                    else if (_Mode == Mode.JsonConfig)
-                    {
-                        recvdtxt += currenbtRecvdText;
-                        if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
-                        {
-                            System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
-                            _Mode = Mode.Config;
-                            await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1))
+                            _Mode = Mode.Json2;
+                            //Send Menu
+                            await WriteAsync(
+"{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Show full list\", \"Setup Sockets\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
                             _Mode = Mode.Running;
-                            status.Text = "Config done. Press [Back]";
-                            recvdtxt = "";
                         }
-
-                        else
-                            return;
                     }
                     else if (_Mode == Mode.Running)
                     {
-                        recvdtxt = currenbtRecvdText;
-                        await MainPage.MP.UpdateTextAsync(recvdtxt);
+
+                        if (listening)
+                            switch ((char) bytes[0])
+                            {
+                                case '^':
+                                    listening = false;
+                                    break;
+                                default:
+                                    //Do app stuff here. For now just echo chars sent
+                                    SendCh((char)bytes[0]);
+                                    break;
+                            }
                     }
+         
 
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("ReadAsync: " + ex.Message);
+                    await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => status.Text += "\r\n" + "Lost connection:\r\n" + ex.Message);
+                    listening = false;
                 }
                 
             }

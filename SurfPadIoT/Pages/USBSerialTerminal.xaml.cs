@@ -36,7 +36,7 @@ namespace SurfPadIoT.Pages
         public const byte EOStringByte = 126;
         private const int cFineStructure = 137; //ASCII per mile sign
         private const string ARDUINO_DBGMSG = "VMDPV_1|1_VMDPV\r\n";
-        string Title = "USB Serial Universal Windows App";
+        string Title = "USB Serial Terminal REMOTE - UWP";
         private SerialDevice serialPort = null;
         DataWriter dataWriteObject = null;
         DataReader dataReaderObject = null;
@@ -48,21 +48,26 @@ namespace SurfPadIoT.Pages
         {
             Disconnected,
             JustConnected,
-            ACK1,
-            ACK3,
-            ACK5,
-            Running,
+            Connected,
+            ACK0,
+            ACK2,
+            ACK4,
             AwaitJson,
-            JsonConfig
+            JsonConfig,
+            Config,
+            Running,
+            Ready,
+            Json1,
+            Json2
         }
         Mode _Mode = Mode.Disconnected;
 
         public USBSerialTerminalPage()
         {
-            this.NavigationCacheMode =
-                    Windows.UI.Xaml.Navigation.NavigationCacheMode.Required;
+            this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
             this.InitializeComponent();
-            MyTitle.Text = Title;         
+            MyTitle.Text = Title;
+            uartTitle.Text = Title;
             listofDevices = new ObservableCollection<DeviceInformation>();
             ListAvailablePorts(); 
             MainPage.USBSerialTerminalPage = this;
@@ -93,22 +98,7 @@ namespace SurfPadIoT.Pages
 
                 var numDevices = dis.Count;
                 status.Text = "Select a device and connect";
-                //if (dis.Any())
-                //{
-                //    var deviceId = dis[1].Id;
-                //    var device = await SerialDevice.FromIdAsync(deviceId);
 
-                //    if (device != null)
-                //    {
-                //        device.BaudRate = 57600;
-                //        device.StopBits = SerialStopBitCount.One;
-                //        device.DataBits = 8;
-                //        device.Parity = SerialParity.None;
-                //        device.Handshake = SerialHandshake.None;
-
-                //        var reader = new DataReader(device.InputStream);
-                //    }
-                //}
 
                 listofDevices.Clear();
 
@@ -116,7 +106,7 @@ namespace SurfPadIoT.Pages
                 {
                     for (int i = 0; i < numDevices; i++)
                     {
-                        if ((dis[i].Name.Contains("USB")) || (dis[i].Id.Contains("FTDI")))
+                        if ((dis[i].Name.ToUpper().Contains("USB")) || (dis[i].Id.ToUpper().Contains("FTDI")) || (dis[i].Name.ToLower().Contains("minwinpc")))
                             this.listofDevices.Add(dis[i]);
                     }
 
@@ -284,9 +274,6 @@ namespace SurfPadIoT.Pages
             {
                 if (serialPort != null)
                 {
-                    // Create the DataWriter object and attach to OutputStream
-                    dataWriteObject = new DataWriter(serialPort.OutputStream);
-
                     //Launch the WriteAsync task to perform the write
                     await WriteAsync(msg);
                 }
@@ -464,6 +451,9 @@ namespace SurfPadIoT.Pages
             if (msg.Length != 0)
             //if (msg.sendText.Text.Length != 0)
             {
+                // Create the DataWriter object and attach to OutputStream
+                dataWriteObject = new DataWriter(serialPort.OutputStream);
+
                 // Load the text from the sendText input text box to the dataWriter object
                 dataWriteObject.WriteString(msg);
                 //dataWriteObject.WriteString(sendText.Text);
@@ -493,6 +483,7 @@ namespace SurfPadIoT.Pages
         }
         
         string recvdtxt = "";
+        bool listening = false;
         /// <summary>
         /// - Create a DataReader object
         /// - Create an async task to read from the SerialDevice InputStream
@@ -507,10 +498,13 @@ namespace SurfPadIoT.Pages
             {
                 if (serialPort != null)
                 {
-                    dataReaderObject = new DataReader(serialPort.InputStream);
+    
 
+                    //Once the first trasmission, form this end, is received, this end IS connected.
                     SendCh((char)137);
+                    _Mode = Mode.Connected;
 
+                    dataReaderObject = new DataReader(serialPort.InputStream);
                     uint i = dataReaderObject.UnconsumedBufferLength;
                     if (i != 0)
                     {
@@ -521,7 +515,8 @@ namespace SurfPadIoT.Pages
                     this.buttonDisconnect.IsEnabled = false;
                     recvdtxt = "";
                     // keep reading the serial input
-                    while (true)
+                    listening = true;
+                    while (listening)
                     {
                         await ReadAsync(ReadCancellationTokenSource.Token);
                     }
@@ -589,117 +584,82 @@ namespace SurfPadIoT.Pages
                 {
                     byte[] bytes  = new byte[bytesRead];
                     dataReaderObject.ReadBytes(bytes);
-                    //var fs = from n in bytes where n == 137 select n;
-                    //if (fs.Count() > 0)
-                    //    bytes = fs.ToArray<byte>();
-                    //else
-                    //{
-                    //    //VMDPV_1|1_VMDPV
-                    //    string currenbtRecvdText1 = Encoding.UTF8.GetString(bytes);
-                    //    //Need to remove the Arduino breakpoint looping messages
-                    //    int ARDUINO_dbgMsg_Len = ARDUINO_DBGMSG.Length;
-                    //    if (bytesRead >= ARDUINO_dbgMsg_Len)
-                    //    {
-                    //        if (currenbtRecvdText1.Substring(0, ARDUINO_dbgMsg_Len) == ARDUINO_DBGMSG)
-                    //        {
-                    //            currenbtRecvdText1 = currenbtRecvdText1.Substring(ARDUINO_dbgMsg_Len);
-                    //            bytes = bytes.Skip(ARDUINO_dbgMsg_Len).Take((int)bytesRead - ARDUINO_dbgMsg_Len).ToArray();
-                    //        }
-                    //    }
-                    //}
                     string currenbtRecvdText = Encoding.UTF8.GetString(bytes);
-
+                    await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => recvdText.Text = "" + ((char)bytes[0]));
 
                     recvdText.Text = currenbtRecvdText;
 
-                    if (_Mode == Mode.JustConnected)
+                    if (_Mode == Mode.Connected)
                     {
-                        if ('1' == bytes[0])
+                        if ('0' == (char)bytes[0])
                         {
-                            _Mode = Mode.ACK1;
-                            SendCh('2');
-                        }
-                    }
-                    else if (_Mode == Mode.ACK1)
-                    {
-                        if ('3' == (char)bytes[0])
-                        {
-                            _Mode = Mode.ACK3;
+                            _Mode = Mode.ACK0;
                             recvdtxt = "";
-                            SendCh('4');
+                            SendCh('1');
                         }
                     }
-                    else if (_Mode == Mode.ACK3)
+                    else if (_Mode == Mode.ACK0)
                     {
-                        if ('5' == (char)bytes[0])
+                        if ('2' == (char)bytes[0])
                         {
-                            _Mode = Mode.ACK5;
+                            _Mode = Mode.ACK2;
                             recvdtxt = "";
-                            SendCh('!');
+                            SendCh('3');
                         }
                     }
-                    else if (_Mode == Mode.ACK5)
+                    else if (_Mode == Mode.ACK2)
+                    {
+                        if ('4' == (char)bytes[0])
+                        {
+                            _Mode = Mode.ACK4;
+                            SendCh('5');
+                            //status.Text="Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
+                        }
+                    }
+                    else if (_Mode == Mode.ACK4)
                     {
                         if ('!' == (char)bytes[0])
                         {
-                            _Mode = Mode.AwaitJson;
-                            recvdtxt = "";
+                            _Mode = Mode.Ready;
                             SendCh('/');
-                            status.Text="Ready for Config 1.";
-
+                            //status.Text="Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
                         }
                     }
-
-                    else if (_Mode == Mode.AwaitJson)
+                    else if (_Mode == Mode.Ready)
                     {
-                        recvdtxt += currenbtRecvdText;
-                        if (recvdtxt.Substring(recvdtxt.Length - 1) == EOStringStr)
+                        if ('/' == (char)bytes[0])
                         {
-                            System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
-                            //.Substring(0,recvdtxt.Length - 1))
-
-                            if (recvdtxt.Substring(0, "{\"Config\":".Length) == "{\"Config\":")
-                            {
-                                _Mode = Mode.JsonConfig;
-                                await MainPage.MP.UpdateTextAsync(recvdtxt);
-                                recvdtxt = "";
-                                SendCh('~');
-                            }
-                            else if (recvdtxt.Substring(0, "{\"MainMenu\":".Length) == "{\"MainMenu\":")
-                            {
-                                _Mode = Mode.JsonConfig;
-                                await MainPage.MP.UpdateTextAsync(recvdtxt);
-                                _Mode = Mode.Running;
-                                recvdtxt = "";
-                            }
-                            else
-                            {
-                                //// Get stack trace for the exception with source file information
-                                //var st = new StackTrace(ex, true);
-                                //string thisFile = new System.Diagnostics.StackTrace(true).GetFrame(0).GetFileName();
-                                //var frame = st.GetFrame(0);
-                                //// Get the line number from the stack frame
-                                //var line = frame.GetFileLineNumber();
-                                throw new System.Exception("BluetoothSerialTerminal.cs: ReadAsync() Getting JsonConfig. Shouldn't have reached this LOC"); //: { 0 }",line);
-
-                            }
-                            recvdtxt = "";
+                            _Mode = Mode.Json1;
+                            //Send Config
+                            await WriteAsync(
+"{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~");
                         }
-                        else
-                            return;
+                    }
+                    else if (_Mode == Mode.Json1)
+                    {
+                        if ('~' == (char)bytes[0])
+                        {
+                            _Mode = Mode.Json2;
+                            //Send Menu
+                            await WriteAsync(
+"{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Show full list\", \"Setup Sockets\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
+                            _Mode = Mode.Running;
+                        }
                     }
                     else if (_Mode == Mode.Running)
                     {
-                        byte byt = bytes[0];
-                        switch (byt)
-                        {
-                            default:
-                                recvdtxt = "" + (char)bytes[0];
-                                await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1));
-                                recvdtxt = "";
-                                System.Diagnostics.Debug.WriteLine("bytes read successfully!");
-                                break;
-                        }
+
+                        if (listening)
+                            switch ((char)bytes[0])
+                            {
+                                case '^':
+                                    listening = false;
+                                    break;
+                                default:
+                                    //Do app stuff here. For now just echo chars sent
+                                    SendCh((char)bytes[0]);
+                                    break;
+                            }
                     }
 
                 }

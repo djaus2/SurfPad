@@ -1,4 +1,5 @@
-﻿using SurfPadIoT.Pages;
+﻿using Bluetooth;
+using SurfPadIoT.Pages;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -48,6 +49,8 @@ namespace SurfPadIoT
         //public static Bluetooth.BluetoothSerialTerminalPage BTTerminalPage;
         public static USBSerialTerminalPage USBSerialTerminalPage { get; internal set; }
         public static SocketServerTerminalPage SocketTerminalPage { get; internal set; }
+        public static BluetoothSerialTerminalPage BTTerminalPage { get; internal set; }
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -76,14 +79,14 @@ namespace SurfPadIoT
                             if (TerminalMode == TerminalModes.none)
                             {
                                 TerminalMode = TerminalModes.USBSerial;
-                                Frame.Navigate(typeof(USBSerialTerminalPage));
+                                Frame.Navigate(typeof(SurfPadIoT.Pages.USBSerialTerminalPage));
                             }
                             break;
                         case "Bluetooth":
                             if (TerminalMode == TerminalModes.none)
                             {
                                 TerminalMode = TerminalModes.BT;
-                                Frame.Navigate(typeof(SocketServerTerminalPage));
+                                Frame.Navigate(typeof(BluetoothSerialTerminalPage));
                             }
                             break;
                         case "Reset":

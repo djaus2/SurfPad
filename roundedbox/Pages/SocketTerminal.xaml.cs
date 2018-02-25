@@ -38,7 +38,7 @@ namespace Socket
         public const byte EOStringByte = 126;
         private const int cFineStructure = 137; //ASCII Per mille sign
 
-        private string Title = "Universal Windows Socket Terminal";
+        private string Title = "Socket Client Terminal UI App - UWP";
 
         private CancellationTokenSource ReadCancellationTokenSource;
 
@@ -62,6 +62,7 @@ namespace Socket
                     Windows.UI.Xaml.Navigation.NavigationCacheMode.Required;
             this.InitializeComponent();
             MyTitle.Text = Title;
+            uartTitle.Text = Title;
 
             //_pairedDevices = new ObservableCollection<PairedDeviceInfo>();
             MainPage.SocketTerminalPage = this;

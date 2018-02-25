@@ -98,6 +98,9 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\BluetoothSerialTerminal.xaml.cs">
+      <DependentUpon>BluetoothSerialTerminal.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\SocketServerTerminal.xaml.cs">
       <DependentUpon>SocketServerTerminal.xaml</DependentUpon>
     </Compile>
@@ -130,6 +133,10 @@
     <Page Include="MainPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\BluetoothSerialTerminal.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\SocketServerTerminal.xaml">
       <Generator>MSBuild:Compile</Generator>

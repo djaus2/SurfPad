@@ -30,7 +30,7 @@ namespace SurfPadIoT.Pages
         private CancellationTokenSource ReadCancellationTokenSource;
         private bool testing = false;
 
- 
+        string Title = "Socket Server Terminal REMOTE - UWP";
 
         enum Mode { Disconnected, Connected, ACK0, ACK2, ACK4, Ready, Json1, Json2, Running };
         Mode _Mode = Mode.Disconnected;
@@ -41,6 +41,9 @@ namespace SurfPadIoT.Pages
             this.InitializeComponent();
             MainPage.SocketTerminalPage = this;
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
+
+            uartTitle.Text =Title;
+
             this.buttonStartRecv.IsEnabled = true;
             this.buttonStopRecv.IsEnabled = false;
 
@@ -124,6 +127,9 @@ namespace SurfPadIoT.Pages
 
                                 await streamWriter.WriteAsync('@');
                                 await streamWriter.FlushAsync();
+
+                                //Once the first transmission/s, iniitaited from thsi end, is received then this end IS connected.
+                                _Mode = Mode.Connected;
 
 
                                 responseLength = await streamReader.ReadAsync(chars, 0, 10);

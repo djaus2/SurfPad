@@ -37,7 +37,7 @@ namespace USBSerial
         public const byte EOStringByte = 126;
         private const int cFineStructure = 137; //ASCII per mile sign
         private const string ARDUINO_DBGMSG = "VMDPV_1|1_VMDPV\r\n";
-        string Title = "USB Serial Universal Windows App";
+        string Title = "USB Serial Terminal UI App - UWP";
         private SerialDevice serialPort = null;
         DataWriter dataWriteObject = null;
         DataReader dataReaderObject = null;
@@ -65,7 +65,8 @@ namespace USBSerial
             this.NavigationCacheMode =
                     Windows.UI.Xaml.Navigation.NavigationCacheMode.Required;
             this.InitializeComponent();
-            MyTitle.Text = Title;         
+            MyTitle.Text = Title;
+            uartTitle.Text = Title;
             listofDevices = new ObservableCollection<DeviceInformation>();
             ListAvailablePorts(); 
             MainPage.USBSerialTerminalPage = this;
@@ -661,9 +662,7 @@ namespace USBSerial
                     }
                     string currenbtRecvdText = Encoding.UTF8.GetString(bytes);
 
-
-                    recvdText.Text = currenbtRecvdText;
-
+                    await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => recvdText.Text = currenbtRecvdText);
                     if (_Mode == Mode.JustConnected)
                     {
                         if (cFineStructure == bytes[0])
@@ -729,6 +728,7 @@ namespace USBSerial
                             System.Diagnostics.Debug.WriteLine("Recvd: " + recvdtxt);
                             _Mode = Mode.Config;
                             await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1))
+
                             _Mode = Mode.Running;
                             status.Text = "Config done. Press [Back]";
                             recvdtxt = "";
