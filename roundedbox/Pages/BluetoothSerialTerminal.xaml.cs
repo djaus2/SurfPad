@@ -24,6 +24,7 @@ using roundedbox;
 using System.Text;
 using System.Diagnostics;
 using Windows.Devices.SerialCommunication;
+using Windows.UI.Core;
 
 namespace Bluetooth
 {
@@ -109,6 +110,15 @@ namespace Bluetooth
                     }
                 }
                 PairedDevices.Source = _pairedDevices;
+                if (numDevices == 1)
+                {
+                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        ConnectDevices.SelectedIndex = 0;
+                    });
+                    
+                    ConnectDevices_DoubleTapped(null, null);
+                }
             }
             catch (Exception ex)
             {
@@ -149,9 +159,18 @@ namespace Bluetooth
                     this.buttonStartRecv.IsEnabled = true;
                     this.buttonStopRecv.IsEnabled = false;
                     //Send("ACK0#");
+                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        status.Text = "Connected now starting Listen";
+                    });
+                    Listen();
                     this.buttonStartRecv.IsEnabled = false;
                     this.buttonStopRecv.IsEnabled = true;
-                    Listen();
+                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        status.Text = "Now listening";
+                    });
+
                     System.Diagnostics.Debug.WriteLine("Connected");
                     //await md.ShowAsync();
                 }

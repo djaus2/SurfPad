@@ -185,6 +185,18 @@ namespace USBSerial
                                 //Doesn't return to here
                             }
                         }
+                    if (!done)
+                    {
+                        if (numDevices == 1)
+                        {
+                            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                            {
+                                ConnectDevices.SelectedIndex = 0;
+                            });
+
+                            ConnectDevices_DoubleTapped(null, null);
+                        }
+                    }
                 }
             }
             catch (Exception ex)

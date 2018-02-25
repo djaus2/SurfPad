@@ -28,7 +28,7 @@ namespace SurfPadIoT
     public sealed partial class MainPage : Page
     {
         const int DefaultCellWidth = 120;
-        public const uint cBAUD = 9600;
+        public const uint cBAUD = 115200;
         const int DefaultCellHeight = 120;
         const int DefaultCellSpacing = 10;
         const int TextSpan = 2;
