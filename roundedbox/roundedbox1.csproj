@@ -99,12 +99,18 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MyUserControl1.xaml.cs">
-      <DependentUpon>MyUserControl1.xaml</DependentUpon>
+    <Compile Include="RoundedButtonControl.xaml.cs">
+      <DependentUpon>RoundedButtonControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\USBSerialTerminal.xaml.cs" />
-    <Compile Include="Pages\BluetoothSerialTerminal.xaml.cs" />
-    <Compile Include="Pages\SerialTerminal.xaml.cs" />
+    <Compile Include="Pages\SocketTerminal.xaml.cs">
+      <DependentUpon>SocketTerminal.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\USBSerialTerminal.xaml.cs">
+      <DependentUpon>USBSerialTerminal.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\BluetoothSerialTerminal.xaml.cs">
+      <DependentUpon>BluetoothSerialTerminal.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -135,19 +141,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="MyUserControl1.xaml">
+    <Page Include="RoundedButtonControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Pages\USBSerialTerminal .xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\BluetoothSerialTerminal.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Pages\SerialTerminal.xaml">
+    <Page Include="Pages\SocketTerminal.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\USBSerialTerminal.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

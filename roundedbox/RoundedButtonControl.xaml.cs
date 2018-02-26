@@ -18,7 +18,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace roundedbox.uc
 {
-    public  partial class MyUserControl1 : UserControl
+    public  partial class RoundedButtonControl : UserControl
     {
         static readonly  Brush DefaultBackground =  new SolidColorBrush (Colors.Beige);
         const int FlagForDefaultVal = -1;
@@ -54,7 +54,7 @@ namespace roundedbox.uc
         public int RowSpan { get; set; } = 1;
         public int ColSpan { get; set; } = 1;
 
-        public MyUserControl1(int row, int col, string text, Grid containerGrid, 
+        public RoundedButtonControl(int row, int col, string text, Grid containerGrid, 
             //Optional parameters:
             //Name or Id should be unique
             string name="", Brush background = null, 

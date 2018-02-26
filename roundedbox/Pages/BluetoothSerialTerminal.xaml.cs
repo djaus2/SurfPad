@@ -80,15 +80,15 @@ namespace Bluetooth
         {
             try
             {
-                string aqs = SerialDevice.GetDeviceSelector();
-                var dis = await DeviceInformation.FindAllAsync(aqs);
+                //string aqs = SerialDevice.GetDeviceSelector();
+                //var dis = await DeviceInformation.FindAllAsync(aqs);
 
-                var numDevices1 = dis.Count;
+                //var numDevices1 = dis.Count;
 
                 DeviceInformationCollection DeviceInfoCollection = await DeviceInformation.FindAllAsync(RfcommDeviceService.GetDeviceSelector(RfcommServiceId.SerialPort));
 
-                DeviceInformationCollection DeviceInfoCollection2 = await DeviceInformation.FindAllAsync();
-                var asdf = (from n in DeviceInfoCollection2 select n.Name).Distinct();
+                //DeviceInformationCollection DeviceInfoCollection2 = await DeviceInformation.FindAllAsync();
+                //var asdf = (from n in DeviceInfoCollection2 select n.Name).Distinct();
 
                 var numDevices = DeviceInfoCollection.Count();
 
@@ -106,9 +106,11 @@ namespace Bluetooth
                     // Found paired devices.
                     foreach (var deviceInfo in DeviceInfoCollection)
                     {
-                        _pairedDevices.Add(new PairedDeviceInfo(deviceInfo));
+                        if (deviceInfo.Name.ToUpper().Contains("SPP"))
+                         _pairedDevices.Add(new PairedDeviceInfo(deviceInfo));
                     }
                 }
+                numDevices = _pairedDevices.Count();
                 PairedDevices.Source = _pairedDevices;
                 if (numDevices == 1)
                 {
@@ -154,25 +156,27 @@ namespace Bluetooth
                 if (success)
                 {
                     _Mode = Mode.JustConnected;
-                    this.buttonDisconnect.IsEnabled = true;
-                    this.buttonSend.IsEnabled = true;
-                    this.buttonStartRecv.IsEnabled = true;
-                    this.buttonStopRecv.IsEnabled = false;
-                    //Send("ACK0#");
+
+                    
                     await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                     {
+                        this.buttonDisconnect.IsEnabled = true;
+                        this.buttonSend.IsEnabled = true;
+                        this.buttonStartRecv.IsEnabled = true;
+                        this.buttonStopRecv.IsEnabled = false;
                         status.Text = "Connected now starting Listen";
                     });
+               
                     Listen();
-                    this.buttonStartRecv.IsEnabled = false;
-                    this.buttonStopRecv.IsEnabled = true;
+
                     await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                     {
-                        status.Text = "Now listening";
+                        this.buttonStartRecv.IsEnabled = false;
+                        this.buttonStopRecv.IsEnabled = true;
+                        status.Text = "Listening for config info.";
                     });
 
-                    System.Diagnostics.Debug.WriteLine("Connected");
-                    //await md.ShowAsync();
+                    System.Diagnostics.Debug.WriteLine("Just Connected");
                 }
             }
             catch (Exception ex)
@@ -461,10 +465,14 @@ namespace Bluetooth
 
                     if (_Mode == Mode.JustConnected)
                     {
-                        if (cFineStructure == bytes[0])
+                        //May get char(194) first
+                        for (int i = 0; i < bytes.Length; i++)
                         {
-                            _Mode = Mode.Connected;
-                            SendCh('0');
+                            if (cFineStructure == bytes[i])
+                            {
+                                _Mode = Mode.Connected;
+                                SendCh('0');
+                            }
                         }
                     }
                     else if (_Mode == Mode.Connected)

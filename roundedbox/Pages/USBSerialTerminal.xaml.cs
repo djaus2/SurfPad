@@ -187,7 +187,7 @@ namespace USBSerial
                         }
                     if (!done)
                     {
-                        if (numDevices == 1)
+                        if (listofDevices.Count() == 1)
                         {
                             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                             {
@@ -298,13 +298,18 @@ namespace USBSerial
                         this.buttonSend.IsEnabled = true;
                         this.buttonStartRecv.IsEnabled = true;
                         this.buttonStopRecv.IsEnabled = false;
-                        //SendCh('0');
-                        //this.buttonStartRecv.IsEnabled = false;
-                        //this.buttonStopRecv.IsEnabled = true;
                         DeviceInformation di = (DeviceInformation)ConnectDevices.SelectedItem;
                         this.TxtBlock_SelectedID.Text = di.Id;
                         this.textBlockBTName.Text = di.Name;
-                        
+                    });
+
+                    //SendCh('0');
+                    Listen();
+                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        this.buttonStartRecv.IsEnabled = false;
+                        this.buttonStopRecv.IsEnabled = true;
+                        status.Text = "Listening for config info.";
                     });
                     ///////////////////////
                 }

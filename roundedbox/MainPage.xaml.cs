@@ -44,7 +44,7 @@ namespace roundedbox
 
 
 
-        uc.MyUserControl1[][] buttons = new uc.MyUserControl1[0][];
+        uc.RoundedButtonControl[][] buttons = new uc.RoundedButtonControl[0][];
 
         public static MainPage MP;
         public static Bluetooth.BluetoothSerialTerminalPage BTTerminalPage;
@@ -58,7 +58,7 @@ namespace roundedbox
             MP = this;
 
             Setup("");
-            uc.MyUserControl1.ButtonTapped += MainPage_ButtonTapped1;
+            uc.RoundedButtonControl.ButtonTapped += MainPage_ButtonTapped1;
 
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
 
@@ -89,7 +89,7 @@ namespace roundedbox
             string name = "", Brush background = null,
             int id = -1, int cnrRad = -1, int colSpan=1, int rowSpan=1)
         {
-            buttons[row][col] = new uc.MyUserControl1(row,col,text,TheGrid,name,background,id,cnrRad, colSpan, rowSpan);
+            buttons[row][col] = new uc.RoundedButtonControl(row,col,text,TheGrid,name,background,id,cnrRad, colSpan, rowSpan);
         }
 
         private  async void MainPage_ButtonTapped1(string sender, int args)
@@ -187,10 +187,10 @@ namespace roundedbox
             TheGrid.Children.Clear();
             TheGrid.RowSpacing = space;
             TheGrid.ColumnSpacing = space;
-            buttons = new uc.MyUserControl1[x][];
+            buttons = new uc.RoundedButtonControl[x][];
             for (int i = 0; i<x;i++)
             {
-                buttons[i] = new uc.MyUserControl1[y];
+                buttons[i] = new uc.RoundedButtonControl[y];
                 RowDefinition rd2 = new RowDefinition();
                 rd2.Height = new GridLength((double)Height);
                 TheGrid.RowDefinitions.Add(rd2);
@@ -282,7 +282,7 @@ namespace roundedbox
                 int index = ch - ((int)'A');
                 if (ch >'Z')
                     index = 26 + ch - ((int)'a');
-                foreach (uc.MyUserControl1[] buts in buttons)
+                foreach (uc.RoundedButtonControl[] buts in buttons)
                 {
                     var but = from n in buts where n.Id == index select n.Text;
 
