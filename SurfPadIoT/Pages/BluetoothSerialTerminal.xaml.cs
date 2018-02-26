@@ -29,7 +29,7 @@ using Windows.Networking;
 using System.IO.Ports;
 using Windows.Devices.SerialCommunication;
 
-namespace Bluetooth
+namespace SurfPadIoT.Pages
 {
     /// <summary>
     /// The Bluetooth Serial page for the app

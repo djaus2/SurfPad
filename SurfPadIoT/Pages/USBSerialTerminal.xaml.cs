@@ -113,7 +113,17 @@ namespace SurfPadIoT.Pages
                     DeviceListSource.Source = this.listofDevices;
                     comPortInput.IsEnabled = true;
                     ConnectDevices.SelectedIndex = -1;
-  
+
+                    if (listofDevices.Count() == 1)
+                    {
+                        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                        {
+                            ConnectDevices.SelectedIndex = 0;
+                        });
+
+                        ConnectDevices_DoubleTapped(null, null);
+                    }
+
                 }
             }
             catch (Exception ex)
@@ -215,13 +225,15 @@ namespace SurfPadIoT.Pages
                         this.buttonSend.IsEnabled = true;
                         this.buttonStartRecv.IsEnabled = true;
                         this.buttonStopRecv.IsEnabled = false;
-                        //SendCh('0');
-                        //this.buttonStartRecv.IsEnabled = false;
-                        //this.buttonStopRecv.IsEnabled = true;
+                    });
+                    Listen();
+                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
                         DeviceInformation di = (DeviceInformation)ConnectDevices.SelectedItem;
                         this.TxtBlock_SelectedID.Text = di.Id;
                         this.textBlockBTName.Text = di.Name;
-                        
+                        this.buttonStartRecv.IsEnabled = false;
+                        this.buttonStopRecv.IsEnabled = true;
                     });
                     ///////////////////////
                 }

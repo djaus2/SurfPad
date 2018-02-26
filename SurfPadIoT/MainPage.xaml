@@ -36,10 +36,8 @@
             <Button x:Name="buttonSocket" Content="Socket Server" Opacity="1" Background="Blue" Foreground="White" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="120" Click="button_Click" IsEnabled="True"/>
             <Button x:Name="buttonUSBSerial" Content="USB Serial" Opacity="1" Background="DarkGreen" Foreground="Pink" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>
             <Button x:Name="buttonBluetooth" Content="Bluetooth" Opacity="1" Background="Purple" Foreground="Yellow" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click"  IsEnabled="True"/>
-            <!--<Button x:Name="buttonClearSendText" Content="Clear Send" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>
-            <Button x:Name="buttonStartRecv" Content="Start Recv" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
-            <Button x:Name="buttonStopRecv" Content="Stop Recv" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="False"/>
-            <Button x:Name="buttonBack" Content="Back" HorizontalAlignment="Left" Height="49" Margin="10" VerticalAlignment="Top" Width="102" Click="button_Click" IsEnabled="True"/>-->
+            
         </StackPanel>
+        <TextBlock x:Name="Status" Width="500"  Grid.Row="4" Height=" 40" HorizontalAlignment="Left"/>
     </Grid>
 </Page>

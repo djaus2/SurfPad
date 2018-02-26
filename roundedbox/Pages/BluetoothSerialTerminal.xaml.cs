@@ -106,7 +106,7 @@ namespace Bluetooth
                     // Found paired devices.
                     foreach (var deviceInfo in DeviceInfoCollection)
                     {
-                        if (deviceInfo.Name.ToUpper().Contains("SPP"))
+                        if (deviceInfo.Name.ToUpper().Contains("DEV")) //"SPP"
                          _pairedDevices.Add(new PairedDeviceInfo(deviceInfo));
                     }
                 }

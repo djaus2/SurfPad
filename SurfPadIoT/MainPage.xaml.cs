@@ -1,11 +1,11 @@
-﻿using Bluetooth;
-using SurfPadIoT.Pages;
+﻿using SurfPadIoT.Pages;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Windows.Devices.Gpio;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
@@ -57,7 +57,75 @@ namespace SurfPadIoT
             MP = this;
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
             TerminalMode = TerminalModes.none;
+            InitGPIO();
         }
+
+        private void InitGPIO()
+
+        {
+            GpioController gpio = GpioController.GetDefault();
+            {
+                if (gpio == null)
+
+                {
+                    Status.Text = "There is no GPIO controller on this device.";
+                    return;
+                }
+
+                using (var pin2 = gpio.OpenPin(2)) {
+                    using (var pin3 = gpio.OpenPin(3)) {
+                        using (var pin4 = gpio.OpenPin(4)) {
+
+
+
+                            pin2.SetDriveMode(GpioPinDriveMode.Input);
+                            pin3.SetDriveMode(GpioPinDriveMode.Input);
+                            pin4.SetDriveMode(GpioPinDriveMode.Input);
+
+                            var a0 = pin2.Read();
+                            var a1 = pin3.Read();
+                            var a2 = pin4.Read();
+                            if (a0 == GpioPinValue.High)
+                            {
+                                TerminalMode = TerminalModes.BT;
+                                Status.Text = "BT Mode";
+                            }
+                            else if (a1 == GpioPinValue.High)
+                            {
+                                TerminalMode = TerminalModes.USBSerial;
+                                Status.Text = "USB Serial Mode";
+                            }
+                            else if (a2 == GpioPinValue.High)
+                            {
+                                TerminalMode = TerminalModes.Socket;
+                                Status.Text = "Socket Mode";
+                            }
+                            else
+                            {
+                                TerminalMode = TerminalModes.none;
+                                Status.Text = "Need to set one of GPIO 2,3,4 to High. Pins 3.5.7 respectively";
+                            }
+                            //switch (TerminalMode)
+                            //{
+                            //    case TerminalModes.Socket:
+                            //            Frame.Navigate(typeof(SocketServerTerminalPage));
+                            //        break;
+                            //    case TerminalModes.USBSerial:
+                            //            Frame.Navigate(typeof(USBSerialTerminalPage));
+                            //        break;
+                            //    case TerminalModes.BT:
+                            //            Frame.Navigate(typeof(BluetoothSerialTerminalPage));
+                            //        break;
+                            //    case TerminalModes.none:
+                            //        break;
+                            //}
+                        }
+                    }
+                }
+            }
+        }
+
+
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
@@ -108,7 +176,7 @@ namespace SurfPadIoT
                     Frame.Navigate(typeof(USBSerialTerminalPage));
                     break;
                 case TerminalModes.BT:
-                    Frame.Navigate(typeof(SocketServerTerminalPage));
+                    Frame.Navigate(typeof(BluetoothSerialTerminalPage));
                     break;
             }
         }
