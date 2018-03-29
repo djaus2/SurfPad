@@ -513,7 +513,7 @@ namespace SurfPadIoT.Pages
     
 
                     //Once the first trasmission, form this end, is received, this end IS connected.
-                    SendCh((char)137);
+                    SendCh((char)cFineStructure);
                     _Mode = Mode.Connected;
 
                     dataReaderObject = new DataReader(serialPort.InputStream);

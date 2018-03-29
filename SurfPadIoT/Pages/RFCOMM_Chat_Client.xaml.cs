@@ -49,15 +49,19 @@ namespace SurfPadIoT.Pages
             Disconnected,
             JustConnected,
             Connected,
-            ACK1,
-            ACK3,
-            ACK5,
+            ACK0,
+            ACK2,
+            ACK4,
             AwaitJson,
             JsonConfig,
             Config,
-            Running
+            Running,
+            Ready,
+            Json1,
+            Json2
         }
         Mode _Mode = Mode.Disconnected;
+
 
         // Used to display list of available devices to chat with
         public ObservableCollection<RfcommChatDeviceDisplay> ResultCollection
@@ -172,7 +176,7 @@ namespace SurfPadIoT.Pages
                 await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
                     // Make sure device name isn't blank
-                    if(deviceInfo.Name != "")
+                    if (deviceInfo.Name != "")
                     {
                         var cv = deviceInfo.GetType();
                         var sdf = cv.GUID;
@@ -210,7 +214,7 @@ namespace SurfPadIoT.Pages
                         String.Format("{0} devices found. Enumeration completed. Watching for updates...", ResultCollection.Count),
                         NotifyType.StatusMessage);
                 });
-               
+
             });
 
             deviceWatcher.Removed += new TypedEventHandler<DeviceWatcher, DeviceInformationUpdate>(async (watcher, deviceInfoUpdate) =>
@@ -254,7 +258,7 @@ namespace SurfPadIoT.Pages
         private async void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             // Make sure user has selected a device first
-            if (ResultCollection.Count !=0 ) //.SelectedItem != null)
+            if (ResultCollection.Count != 0) //.SelectedItem != null)
             {
                 UpdateStatus("Connecting to remote device. Please wait...", NotifyType.StatusMessage);
             }
@@ -269,111 +273,115 @@ namespace SurfPadIoT.Pages
             //var xx = resultsListView.SelectedItem;
             RfcommChatDeviceDisplay deviceInfoDisp = ResultCollection[0]; // resultsListView.SelectedItem as RfcommChatDeviceDisplay;
 
-                // Perform device access checks before trying to get the device.
-                // First, we check if consent has been explicitly denied by the user.
-                DeviceAccessStatus accessStatus = DeviceAccessInformation.CreateFromId(deviceInfoDisp.Id).CurrentStatus;
-                if (accessStatus == DeviceAccessStatus.DeniedByUser)
-                {
-                    UpdateStatus("This app does not have access to connect to the remote device (please grant access in Settings > Privacy > Other Devices", NotifyType.ErrorMessage);
-                    return;
-                }
-                // If not, try to get the Bluetooth device
-                try
-                {
-                    bluetoothDevice = await BluetoothDevice.FromIdAsync(deviceInfoDisp.Id);
-                }
-                catch (Exception ex)
-                {
-                    UpdateStatus(ex.Message, NotifyType.ErrorMessage);
-                    //ResetMainUI();
-                    return;
-                }
-                // If we were unable to get a valid Bluetooth device object,
-                // it's most likely because the user has specified that all unpaired devices
-                // should not be interacted with.
-                if (bluetoothDevice == null)
-                {
-                    UpdateStatus("Bluetooth Device returned null. Access Status = " + accessStatus.ToString(), NotifyType.ErrorMessage);
-                    return;
-                }
+            // Perform device access checks before trying to get the device.
+            // First, we check if consent has been explicitly denied by the user.
+            DeviceAccessStatus accessStatus = DeviceAccessInformation.CreateFromId(deviceInfoDisp.Id).CurrentStatus;
+            if (accessStatus == DeviceAccessStatus.DeniedByUser)
+            {
+                UpdateStatus("This app does not have access to connect to the remote device (please grant access in Settings > Privacy > Other Devices", NotifyType.ErrorMessage);
+                return;
+            }
+            // If not, try to get the Bluetooth device
+            try
+            {
+                bluetoothDevice = await BluetoothDevice.FromIdAsync(deviceInfoDisp.Id);
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus(ex.Message, NotifyType.ErrorMessage);
+                //ResetMainUI();
+                return;
+            }
+            // If we were unable to get a valid Bluetooth device object,
+            // it's most likely because the user has specified that all unpaired devices
+            // should not be interacted with.
+            if (bluetoothDevice == null)
+            {
+                UpdateStatus("Bluetooth Device returned null. Access Status = " + accessStatus.ToString(), NotifyType.ErrorMessage);
+                return;
+            }
 
-                // This should return a list of uncached Bluetooth services (so if the server was not active when paired, it will still be detected by this call
-                var rfcommServices = await bluetoothDevice.GetRfcommServicesForIdAsync(
-                    RfcommServiceId.FromUuid(Constants.RfcommChatServiceUuid), BluetoothCacheMode.Uncached);
+            // This should return a list of uncached Bluetooth services (so if the server was not active when paired, it will still be detected by this call
+            var rfcommServices = await bluetoothDevice.GetRfcommServicesForIdAsync(
+                RfcommServiceId.FromUuid(Constants.RfcommChatServiceUuid), BluetoothCacheMode.Uncached);
 
-                if (rfcommServices.Services.Count > 0)
-                {
-                    chatService = rfcommServices.Services[0];
-                }
-                else
-                {
-                    UpdateStatus(
-                       "Could not discover the chat service on the remote device",
-                       NotifyType.StatusMessage);
-                    //ResetMainUI();
-                    return;
-                }
+            if (rfcommServices.Services.Count > 0)
+            {
+                chatService = rfcommServices.Services[0];
+            }
+            else
+            {
+                UpdateStatus(
+                   "Could not discover the chat service on the remote device",
+                   NotifyType.StatusMessage);
+                //ResetMainUI();
+                return;
+            }
 
-                // Do various checks of the SDP record to make sure you are talking to a device that actually supports the Bluetooth Rfcomm Chat Service
-                var attributes = await chatService.GetSdpRawAttributesAsync();
-                if (!attributes.ContainsKey(Constants.SdpServiceNameAttributeId))
-                {
-                    UpdateStatus(
-                        "The Chat service is not advertising the Service Name attribute (attribute id=0x100). " +
-                        "Please verify that you are running the BluetoothRfcommChat server.",
-                        NotifyType.ErrorMessage);
-                    //ResetMainUI();
-                    return;
-                }
-                var attributeReader = DataReader.FromBuffer(attributes[Constants.SdpServiceNameAttributeId]);
-                var attributeType = attributeReader.ReadByte();
-                if (attributeType != Constants.SdpServiceNameAttributeType)
-                {
-                    UpdateStatus(
-                        "The Chat service is using an unexpected format for the Service Name attribute. " +
-                        "Please verify that you are running the BluetoothRfcommChat server.",
-                        NotifyType.ErrorMessage);
-                    //ResetMainUI();
-                    return;
-                }
-                var serviceNameLength = attributeReader.ReadByte();
+            // Do various checks of the SDP record to make sure you are talking to a device that actually supports the Bluetooth Rfcomm Chat Service
+            var attributes = await chatService.GetSdpRawAttributesAsync();
+            if (!attributes.ContainsKey(Constants.SdpServiceNameAttributeId))
+            {
+                UpdateStatus(
+                    "The Chat service is not advertising the Service Name attribute (attribute id=0x100). " +
+                    "Please verify that you are running the BluetoothRfcommChat server.",
+                    NotifyType.ErrorMessage);
+                //ResetMainUI();
+                return;
+            }
+            var attributeReader = DataReader.FromBuffer(attributes[Constants.SdpServiceNameAttributeId]);
+            var attributeType = attributeReader.ReadByte();
+            if (attributeType != Constants.SdpServiceNameAttributeType)
+            {
+                UpdateStatus(
+                    "The Chat service is using an unexpected format for the Service Name attribute. " +
+                    "Please verify that you are running the BluetoothRfcommChat server.",
+                    NotifyType.ErrorMessage);
+                //ResetMainUI();
+                return;
+            }
+            var serviceNameLength = attributeReader.ReadByte();
 
-                // The Service Name attribute requires UTF-8 encoding.
-                attributeReader.UnicodeEncoding = UnicodeEncoding.Utf8;
+            // The Service Name attribute requires UTF-8 encoding.
+            attributeReader.UnicodeEncoding = UnicodeEncoding.Utf8;
 
-                
 
-                lock (this)
-                {
-                    chatSocket = new StreamSocket();
-                }
-                try
-                {
-                    await chatSocket.ConnectAsync(chatService.ConnectionHostName, chatService.ConnectionServiceName);
 
-                    SetChatUI(attributeReader.ReadString(serviceNameLength), bluetoothDevice.Name);
-                    chatWriter = new DataWriter(chatSocket.OutputStream);
+            lock (this)
+            {
+                chatSocket = new StreamSocket();
+            }
+            try
+            {
+                await chatSocket.ConnectAsync(chatService.ConnectionHostName, chatService.ConnectionServiceName);
 
-                    DataReader chatReader = new DataReader(chatSocket.InputStream);
-                    ReceiveStringLoop(chatReader);
-                    UpdateStatus(
-                                    "Chatting now.",
-                                    NotifyType.StatusMessage);
-                    StopWatcher();
-                }
-                catch (Exception ex) when ((uint)ex.HResult == 0x80070490) // ERROR_ELEMENT_NOT_FOUND
-                {
-                    UpdateStatus("Please verify that you are running the BluetoothRfcommChat server.", NotifyType.ErrorMessage);
-                    //ResetMainUI();
-                    return;
-                }
-                catch (Exception ex) when ((uint)ex.HResult == 0x80072740) // WSAEADDRINUSE
-                {
-                    UpdateStatus("Please verify that there is no other RFCOMM connection to the same device.", NotifyType.ErrorMessage);
-                    //ResetMainUI();
-                    return;
-                }
-            
+                SetChatUI(attributeReader.ReadString(serviceNameLength), bluetoothDevice.Name);
+                chatWriter = new DataWriter(chatSocket.OutputStream);
+
+                DataReader chatReader = new DataReader(chatSocket.InputStream);
+                ReceiveStringLoop(chatReader);
+                SendCh('@');
+                _Mode = Mode.Connected;
+                UpdateStatus(
+                                "Chatting now.",
+                                NotifyType.StatusMessage);
+                StopWatcher();
+                recvdtxt = "";
+                listening = true;
+            }
+            catch (Exception ex) when ((uint)ex.HResult == 0x80070490) // ERROR_ELEMENT_NOT_FOUND
+            {
+                UpdateStatus("Please verify that you are running the BluetoothRfcommChat server.", NotifyType.ErrorMessage);
+                //ResetMainUI();
+                return;
+            }
+            catch (Exception ex) when ((uint)ex.HResult == 0x80072740) // WSAEADDRINUSE
+            {
+                UpdateStatus("Please verify that there is no other RFCOMM connection to the same device.", NotifyType.ErrorMessage);
+                //ResetMainUI();
+                return;
+            }
+
         }
 
         /// <summary>
@@ -460,9 +468,9 @@ namespace SurfPadIoT.Pages
                     // The underlying socket was closed before we were able to read the whole data
                     return;
                 }
-
-                ConversationList.Items.Add("Received: " + chatReader.ReadString(stringLength));
-
+                string msg = chatReader.ReadString(stringLength);
+                ConversationList.Items.Add("Received: " + msg);
+                await ReadAsync(msg);
                 ReceiveStringLoop(chatReader);
             }
             catch (Exception ex)
@@ -537,7 +545,7 @@ namespace SurfPadIoT.Pages
 
         private void UpdateStatus(string msg, NotifyType statusMessage)
         {
-            var t = Task.Run(async() =>
+            var t = Task.Run(async () =>
             {
                 await UpdateAsync(msg, statusMessage);
             });
@@ -571,9 +579,142 @@ namespace SurfPadIoT.Pages
                 ConnectButton.IsEnabled = false;
             }
         }
+
+        string recvdtxt = "";
+        bool listening = false;
+
+        private async Task ReadAsync(string msg)
+        {
+
+            if (msg != "")
+            {
+                try
+                {
+
+
+                    string currenbtRecvdText = msg;
+                    ////await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    ////    recvdText.Text = currenbtRecvdText;
+                    ////));
+
+
+                    if (_Mode == Mode.JustConnected)
+                    {
+                        if (cFineStructure == msg[0])
+                        {
+                            _Mode = Mode.Connected;
+                            SendCh('0');
+                        }
+                    }
+                    else if (_Mode == Mode.Connected)
+                    {
+                        if ('0' == msg[0])
+                        {
+                            _Mode = Mode.ACK0;
+                            recvdtxt = "";
+                            SendCh('1');
+                        }
+                    }
+                    else if (_Mode == Mode.ACK0)
+                    {
+                        if ('2' == msg[0])
+                        {
+                            _Mode = Mode.ACK2;
+                            recvdtxt = "";
+                            SendCh('3');
+                        }
+                    }
+                    else if (_Mode == Mode.ACK2)
+                    {
+                        if ('4' == msg[0])
+                        {
+                            _Mode = Mode.ACK4;
+                            SendCh('5');
+                            //status.Text="Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
+                        }
+                    }
+                    else if (_Mode == Mode.ACK4)
+                    {
+                        if ('!' == msg[0])
+                        {
+                            _Mode = Mode.Ready;
+                            SendCh('/');
+                            //status.Text="Ready for Config. Press [Back] then on MainPage press [Load App Menu]";
+                        }
+                    }
+                    else if (_Mode == Mode.Ready)
+                    {
+                        if ('/' == msg[0])
+                        {
+                            _Mode = Mode.Json1;
+                            //Send Config
+                            await SendMsgTask(
+"{\"Config\":[ [ { \"iWidth\": 120 },{ \"iHeight\": 100 },{ \"iSpace\": 5 },{ \"iCornerRadius\": 10 },{ \"iRows\": 2 },{ \"iColumns\": 5 },{ \"sComPortId\": \"\\\\\\\\?\\\\USB#VID_26BA&PID_0003#5543830353935161A112#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"sFTDIComPortId\": \"\\\\\\\\?\\\\FTDIBUS#VID_0403+PID_6001+FTG71BUIA#0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}\" },{ \"iComportConnectDeviceNo\": -1 },{ \"iFTDIComportConnectDeviceNo\": 1 },{ \"sUseSerial\": \"BT\" } ] ] }~");
+                        }
+                    }
+                    else if (_Mode == Mode.Json1)
+                    {
+                        if ('~' == msg[0])
+                        {
+                            _Mode = Mode.Json2;
+                            //Send Menu
+                            await SendMsgTask(
+"{\"MainMenu\":[ [ \"Something else\", \"Unload\", \"Show full list\", \"Setup Sockets\", \"The quick brown fox jumps over the lazy dog\" ],[ \"First\", \"Back\", \"Next\", \"Last\", \"Show All\" ] ] }~");
+                            _Mode = Mode.Running;
+                        }
+                    }
+                    else if (_Mode == Mode.Running)
+                    {
+
+                        if (listening)
+                            switch (msg[0])
+                            {
+                                case '^':
+                                    listening = false;
+                                    break;
+                                default:
+                                    //Do app stuff here. For now just echo chars sent
+                                    SendCh(msg[0]);
+                                    break;
+                            }
+                    }
+
+
+                }
+                catch (Exception ex)
+                {
+                    await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => status.Text += "\r\n" + "Lost connection:\r\n" + ex.Message);
+                    listening = false;
+                }
+
+            }
+        }
+
+        //private Task WriteAsync(string v)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        private void SendCh(char ch)
+        {
+            var t = Task.Run(async () =>
+            {
+                await SendMsgTask("" + ch);
+            });
+        }
+
+        private async Task SendMsgTask(string msg)
+        {
+            await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    MessageTextBox.Text = msg;
+                    SendMessage();
+                }
+            );
+        }
     }
 
-    public class RfcommChatDeviceDisplay : INotifyPropertyChanged
+        public class RfcommChatDeviceDisplay : INotifyPropertyChanged
     {
         private DeviceInformation deviceInfo;
 
@@ -646,13 +787,5 @@ namespace SurfPadIoT.Pages
 
 
 
-        //private void  rootPageNotifyUser(string msg, MainPage.NotifyType nt )
-        //{
-        //    //await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-        //    //{
-        //    //    status.Text = string.Format("{0}: {1}", nt,
-        //    //    msg);
-        //    //});
-        //}
     }
 }

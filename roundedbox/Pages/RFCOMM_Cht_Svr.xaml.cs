@@ -360,11 +360,14 @@ namespace roundedbox
             }
         }
 
-        public void SendCh(char ch)
+        public async void SendCh(char ch)
         {
-            string msg = "" + ch;
-            MessageTextBox.Text = msg;
-            SendMessage();
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                string msg = "" + ch;
+                MessageTextBox.Text = msg;
+                SendMessage();
+            });
         }
 
         string recvdtxt = "";
