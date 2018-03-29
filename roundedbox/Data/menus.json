@@ -31,7 +31,7 @@
   },
   {
     "MainMenu": [
-      [ "Setup BT Serial", "Load App Menu", "Setup USB Serial", "Setup Sockets", "Use Azure IoT Hub" ],
+      [ "Setup BT Serial", "Load App Menu", "Setup USB Serial", "Setup Sockets","Setup RFCOMM Chat" ],
       [ "_This is just text", "The", "Quick", "Brown", "Fox" ],
       [ "_More text", "Jumps", "Over", "The", "Lazy" ],
       [ "_Text", "Dog", "The quick brown", "fox jumps over", "the lazy dog" ],

@@ -37,10 +37,10 @@ namespace roundedbox
         Brush Black = new SolidColorBrush(Colors.Black);
         Brush White = new SolidColorBrush(Colors.White);
 
-        public enum TerminalModes {none,BT,USBSerial, Socket };
+        public enum TerminalModes { none, BT, USBSerial, Socket, RFCOMM_Chat };
         public static TerminalModes TerminalMode = TerminalModes.none;
 
-        public  ListView clientListBox;
+        public ListView clientListBox;
 
 
 
@@ -50,6 +50,7 @@ namespace roundedbox
         public static Bluetooth.BluetoothSerialTerminalPage BTTerminalPage;
         public static USBSerial.USBSerialTerminalPage USBSerialTerminalPage { get; internal set; }
         public static SocketTerminalPage SocketTerminalPage { get; internal set; }
+        public static RFCOMM_ChatServer RFCOMM_ChatPage {get; internal set;}
 
         public MainPage()
         {
@@ -156,8 +157,23 @@ namespace roundedbox
                     notDone = true;
                 }
             }
-            
-            if ((args > 3) || notDone)
+
+            else if (args == 4)
+            {
+
+
+                if (TerminalMode == TerminalModes.none)
+                {
+                    TerminalMode = TerminalModes.RFCOMM_Chat;
+                    Frame.Navigate(typeof(RFCOMM_ChatServer));
+                }
+                else
+                {
+                    notDone = true;
+                }
+            }
+
+            if ((args > 4) || notDone)
             {
                 //characters as code for keys are A..Z and a..z
                 char ch = (char)((int)'A' + id);
@@ -177,6 +193,11 @@ namespace roundedbox
                 {
                     if (SocketTerminalPage != null)
                         await SocketTerminalPage.SendCh(ch);
+                }
+                else if (TerminalMode == TerminalModes.RFCOMM_Chat)
+                {
+                    if (SocketTerminalPage != null)
+                        RFCOMM_ChatPage.SendCh(ch);
                 }
 
             }
