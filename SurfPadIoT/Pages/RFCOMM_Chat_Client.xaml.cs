@@ -436,7 +436,7 @@ namespace SurfPadIoT.Pages
                     chatWriter.WriteUInt32((uint)MessageTextBox.Text.Length);
                     chatWriter.WriteString(MessageTextBox.Text);
 
-                    ConversationList.Items.Add("Sent: " + MessageTextBox.Text);
+                    ConversationList.Items.Insert(0,"Sent: " + MessageTextBox.Text);
                     MessageTextBox.Text = "";
                     await chatWriter.StoreAsync();
 
@@ -469,7 +469,7 @@ namespace SurfPadIoT.Pages
                     return;
                 }
                 string msg = chatReader.ReadString(stringLength);
-                ConversationList.Items.Add("Received: " + msg);
+                ConversationList.Items.Insert(0,"Received: " + msg);
                 await ReadAsync(msg);
                 ReceiveStringLoop(chatReader);
             }

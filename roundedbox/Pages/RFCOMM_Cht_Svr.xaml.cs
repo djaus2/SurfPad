@@ -56,6 +56,7 @@ namespace roundedbox
 
         // A pointer back to the main page is required to display status messages.
         MainPage MP=null;
+        bool IsFirstView = true;
 
         public RFCOMM_ChatServer()
         {
@@ -64,12 +65,17 @@ namespace roundedbox
             this.InitializeComponent();
             _Mode = Mode.Disconnected;
             TitleTextBlock.Text = Title;
+            IsFirstView = true;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            MP = MainPage.MP;
-            ListenButton_Click(null, null);
+            if (!IsFirstView)
+            {
+                MP = MainPage.MP;
+                ListenButton_Click(null, null);
+                IsFirstView = false;
+            }
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
