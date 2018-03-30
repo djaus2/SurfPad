@@ -57,6 +57,7 @@ namespace SurfPadIoT
             MP = this;
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
             TerminalMode = TerminalModes.none;
+            //TerminalMode = TerminalModes.RFCOMMChat;
             InitGPIO();
         }
 
@@ -73,62 +74,57 @@ namespace SurfPadIoT
                     Status.Text = "RFCOMM Chat Mode";
                     return;
                 }
+                //Can set in MainPage()
+                if (TerminalMode == TerminalModes.none)
+                { 
+                using (var pin2 = gpio.OpenPin(2)) { //Physical Pin 3
+                    using (var pin3 = gpio.OpenPin(3)) { //Physical Pin 5
+                        using (var pin4 = gpio.OpenPin(4)) { //Physical Pin 7
+                                using (var pin17 = gpio.OpenPin(17)) //Physical Pin 11
+                                {
+                                    //Nb: Physical Pin 1 = Vcc(3.3) & Physical Pin 9 = Gnd
+                                    //Need to ground all but the required pinX input
 
-                using (var pin2 = gpio.OpenPin(2)) {
-                    using (var pin3 = gpio.OpenPin(3)) {
-                        using (var pin4 = gpio.OpenPin(4)) {
-                            using (var pin5 = gpio.OpenPin(5))
-                            {
+                                    //Nb: pinX X is the GPIO number not the physical pin
+                                    // eg. pin2 is GPIO2 = physical pin 3 etc.
 
+                                    //Seems that all bar GPIO17 float high.
+                                    //So might get away with only defintely setting its state and driving other ones low as required
+                                    pin2.SetDriveMode(GpioPinDriveMode.Input);
+                                    pin3.SetDriveMode(GpioPinDriveMode.Input);
+                                    pin4.SetDriveMode(GpioPinDriveMode.Input);
+                                    pin17.SetDriveMode(GpioPinDriveMode.Input);
 
-                                pin2.SetDriveMode(GpioPinDriveMode.Input);
-                                pin3.SetDriveMode(GpioPinDriveMode.Input);
-                                pin4.SetDriveMode(GpioPinDriveMode.Input);
-                                pin5.SetDriveMode(GpioPinDriveMode.Input);
-
-                                var a0 = pin2.Read();
-                                var a1 = pin3.Read();
-                                var a2 = pin4.Read();
-                                var a3 = pin4.Read();
-                                if (a0 == GpioPinValue.High)
-                                {
-                                    TerminalMode = TerminalModes.BT;
-                                    Status.Text = "BT Mode";
+                                    var a0 = pin2.Read();
+                                    var a1 = pin3.Read();
+                                    var a2 = pin4.Read();
+                                    var a3 = pin17.Read();
+                                    if (a0 == GpioPinValue.Low)
+                                    {
+                                        TerminalMode = TerminalModes.BT;
+                                        Status.Text = "BT Mode";
+                                    }
+                                    else if (a1 == GpioPinValue.Low)
+                                    {
+                                        TerminalMode = TerminalModes.USBSerial;
+                                        Status.Text = "USB Serial Mode";
+                                    }
+                                    else if (a2 == GpioPinValue.Low)
+                                    {
+                                        TerminalMode = TerminalModes.Socket;
+                                        Status.Text = "Socket Mode";
+                                    }
+                                    else if (a3 == GpioPinValue.Low)
+                                    {
+                                        TerminalMode = TerminalModes.RFCOMMChat;
+                                        Status.Text = "RFCOMM Chat Mode";
+                                    }
+                                    else
+                                    {
+                                        TerminalMode = TerminalModes.none;
+                                        Status.Text = "Need to set one of GPIO 2,3,4, 17 to High. Pins 3,5,7,11 respectively";
+                                    }
                                 }
-                                else if (a1 == GpioPinValue.High)
-                                {
-                                    TerminalMode = TerminalModes.USBSerial;
-                                    Status.Text = "USB Serial Mode";
-                                }
-                                else if (a2 == GpioPinValue.High)
-                                {
-                                    TerminalMode = TerminalModes.Socket;
-                                    Status.Text = "Socket Mode";
-                                }
-                                else if (a3 == GpioPinValue.High)
-                                {
-                                    TerminalMode = TerminalModes.RFCOMMChat;
-                                    Status.Text = "RFCOMM Chat Mode";
-                                }
-                                else
-                                {
-                                    TerminalMode = TerminalModes.none;
-                                    Status.Text = "Need to set one of GPIO 2,3,4 to High. Pins 3.5.7 respectively";
-                                }
-                                //switch (TerminalMode)
-                                //{
-                                //    case TerminalModes.Socket:
-                                //            Frame.Navigate(typeof(SocketServerTerminalPage));
-                                //        break;
-                                //    case TerminalModes.USBSerial:
-                                //            Frame.Navigate(typeof(USBSerialTerminalPage));
-                                //        break;
-                                //    case TerminalModes.BT:
-                                //            Frame.Navigate(typeof(BluetoothSerialTerminalPage));
-                                //        break;
-                                //    case TerminalModes.none:
-                                //        break;
-                                //}
                             }
                         }
                     }
