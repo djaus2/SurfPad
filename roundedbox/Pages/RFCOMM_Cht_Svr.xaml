@@ -48,6 +48,7 @@
                 <StackPanel Margin="0,0,0,10" Orientation="Horizontal" Grid.Row="1" Grid.ColumnSpan ="2">
                     <Button Name="ListenButton" Margin="20,0,20,0" Click="ListenButton_Click">Start Listening</Button>
                     <Button x:Name="DisconnectButton" Margin="20,0,20,0" IsEnabled="False" Click="DisconnectButton_Click" Content="Disconnect"/>
+                    <Button x:Name="BacktButton" Margin="20,0,20,0" IsEnabled="False" Click="BacktButton_Click"  Content="Back"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock x:Name="RecvdText" HorizontalAlignment="Left" Height="23" Margin="10" TextWrapping="NoWrap" Text="Recvd: " VerticalAlignment="Top" Width="50"/>

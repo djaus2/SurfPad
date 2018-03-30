@@ -55,10 +55,12 @@ namespace roundedbox
         Mode _Mode = Mode.Disconnected;
 
         // A pointer back to the main page is required to display status messages.
-        MainPage MP;
+        MainPage MP=null;
 
         public RFCOMM_ChatServer()
         {
+            MP = MainPage.MP;
+            MainPage.RFCOMM_ChatPage = this;
             this.InitializeComponent();
             _Mode = Mode.Disconnected;
             TitleTextBlock.Text = Title;
@@ -72,7 +74,7 @@ namespace roundedbox
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            Disconnect();
+            //Disconnect();
         }
 
         private void ListenButton_Click(object sender, RoutedEventArgs e)
@@ -193,7 +195,7 @@ namespace roundedbox
                     writer.WriteUInt32((uint)message.Length);
                     writer.WriteString(message);
 
-                    ConversationListBox.Items.Add("Sent: " + message);
+                    ConversationListBox.Items.Insert(0,"Sent: " + message);
                     // Clear the messageTextBox for a new message
                     MessageTextBox.Text = "";
 
@@ -228,6 +230,7 @@ namespace roundedbox
 
         private async void Disconnect()
         {
+            _Mode = Mode.Disconnected;
             if (rfcommProvider != null)
             {
                 rfcommProvider.StopAdvertising();
@@ -300,7 +303,7 @@ namespace roundedbox
 
             });
 
-
+            _Mode = Mode.JustConnected;
             // Infinite read buffer loop
             recvdtxt = "";
             while (true)
@@ -332,7 +335,7 @@ namespace roundedbox
 
                     await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                     {
-                        ConversationListBox.Items.Add("Received: " + message);
+                        ConversationListBox.Items.Insert(0,"Received: " + message);
                     });
                 }
                 // Catch exception HRESULT_FROM_WIN32(ERROR_OPERATION_ABORTED).
@@ -360,11 +363,18 @@ namespace roundedbox
             }
         }
 
-        public async void SendCh(char ch)
+        public void SendCh(char ch)
+        {
+            var t = Task.Run(async () =>
+            {
+                await SendChTask("" + ch);
+            });
+        }
+
+        public async Task  SendChTask(string msg)
         {
             await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                string msg = "" + ch;
                 MessageTextBox.Text = msg;
                 SendMessage();
             });
@@ -380,14 +390,18 @@ namespace roundedbox
                 {
                     string currenbtRecvdText = msg;
 
-                    recvdText.Text = currenbtRecvdText;
+                    
+                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        recvdText.Text = currenbtRecvdText;
+                    });
 
                     if (_Mode == Mode.JustConnected)
                     {
                         //May get char(194) first
                         for (int i = 0; i < msg.Length; i++)
                         {
-                            if (cFineStructure == (byte)msg[i])
+                            if ('@' == msg[i])
                             {
                                 _Mode = Mode.Connected;
                                 SendCh('0');
@@ -451,8 +465,13 @@ namespace roundedbox
                             _Mode = Mode.Config;
                             await MainPage.MP.UpdateTextAsync(recvdtxt);//.Substring(0,recvdtxt.Length - 1))
                             _Mode = Mode.Running;
-                            status.Text = "Config done. Press [Back]";
-                            recvdtxt = "";
+                            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                            {
+                                status.Text = "Config done. Press [Back]";
+                                recvdtxt = "";
+                                BacktButton.IsEnabled = true;
+                            });
+
                         }
 
                         else
@@ -471,6 +490,11 @@ namespace roundedbox
                 }
 
             }
+        }
+
+        private void BacktButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.GoBack();
         }
     }
 }

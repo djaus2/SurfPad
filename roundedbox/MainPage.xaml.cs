@@ -196,7 +196,7 @@ namespace roundedbox
                 }
                 else if (TerminalMode == TerminalModes.RFCOMM_Chat)
                 {
-                    if (SocketTerminalPage != null)
+                    if (RFCOMM_ChatPage != null)
                         RFCOMM_ChatPage.SendCh(ch);
                 }
 
@@ -273,27 +273,31 @@ namespace roundedbox
         private string config = "";
         internal async Task UpdateTextAsync(string recvdtxt)
         {
-            if(recvdtxt.Substring(recvdtxt.Length - 1,1) == EOStringStr)
-            {
-                if (recvdtxt.Substring(0, "{\"Config\":".Length) == "{\"Config\":")
+
+            if (recvdtxt.Substring(recvdtxt.Length - 1,1) == EOStringStr)
+            { 
+
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
-                    config = recvdtxt;
-                    config = config.Replace(EOStringStr, "");
-                }
-                else if (recvdtxt.Substring(0, "{\"MainMenu\":".Length) == "{\"MainMenu\":")
-                {
-                    string menus = recvdtxt;
-                    menus = menus.Replace(EOStringStr, "");
-                    string jsonData = "[ " + config + " , " + menus + " ]";
-                    Setup(jsonData);
-                }
-                else
-                {
-                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    if (recvdtxt.Substring(0, "{\"Config\":".Length) == "{\"Config\":")
                     {
-                        listView1.Items.Insert(0, recvdtxt.Substring(0, recvdtxt.Length - 1));
-                    });
-                }
+                        config = recvdtxt;
+                        config = config.Replace(EOStringStr, "");
+                    }
+                    else if (recvdtxt.Substring(0, "{\"MainMenu\":".Length) == "{\"MainMenu\":")
+                    {
+                        string menus = recvdtxt;
+                        menus = menus.Replace(EOStringStr, "");
+                        string jsonData = "[ " + config + " , " + menus + " ]";
+                        Setup(jsonData);
+                    }
+                    else
+                    {
+
+                            listView1.Items.Insert(0, recvdtxt.Substring(0, recvdtxt.Length - 1));
+
+                    }
+                 });
 
             }
             else
